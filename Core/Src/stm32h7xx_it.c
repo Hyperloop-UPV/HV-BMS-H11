@@ -94,7 +94,7 @@ extern FDCAN_HandleTypeDef hfdcan1;
 //calls my_fault_handler with the MSP(main stack pointer)
 #define HARDFAULT_HANDLING_ASM(_x)               \
   __asm volatile(                                \
-      "mrseq r0, msp \n"                         \
+      "mrs r0, msp \n"                         \
       "b my_fault_handler_c \n"                  \
     )
 
@@ -216,7 +216,7 @@ void my_fault_handler_c(sContextStateFrame *frame) {
     const uint16_t INVPC = usage_fault & 0x0004; //Invalid program counter load
     const uint16_t INVSTATE = usage_fault & 0x0002; // Invalid processor state
     const uint16_t UNDEFINSTR = usage_fault & 0x0001; //Undefined instruction.
-    //HALT_IF_DEBUGGING(); 
+    HALT_IF_DEBUGGING(); 
   }
   volatile uint8_t metadata_buffer[0x100];
   memcpy(metadata_buffer,(void*)METADATA_FLASH_ADDR,0x100);
@@ -226,10 +226,10 @@ void my_fault_handler_c(sContextStateFrame *frame) {
   //write log Metadata_flash_addr
   flash_write_blockwise(METADATA_FLASH_ADDR,metadata_buffer,(0x100)/32);
   //reboot the system
-  volatile uint32_t *aircr = (volatile uint32_t *)0xE000ED0C;
-  __asm volatile ("dsb");
-  *aircr = (0x05FA << 16) | 0x1 << 2;
-  __asm volatile ("dsb");
+  // volatile uint32_t *aircr = (volatile uint32_t *)0xE000ED0C;
+  // __asm volatile ("dsb");
+  // *aircr = (0x05FA << 16) | 0x1 << 2;
+  // __asm volatile ("dsb");
   while (1) {} // should be unreachable
   }
 
