@@ -35,6 +35,7 @@
 ENTRY(Reset_Handler)
 
 /* Highest address of the user mode stack */
+_sstack = ORIGIN(RAM_D1);
 _estack = ORIGIN(RAM_D1) + LENGTH(RAM_D1);    /* end of RAM */
 /* Generate a link error if heap and stack don't fit into RAM */
 _Min_Heap_Size = 0x200;      /* required amount of heap  */
@@ -66,6 +67,7 @@ SECTIONS
   .text :
   {
     . = ALIGN(4);
+    _stext = .;
     *(.text)           /* .text sections (code) */
     *(.text*)          /* .text* sections (code) */
     *(.glue_7)         /* glue arm to thumb code */
@@ -149,9 +151,9 @@ SECTIONS
     KEEP(*(.hardfault_log))
     . = . + 0x200;
   } >FLASH
-  .metadata_pool :
+
+  .metadata_pool 0x080DFD00:
   {
-  	. = ABSOLUTE(0x080DFD00);
     . = ALIGN(4);
     metadata = .;
     KEEP(*(.metadata_pool))

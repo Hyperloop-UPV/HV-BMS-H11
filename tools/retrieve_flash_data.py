@@ -23,8 +23,8 @@ def main():
         exit(-1)
 
     binary_raw = None
-
-    with open("dump.bin","r") as binary:
+    with open("dump.bin","rb") as binary:
+        
         binary_raw = binary.read()
 
     #DEFINITIONS FOR LOCATIONS

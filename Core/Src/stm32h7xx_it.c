@@ -80,6 +80,13 @@ extern TIM_HandleTypeDef htim8;
 extern TIM_HandleTypeDef htim23;
 extern TIM_HandleTypeDef htim24;
 extern FDCAN_HandleTypeDef hfdcan1;
+/*
+Externs for calltrace
+*/ 
+extern uint32_t _stext;
+extern uint32_t _etext;
+extern uint32_t _sstack;
+extern uint32_t _estack;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -154,12 +161,36 @@ static void flash_erase_hard_fault_sector(void){
 static int hardfault_flag_is_set(void){
   return (*(volatile uint32_t *)HF_FLASH_ADDR) == HF_FLAG_VALUE;
 }
+static uint8_t is_valid_pc(uint32_t pc)
+{
+    pc &= ~1U;  // Thumb
+    return (pc >= (uint32_t)&_stext &&
+            pc <  (uint32_t)&_etext);
+}
 
+static void scan_call_stack(sContextStateFrame *frame, HardFaultLog *log_hard_fault)
+{
+    uint32_t *stack_start = (uint32_t *)&_sstack;
+    uint32_t *stack_end   = (uint32_t *)&_estack;
 
+    log_hard_fault->CallTrace.depth = 0;
+    uint32_t *sp = (uint32_t *)(frame + 1); 
+    while (sp < stack_end && sp >= stack_start)
+    {
+        uint32_t val = *sp++;
+        if (log_hard_fault->CallTrace.depth >= CALL_TRACE_MAX_DEPTH) break;
+        if ((val & 1U) == 0) continue;
+        if (!is_valid_pc(val)) continue;
+        log_hard_fault->CallTrace.pcs[log_hard_fault->CallTrace.depth++] = val & ~1U;
+    }
+}
 __attribute__((noreturn,optimize("O0")))
 void my_fault_handler_c(sContextStateFrame *frame) {
   volatile uint32_t real_fault_pc = frame->return_address & ~1;
   volatile HardFaultLog log_hard_fault;
+
+  scan_call_stack(frame,&log_hard_fault);
+
   volatile uint32_t *cfsr = (volatile uint32_t *)0xE000ED28;
   //keep the log in the estructure
   log_hard_fault.HF_flag = HF_FLAG_VALUE;
@@ -208,7 +239,9 @@ void my_fault_handler_c(sContextStateFrame *frame) {
   memcpy(metadata_buffer,(void*)METADATA_FLASH_ADDR,0x100);
   flash_erase_hard_fault_sector();
   //write log hard fault
+  volatile uint8_t hardfault_buffer[0x100];
   flash_write_blockwise(HF_FLASH_ADDR,(uint8_t*)&log_hard_fault,(sizeof(log_hard_fault) + 31)/32);
+  memcpy(hardfault_buffer,(void*)HF_FLASH_ADDR,0X200);
   //write log Metadata_flash_addr
   flash_write_blockwise(METADATA_FLASH_ADDR,metadata_buffer,(0x100)/32);
   //reboot the system
@@ -241,16 +274,13 @@ void NMI_Handler(void)
   */
 void MemManage_Handler(void)
 {
-  /* USER CODE BEGIN MemoryManagement_IRQn 0 */
-
-  /* USER CODE END MemoryManagement_IRQn 0 */
-  while (1)
-  {
-    /* USER CODE BEGIN W1_MemoryManagement_IRQn 0 */
-    /* USER CODE END W1_MemoryManagement_IRQn 0 */
+    extern void my_fault_handler_c(sContextStateFrame *frame);
+    
+    __asm volatile(
+        "mrs r0, msp\n"      // obtener stack frame
+        "b my_fault_handler_c\n"
+    );
   }
-}
-
 /**
   * @brief This function handles Pre-fetch fault, memory access fault.
   */

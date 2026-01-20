@@ -6,11 +6,12 @@ HF_FLASH_ADDR = 0x080C0000
 HF_FLASH_ADDR_STRING = "0x080C000"
 ELF_FILE = "out/build/latest.elf"
 
+CALL_TRACE_MAX_DEPTH = 16
 def read_flash():
     cmd = [
         "STM32_Programmer_CLI",
         "-c", "port=SWD",
-        "-r32", hex(HF_FLASH_ADDR), "44"
+        "-r32", hex(HF_FLASH_ADDR), "112"
     ]
     out = subprocess.check_output(cmd, text=True)
     return out
@@ -22,6 +23,11 @@ def decode_cfsr_memory(cfsr, fault_addr):
     print("\nMemory Fault (MMFSR):")
     if memory_fault & 0b10000000:
         print(f"  MMARVALID: Memory fault address valid -> 0x{fault_addr:08X}")
+        if fault_addr in (0xFFFFFFFF, 0x00000000):
+            print("  Fault address is invalid / unmapped memory")
+        else:
+            mem_info = addr2line(fault_addr)
+            print_code_context(mem_info)
     if memory_fault & 0b00100000:
         print("  MLSPERR : Floating Point Unit lazy state preservation error")
     if memory_fault & 0b00010000:
@@ -45,8 +51,8 @@ def decode_cfsr_bus(cfsr, fault_addr):
     if bus_fault & 0b10000000:
         if(bus_fault & 0b00000001):
             print(f"  BFARVALID : Bus fault address valid -> 0x{fault_addr:08X}")
-        else: 
-            print(f"  BFARVALID : Bus fault address imprecise -> 0x{fault_addr:08X}")
+    if bus_fault & 0b00000100:
+        print(f"\033[91m Bus fault address imprecise\033[0m")
     if bus_fault & 0b00100000:
         print("  LSPERR : Floating Point Unit lazy state preservation error")
     if bus_fault & 0b00010000:
@@ -101,13 +107,16 @@ def print_code_context(lines, context=2):
         print("Invalid addr2line output")
         return
 
-    file_line = line_list[1].strip()  # ejemplo: /path/to/file.cpp:5
+    file_line = line_list[1].strip()  
     split = file_line.rfind(':')
     file_path = file_line[:split]
-    line_no = int(file_line[split+1:]) - 1  # índice base 0
-
-    if not os.path.exists(file_path):
-        print("Source file not found")
+    try:
+        line_no = int(file_line[split+1:]) - 1  # índice base 0
+    except ValueError:
+        print("\33[91m Couldn't find exact line\33[0m")
+        return
+        if not os.path.exists(file_path):
+            print("Source file not found")
         return
 
     with open(file_path, "r") as f:
@@ -127,7 +136,7 @@ def print_code_context(lines, context=2):
 
 def hard_fault_analysis(memory_string):
     raw = bytes.fromhex(memory_string)
-    raw = struct.unpack(">11I",raw)
+    raw = struct.unpack(">28I",raw)
     hf = {
         "HF_Flag": raw[0],
         "r0": raw[1],
@@ -136,10 +145,12 @@ def hard_fault_analysis(memory_string):
         "r3": raw[4],
         "r12": raw[5],
         "lr": raw[6],
-        "pc":raw[7],
+        "pc": raw[7],
         "psr": raw[8],
-        "cfsr":raw[9],
-        "fault_addr":raw[10]
+        "cfsr": raw[9],
+        "fault_addr": raw[10],
+        "calltrace_depth": raw[11],
+        "calltrace_pcs": raw[12:28]  
     }
     if(hf["HF_Flag"] != 0xFF00FF00):
         print("There was no hardfault in your Microcontroller, Kudos for you, I hope...")
@@ -166,7 +177,10 @@ def hard_fault_analysis(memory_string):
     
     print("Note: In Release builds (-O2/-O3) the PC may not point exactly to the failing instruction.")
     print("      During interrupts, bus faults, or stack corruption, the PC can be imprecise.")
-    print("      Use the LR and stack frame for better context of where the fault originated.")
+    print("\nIn case of Imprecise error is dificult to find due to is asynchronous fault")
+    print("The error has to be before PC. But not possible to know exactly when.")
+    print("Check this link to know more : https://interrupt.memfault.com/blog/cortex-m-hardfault-debug#fn:8")
+    
 
 if __name__ == '__main__':
     out = read_flash()
@@ -181,6 +195,5 @@ if __name__ == '__main__':
         _,mem = line.split(":")
         memory_string += mem
     memory_string = memory_string.replace(" ","")
-    print(memory_string)
     hard_fault_analysis(memory_string)
     
