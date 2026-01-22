@@ -1,5 +1,6 @@
 #include "main.h"
 #include "ST-LIB.hpp"
+#include "state_machine.hpp"
 
 int main(void) {
 #ifdef SIM_ON
@@ -11,6 +12,8 @@ int main(void) {
 
     Time::register_low_precision_alarm(100, [&]() { led_on.toggle(); 
     });
+    
+    update_state_machines();
 
     while (1) {
         STLIB::update();
