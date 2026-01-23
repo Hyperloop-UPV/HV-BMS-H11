@@ -41,7 +41,6 @@ FMAC_HandleTypeDef hfmac;
  *             	 		MPU
  ***********************************************/
 
-MPUManager::config MPUManager::MPUConfig = {};
 
 /************************************************
  *              Communication-FDCAN

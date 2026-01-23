@@ -1,6 +1,6 @@
 #include "main.h"
-#include "ST-LIB.hpp"
-#include "state_machine.hpp"
+#include "ST-LIB.hpp" 
+#include "BMSStateMachine.hpp"
 
 int main(void) {
 #ifdef SIM_ON
@@ -9,13 +9,13 @@ int main(void) {
 
     DigitalOutput led_on(PB0);
     STLIB::start();
+    BSM.start();
 
     Time::register_low_precision_alarm(100, [&]() { led_on.toggle(); 
     });
     
-    update_state_machines();
-
     while (1) {
+        BSM.check_transitions();
         STLIB::update();
     }
 }
