@@ -97,3 +97,6 @@ tools/*.bin
 
 # Log files
 *.log
+
+
+Core/Src/Runes/generated_metadata.cpp
