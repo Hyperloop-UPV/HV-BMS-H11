@@ -1,3 +1,10 @@
+#define EXAMPLE_BASE
+#define TEST_0 // Test to be run
+
+// Include all examples, run the one defined above
+#include "Examples/ExampleMPU.cpp"
+
+#ifdef EXAMPLE_BASE
 
 #include "main.h"
 #include "ST-LIB.hpp"
@@ -23,3 +30,5 @@ void Error_Handler(void) {
     while (1) {
     }
 }
+
+#endif
