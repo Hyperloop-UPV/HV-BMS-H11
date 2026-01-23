@@ -21,7 +21,7 @@
 #include "main.h"
 #include "stm32h7xx_it.h"
 #include "stm32h7xx_hal.h"
-#include "HALAL/Benchmarking_toolkit/HardfaultTrace.h"
+#include "HALAL/HardFault/HardfaultTrace.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
