@@ -3,6 +3,7 @@
 #include "Actions/operational.hpp"
 #include "Actions/connecting.hpp"
 #include "Actions/fault.hpp"
+#include "Guards/guards.hpp"
 
 // Estados que necesita el sm basico
 enum class BMSState {
@@ -11,21 +12,13 @@ enum class BMSState {
     FAULT
 };
 
-// Mover esto a sus correspondientes archivos
-// Declaramos las funciones que decidirán las transiciones
-namespace guard {
-    bool connection_finished();
-    bool fault_during_operation();
-}
-
-
 // Crear estados 
 constexpr auto connecting_state = make_state(BMSState::CONNECTING,
-    Transition<BMSState>{BMSState::OPERATIONAL, &guard::connection_finished}
+    Transition<BMSState>{BMSState::OPERATIONAL, &Guards::connection_finished}
 );
 
 constexpr auto operational_state = make_state(BMSState::OPERATIONAL,
-    Transition<BMSState>{BMSState::FAULT, &guard::fault_during_operation}
+    Transition<BMSState>{BMSState::FAULT, &Guards::fault_during_operation}
 );
 
 constexpr auto fault_state = make_state(BMSState::FAULT);
@@ -70,3 +63,8 @@ consteval auto build_bms_state_machine() {
 
 inline auto BSM = build_bms_state_machine();
 
+void remove_errors(){
+    for(int i = 0; i < 10; i++){
+        
+    }
+}
