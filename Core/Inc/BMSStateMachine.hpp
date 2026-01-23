@@ -86,3 +86,4 @@ consteval auto build_bms_state_machine() {
 }
 
 inline auto BSM = build_bms_state_machine();
+
