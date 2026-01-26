@@ -4,6 +4,8 @@
 #include "Actions/connecting.hpp"
 #include "Actions/fault.hpp"
 #include "Guards/guards.hpp"
+#include "Actuators/Actuators.hpp"
+#include "Sensors/Sensors.hpp"
 
 // Estados que necesita el sm basico
 enum class BMSState {
@@ -36,9 +38,9 @@ consteval auto build_bms_state_machine() {
     // -- ACCIONES --
 
     // Al entrar a FAULT
-    bms_sm.add_enter_action([](){Fault::contactors_to_open();}, fault_state);
-    bms_sm.add_enter_action([](){Fault::fault_to_cs();}, fault_state);
-    bms_sm.add_enter_action([](){Fault::open_sdc();}, fault_state);
+    bms_sm.add_enter_action([](){HVBMS::Actuators::open_HV();}, fault_state);
+    bms_sm.add_enter_action([](){Fault::fault_to_cs();}, fault_state); // Necesito control station
+    bms_sm.add_enter_action([](){HVBMS::Sensors::open_sdc();}, fault_state);
 
     // Al entrar a CONNECTING
     bms_sm.add_enter_action([](){Connecting::connect_tcp();}, connecting_state);
@@ -46,17 +48,13 @@ consteval auto build_bms_state_machine() {
 
     // Al entrar a OPERATIONAL
     bms_sm.add_enter_action([](){Operational::start_precharge();}, operational_state);
-    bms_sm.add_enter_action([](){Operational::start_sensors();}, operational_state);
+    bms_sm.add_enter_action([](){HVBMS::Sensors::init();}, operational_state);
 
 
     // Acciones CÍCLICAS
     using namespace std::chrono_literals;
-    // Se definen con la acción, el periodo y el estado en el que se ejecutan.
-    bms_sm.add_cyclic_action(Operational::check_precharge_status, 1ms, operational_state);
-    bms_sm.add_cyclic_action(Operational::read_current, 10ms, operational_state);
-    bms_sm.add_cyclic_action(Operational::read_voltage, 10ms, operational_state);
-    bms_sm.add_cyclic_action(Operational::monitor_cell_voltage, 10ms, operational_state);
-    bms_sm.add_cyclic_action(Operational::read_sdc, 10ms, operational_state);
+    // Actualizar voltaje y corriente
+    bms_sm.add_cyclic_action(HVBMS::Sensors::update, 10ms, operational_state);
 
     return bms_sm;
 }
