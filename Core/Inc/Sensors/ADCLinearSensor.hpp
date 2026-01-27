@@ -13,9 +13,9 @@ class ADCLinearSensor {
     float reading{};
 
     ADCLinearSensor(Pin& pin, uint16_t id, float slope, float offset)
-        : sensor{pin, slope, offset, reading, filter} {};
+        : sensor{pin, slope, offset, reading, filter} {}
 
-    void read() { sensor.read(); };
+    void read() { sensor.read(); }
 };
 }  // namespace HBMS
 

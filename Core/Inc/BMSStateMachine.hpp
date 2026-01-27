@@ -20,7 +20,8 @@ constexpr auto connecting_state = make_state(BMSState::CONNECTING,
 );
 
 constexpr auto operational_state = make_state(BMSState::OPERATIONAL,
-    Transition<BMSState>{BMSState::FAULT, &Guards::fault_during_operation}
+    Transition<BMSState>{BMSState::FAULT, &Guards::fault_during_operation},
+    Transition<BMSState>{BMSState::FAULT, &HVBMS::Sensors::check_sdc}
 );
 
 constexpr auto fault_state = make_state(BMSState::FAULT);
@@ -47,14 +48,17 @@ consteval auto build_bms_state_machine() {
     bms_sm.add_enter_action([](){Connecting::connect_udp();}, connecting_state);
 
     // Al entrar a OPERATIONAL
-    bms_sm.add_enter_action([](){Operational::start_precharge();}, operational_state);
+    bms_sm.add_enter_action([](){HVBMS::Actuators::start_precharge();}, operational_state);
     bms_sm.add_enter_action([](){HVBMS::Sensors::init();}, operational_state);
 
 
     // Acciones CÍCLICAS
     using namespace std::chrono_literals;
     // Actualizar voltaje y corriente
-    bms_sm.add_cyclic_action(HVBMS::Sensors::update, 10ms, operational_state);
+    bms_sm.add_cyclic_action(HVBMS::Sensors::update_voltage, 10ms, operational_state);
+    // Luego tendre que crear otro de current con una frecuencia distinta
+    // De momento se queda asi
+    bms_sm.add_cyclic_action(HVBMS::Sensors::update_current, 1ms, operational_state);
 
     return bms_sm;
 }

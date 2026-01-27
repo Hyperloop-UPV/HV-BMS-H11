@@ -25,7 +25,7 @@ class SDC {
         : sdc_good{pin, [&]() { sdc_callback(); }, &sdc_good_value,
                    TRIGGER::BOTH_EDGES}{ };
 
-    void enable() { enabled = true; };
+    void enable() { enabled = true; }
 
     void process_state(PinState value){
         if (value == PinState::OFF) {
