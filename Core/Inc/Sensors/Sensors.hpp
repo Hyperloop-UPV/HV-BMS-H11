@@ -20,7 +20,6 @@ class Sensors {
     // SDC
     static constexpr Pin &SDC_GOOD_PIN{PB12};
 
-    static inline bool reading_sensors_flag{false};
 
    public:
     static ADCLinearSensor<5> &voltage_sensor() {
