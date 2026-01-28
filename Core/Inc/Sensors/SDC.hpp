@@ -23,7 +23,7 @@ class SDC {
 
     SDC(Pin& pin, uint16_t id)
         : sdc_good{pin, [&]() { sdc_callback(); }, &sdc_good_value,
-                   TRIGGER::BOTH_EDGES}{ };
+                    TRIGGER::BOTH_EDGES}{ };
 
     void enable() { enabled = true; }
 

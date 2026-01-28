@@ -1,11 +1,11 @@
 #pragma once
-#include "StateMachine/StateMachine.hpp"
 #include "Actions/operational.hpp"
 #include "Actions/connecting.hpp"
 #include "Actions/fault.hpp"
 #include "Guards/guards.hpp"
 #include "Actuators/Actuators.hpp"
 #include "Sensors/Sensors.hpp"
+#include "Comms/Comms.hpp"
 
 // Estados que necesita el sm basico
 enum class BMSState {
@@ -41,11 +41,10 @@ consteval auto build_bms_state_machine() {
     // Al entrar a FAULT
     bms_sm.add_enter_action([](){HVBMS::Actuators::open_HV();}, fault_state);
     bms_sm.add_enter_action([](){Fault::fault_to_cs();}, fault_state); // Necesito control station
-    bms_sm.add_enter_action([](){HVBMS::Sensors::open_sdc();}, fault_state);
+    bms_sm.add_enter_action([](){HVBMS::Actuators::open_sdc();}, fault_state);
 
     // Al entrar a CONNECTING
-    bms_sm.add_enter_action([](){Connecting::connect_tcp();}, connecting_state);
-    bms_sm.add_enter_action([](){Connecting::connect_udp();}, connecting_state);
+    bms_sm.add_enter_action([](){HVBMS::Comms::start();}, connecting_state);
 
     // Al entrar a OPERATIONAL
     bms_sm.add_enter_action([](){HVBMS::Actuators::start_precharge();}, operational_state);

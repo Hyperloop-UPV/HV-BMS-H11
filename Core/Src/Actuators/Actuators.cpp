@@ -50,4 +50,8 @@ bool Actuators::is_precharging() {
     return contactor_discharge().is_open() && contactor_low().is_closed() &&
            contactor_high().is_open() && contactor_precharge().is_closed();
 }
+
+void Actuators::open_sdc(){
+    sdc_obccu().turn_on();
+}
 }  // namespace HVBMS

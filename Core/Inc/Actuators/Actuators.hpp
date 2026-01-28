@@ -46,10 +46,6 @@ class Actuators {
         static DigitalOutput sdc_obccu{SDC_OBCCU};
         return sdc_obccu;
     }
-    static DigitalOutput& imd_bypass() {
-        static DigitalOutput imd_bypass{IMD_BYPASS};
-        return imd_bypass;
-    }
 
     static void init();
 
@@ -61,5 +57,7 @@ class Actuators {
 
     static void start_precharge();
     static bool is_precharging();
+
+    static void open_sdc();
 };
 }  // namespace HVBMS
