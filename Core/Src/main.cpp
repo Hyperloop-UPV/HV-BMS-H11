@@ -7,10 +7,8 @@ int main(void) {
     SharedMemory::start();
 #endif
     
-    
-    STLIB::start();
-
-    
+    Hard_fault_check();
+    STLIB::start();    
 
     
     while (1) {
