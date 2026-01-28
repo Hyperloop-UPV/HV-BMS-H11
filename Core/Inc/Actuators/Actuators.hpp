@@ -59,5 +59,8 @@ class Actuators {
     static bool is_precharging();
 
     static void open_sdc();
+
+    static void fault_led();
+    static void operational_led();
 };
 }  // namespace HVBMS

@@ -12,7 +12,6 @@ void Actuators::init() {
     led_operational();
     led_fault();
     sdc_obccu();
-    imd_bypass();
 }
 
 void Actuators::open_HV() {
@@ -54,4 +53,13 @@ bool Actuators::is_precharging() {
 void Actuators::open_sdc(){
     sdc_obccu().turn_on();
 }
+
+void Actuators::fault_led(){
+    led_fault().toggle();
+}
+
+void Actuators::operational_led(){
+    led_operational().toggle();
+}
+
 }  // namespace HVBMS

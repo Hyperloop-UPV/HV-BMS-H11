@@ -6,18 +6,14 @@ int main(void) {
 #ifdef SIM_ON
     SharedMemory::start();
 #endif
-
-    DigitalOutput led_on(PB0);
+    
+    
     STLIB::start();
-    BSM.start();
 
-    Time::register_low_precision_alarm(100, [&]() { led_on.toggle(); 
-    });
+    
 
-    remove_errors();
     
     while (1) {
-        BSM.check_transitions();
         STLIB::update();
     }
 }

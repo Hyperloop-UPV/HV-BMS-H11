@@ -3,24 +3,25 @@
 #include "Actions/connecting.hpp"
 #include "Actions/fault.hpp"
 #include "Guards/guards.hpp"
-#include "Actuators/Actuators.hpp"
 #include "Sensors/Sensors.hpp"
+#include "Actuators/Actuators.hpp"
 #include "Comms/Comms.hpp"
+#include "ST-LIB.hpp"
+#include "ST-LIB_HIGH/Protections/ProtectionManager.hpp"
 
 // Estados que necesita el sm basico
-enum class BMSState {
-    CONNECTING,
+enum BMSState : uint8_t{
+    CONNECTING, 
     OPERATIONAL,
     FAULT
 };
 
 // Crear estados 
 constexpr auto connecting_state = make_state(BMSState::CONNECTING,
-    Transition<BMSState>{BMSState::OPERATIONAL, &Guards::connection_finished}
+    Transition<BMSState>{BMSState::OPERATIONAL, &HVBMS::Comms::tcp_connected}
 );
 
 constexpr auto operational_state = make_state(BMSState::OPERATIONAL,
-    Transition<BMSState>{BMSState::FAULT, &Guards::fault_during_operation},
     Transition<BMSState>{BMSState::FAULT, &HVBMS::Sensors::check_sdc}
 );
 
@@ -40,15 +41,20 @@ consteval auto build_bms_state_machine() {
 
     // Al entrar a FAULT
     bms_sm.add_enter_action([](){HVBMS::Actuators::open_HV();}, fault_state);
-    bms_sm.add_enter_action([](){Fault::fault_to_cs();}, fault_state); // Necesito control station
     bms_sm.add_enter_action([](){HVBMS::Actuators::open_sdc();}, fault_state);
+    bms_sm.add_enter_action([](){HVBMS::Actuators::fault_led();}, fault_state);
 
     // Al entrar a CONNECTING
+ 
     bms_sm.add_enter_action([](){HVBMS::Comms::start();}, connecting_state);
 
     // Al entrar a OPERATIONAL
-    bms_sm.add_enter_action([](){HVBMS::Actuators::start_precharge();}, operational_state);
+    bms_sm.add_enter_action([](){HVBMS::Actuators::operational_led();}, operational_state);
+    bms_sm.add_enter_action([](){HVBMS::Actuators::init();}, operational_state);
     bms_sm.add_enter_action([](){HVBMS::Sensors::init();}, operational_state);
+
+    // Al salir de OPERATIONAL
+    bms_sm.add_exit_action([](){HVBMS::Actuators::operational_led();}, operational_state);
 
 
     // Acciones CÍCLICAS
@@ -62,10 +68,34 @@ consteval auto build_bms_state_machine() {
     return bms_sm;
 }
 
-inline auto BSM = build_bms_state_machine();
+auto BSM = build_bms_state_machine();
 
-void remove_errors(){
-    for(int i = 0; i < 10; i++){
-        
+
+// Esto no debe ir aqui
+#define set_protection_name(protection, name)                 \
+    {                                                         \
+        protection->set_name((char*)malloc(name.size() + 1)); \
+        sprintf(protection->get_name(), "%s", name.c_str());  \
+    }
+
+namespace HVBMS{
+    void add_protections(){
+        ProtectionManager::link_state_machine(BSM,
+                                         BMSState::FAULT);
+
+        // DC bus voltage
+        Protection* protection = &ProtectionManager::_add_protection(
+            &Sensors::voltage_sensor().reading, Boundary<float, ABOVE>{410});
+        std::string name = "DC bus voltage";
+        set_protection_name(protection, name);
+
+
+        protection = &ProtectionManager::_add_protection(
+            &Sensors::current_sensor().reading, Boundary<float, ABOVE>{120});
+        name = "DC bus current";
+        set_protection_name(protection, name);
+
+        ProtectionManager::initialize();
     }
 }
+

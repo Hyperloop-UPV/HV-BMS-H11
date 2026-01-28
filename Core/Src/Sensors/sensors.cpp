@@ -20,9 +20,6 @@ void Sensors::update_current(){
     current_sensor().read();
 }
 
-void Sensors::open_sdc(){
-    sdc().process_state(PinState::OFF);
-}
 
 bool Sensors::check_sdc(){
     if (sdc().status == HVBMS::SDC::STATUS::DISENGAGED){
