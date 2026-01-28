@@ -1,6 +1,7 @@
 #include "main.h"
 #include "ST-LIB.hpp" 
 #include "BMSStateMachine.hpp"
+#include "Comms/Comms.hpp"
 
 int main(void) {
 #ifdef SIM_ON
@@ -9,10 +10,14 @@ int main(void) {
     
     Hard_fault_check();
     STLIB::start("00:aa:6b:ae:19:6b");    
-    BSM.start();
-    
+    //BSM.start();
+    HVBMS::Comms::start();
+
+    [[maybe_unused]]bool funciona = false;
+
     while (1) {
         STLIB::update();
+        funciona = HVBMS::Comms::tcp_connected();
     }
 }
 
