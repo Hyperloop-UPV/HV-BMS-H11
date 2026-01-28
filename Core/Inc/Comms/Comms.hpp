@@ -56,7 +56,7 @@ class Comms {
         INFO = 904
     };
 
-    static constexpr std::string HVBMS_IP = "192.168.0.7";
+    static constexpr std::string HVBMS_IP = "192.168.1.7";
 
     static void start();
     static bool tcp_connected();
