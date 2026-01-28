@@ -9,7 +9,7 @@ int main(void) {
     
     Hard_fault_check();
     STLIB::start("00:aa:6b:ae:19:6b");    
-
+    BSM.start();
     
     while (1) {
         STLIB::update();
