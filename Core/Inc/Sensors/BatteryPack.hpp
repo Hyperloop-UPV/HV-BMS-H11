@@ -18,7 +18,7 @@
 
 #define TEMP_CHEAT 1  // Ñapa para temperaturas, esto no debería existir
 
-namespace HVSCU {
+namespace HVBMS {
 template <size_t N_BATTERIES>
 class BatteryPack {
     using Battery =

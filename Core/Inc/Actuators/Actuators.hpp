@@ -11,7 +11,15 @@
 #define IMD_BYPASS PF5
 #define SDC_OBCCU PA11
 
+using ST_LIB::DigitalOutputDomain;
+
+constexpr DigitalOutputDomain::DigitalOutput led_PG8{ST_LIB::PG8};
+constexpr DigitalOutputDomain::DigitalOutput led_PG7{ST_LIB::PG7};
+
 namespace HVBMS {
+extern DigitalOutputDomain::Instance *fault_led;
+extern DigitalOutputDomain::Instance *operational_led;
+
 class Actuators {
    private:
     static Contactor& contactor_low() {
@@ -34,19 +42,11 @@ class Actuators {
     static uint8_t contactors_timeout_id;
 
    public:
-    static DigitalOutput& led_operational() {
-        static DigitalOutput led_operational{LED_OPERATIONAL};
-        led_on = true;
-        return led_operational;
-    }
-    static DigitalOutput& led_fault() {
-        static DigitalOutput led_fault{LED_FAULT};
-        return led_fault;
-    }
     static DigitalOutput& sdc_obccu() {
         static DigitalOutput sdc_obccu{SDC_OBCCU};
         return sdc_obccu;
     }
+
 
     inline static bool led_on = false; 
 
@@ -62,8 +62,5 @@ class Actuators {
     static bool is_precharging();
 
     static void open_sdc();
-
-    static void fault_led();
-    static void operational_led();
 };
 }  // namespace HVBMS

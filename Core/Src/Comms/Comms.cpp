@@ -1,4 +1,5 @@
 #include "Comms/Comms.hpp"
+#include "BMSStateMachine.hpp"
 
 namespace HVBMS {
 ServerSocket* Comms::order_endpoint{nullptr};
@@ -30,6 +31,12 @@ void Comms::send_packets() {
                     break;
             }
         }
-    }
+    } 
 }
+
+void Comms::create_packets(){
+    auto paquete_prueba = new HeapPacket(static_cast<uint16_t>(HVBMS::Comms::IDPacket::CONSTANT), &state_machine.current_state);
+    HVBMS::Comms::add_packet(HVBMS::Comms::Target::CONTROL_STATION, paquete_prueba);
+}
+
 }  // namespace HVBMS

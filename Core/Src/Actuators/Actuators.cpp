@@ -1,7 +1,10 @@
 #include "Actuators/Actuators.hpp"
+#include "main.h"
 
 namespace HVBMS {
 uint8_t Actuators::contactors_timeout_id;
+DigitalOutputDomain::Instance *fault_led;
+DigitalOutputDomain::Instance *operational_led;
 
 void Actuators::init() {
     contactor_low();
@@ -9,11 +12,7 @@ void Actuators::init() {
     contactor_precharge();
     contactor_discharge();
 
-    led_operational();
-    led_fault();
     sdc_obccu();
-
-    led_operational().turn_on();
 }
 
 void Actuators::open_HV() {
@@ -56,12 +55,5 @@ void Actuators::open_sdc(){
     sdc_obccu().turn_on();
 }
 
-void Actuators::fault_led(){
-    led_fault().toggle();
-}
-
-void Actuators::operational_led(){
-    led_operational().toggle();
-}
 
 }  // namespace HVBMS

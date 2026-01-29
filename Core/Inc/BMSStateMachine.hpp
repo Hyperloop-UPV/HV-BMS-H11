@@ -8,6 +8,7 @@
 #include "Comms/Comms.hpp"
 #include "ST-LIB.hpp"
 #include "ST-LIB_HIGH/Protections/ProtectionManager.hpp"
+#include "main.h"
 
 // Estados que necesita el sm basico
 enum BMSState : uint8_t{
@@ -41,17 +42,21 @@ static constinit auto state_machine = []() consteval {
     // Al entrar a FAULT
     bms_sm.add_enter_action([](){HVBMS::Actuators::open_HV();}, fault_state);
     bms_sm.add_enter_action([](){HVBMS::Actuators::open_sdc();}, fault_state);
-    bms_sm.add_enter_action([](){HVBMS::Actuators::fault_led();}, fault_state);
+    bms_sm.add_enter_action([](){HVBMS::fault_led->turn_on();}, fault_state);
     
     // Al entrar a CONNECTING
     bms_sm.add_enter_action([](){HVBMS::Comms::start();}, connecting_state);
+    bms_sm.add_enter_action([](){HVBMS::Comms::create_packets();}, connecting_state);
 
+    bms_sm.add_cyclic_action(HVBMS::operational_led->toggle, 1000ms, connecting_state);
+    
     // Al entrar a OPERATIONAL
     bms_sm.add_enter_action([](){HVBMS::Actuators::init();}, operational_state);
     bms_sm.add_enter_action([](){HVBMS::Sensors::init();}, operational_state);
+    bms_sm.add_enter_action([](){HVBMS::operational_led->turn_on();}, operational_state);
 
     // Al salir de OPERATIONAL
-    bms_sm.add_exit_action([](){HVBMS::Actuators::operational_led();}, operational_state);
+    //bms_sm.add_exit_action([](){HVBMS::Actuators::operational_led();}, operational_state);
 
     // Acciones CÍCLICAS
     using namespace std::chrono_literals;

@@ -23,7 +23,7 @@ class Comms {
     static DatagramSocket* control_station_endpoint;
 
    public:
-    enum class IDMeasurament : uint16_t {
+    enum class IDPacket : uint16_t {
         BATTERY_1 = 910,
         BATTERY_2 = 911,
         BATTERY_3 = 912,
@@ -47,9 +47,10 @@ class Comms {
         CURRENT = 931,
         GENERAL_STATE_MACHINE_STATUS = 940,
         SDC = 944,
+        CONSTANT = 904,
     };
 
-    enum class IDPacket : uint16_t {
+    enum class IDOrder : uint16_t {
         CLOSE_CONTACTORS_ID = 900,
         OPEN_CONTACTORS_ID = 901,
         SDC_OBCCU_ID = 902,
@@ -63,5 +64,8 @@ class Comms {
     static bool tcp_connected();
     static void add_packet(Target target, HeapPacket* packet);
     static void send_packets();
+    static void create_packets();
 };
 }  // namespace HVBMS
+
+
