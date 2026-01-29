@@ -15,12 +15,9 @@ int main(void) {
 
 
     //BSM.start();
-
+    HVBMS::Actuators::led_operational().turn_on();
     while (1) {
         STLIB::update();
-        if (HVBMS::Comms::tcp_connected()){
-            HVBMS::Actuators::led_operational().turn_on();
-        }
     }
 }
 
