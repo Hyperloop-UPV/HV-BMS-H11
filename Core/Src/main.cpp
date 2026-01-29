@@ -9,7 +9,7 @@ int main(void) {
 #endif
     
     Hard_fault_check();
-    STLIB::start("00:aa:6b:ae:19:6b");    
+    STLIB::start("00:aa:6b:ae:19:6b", "192.168.1.7");    
     //BSM.start();
     HVBMS::Comms::start();
 
