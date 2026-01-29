@@ -44,11 +44,10 @@ static constinit auto state_machine = []() consteval {
     bms_sm.add_enter_action([](){HVBMS::Actuators::fault_led();}, fault_state);
 
     // Al entrar a CONNECTING
- 
     bms_sm.add_enter_action([](){HVBMS::Comms::start();}, connecting_state);
 
     // Al entrar a OPERATIONAL
-    bms_sm.add_enter_action([](){HVBMS::Actuators::operational_led();}, operational_state);
+    //bms_sm.add_enter_action([](){HVBMS::Actuators::operational_led();}, operational_state);
     bms_sm.add_enter_action([](){HVBMS::Actuators::init();}, operational_state);
     bms_sm.add_enter_action([](){HVBMS::Sensors::init();}, operational_state);
 

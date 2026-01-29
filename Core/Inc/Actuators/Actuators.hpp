@@ -36,6 +36,7 @@ class Actuators {
    public:
     static DigitalOutput& led_operational() {
         static DigitalOutput led_operational{LED_OPERATIONAL};
+        led_on = true;
         return led_operational;
     }
     static DigitalOutput& led_fault() {
@@ -46,6 +47,8 @@ class Actuators {
         static DigitalOutput sdc_obccu{SDC_OBCCU};
         return sdc_obccu;
     }
+
+    inline static bool led_on = false; 
 
     static void init();
 

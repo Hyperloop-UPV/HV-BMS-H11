@@ -51,7 +51,6 @@ class Sensors {
     static void init();
     static void update_voltage();
     static void update_current();
-    static void open_sdc();
     static bool check_sdc();
 };
 }  // namespace HVBMS
