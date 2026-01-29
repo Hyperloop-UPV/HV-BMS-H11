@@ -15,7 +15,7 @@ int main(void) {
 
 
     //BSM.start();
-    HVBMS::Actuators::led_operational().turn_on();
+    HVBMS::Actuators::led_fault().turn_on();
     while (1) {
         STLIB::update();
     }
