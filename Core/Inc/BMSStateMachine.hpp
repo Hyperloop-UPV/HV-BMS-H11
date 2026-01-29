@@ -28,7 +28,7 @@ constexpr auto fault_state = make_state(BMSState::FAULT);
 
 
 // Crear maquina de estados
-consteval auto build_bms_state_machine() {
+static constinit auto state_machine = []() consteval {
     auto bms_sm = make_state_machine(
         BMSState::CONNECTING,
         connecting_state,
@@ -66,9 +66,8 @@ consteval auto build_bms_state_machine() {
     bms_sm.add_cyclic_action(HVBMS::Sensors::update_current, 1ms, operational_state);
 
     return bms_sm;
-}
+}();
 
-auto BSM = build_bms_state_machine();
 
 
 // Esto no debe ir aqui
@@ -78,24 +77,23 @@ auto BSM = build_bms_state_machine();
         sprintf(protection->get_name(), "%s", name.c_str());  \
     }
 
-namespace HVBMS{
-    void add_protections(){
-        ProtectionManager::link_state_machine(BSM,
-                                         BMSState::FAULT);
+// namespace HVBMS{
+//     void add_protections(){
+//         ProtectionManager::link_state_machine(state_machine(),
+//                                          BMSState::FAULT);
 
-        // DC bus voltage
-        Protection* protection = &ProtectionManager::_add_protection(
-            &Sensors::voltage_sensor().reading, Boundary<float, ABOVE>{410});
-        std::string name = "DC bus voltage";
-        set_protection_name(protection, name);
+//         // DC bus voltage
+//         Protection* protection = &ProtectionManager::_add_protection(
+//             &Sensors::voltage_sensor().reading, Boundary<float, ABOVE>{410});
+//         std::string name = "DC bus voltage";
+//         set_protection_name(protection, name);
 
 
-        protection = &ProtectionManager::_add_protection(
-            &Sensors::current_sensor().reading, Boundary<float, ABOVE>{120});
-        name = "DC bus current";
-        set_protection_name(protection, name);
+//         protection = &ProtectionManager::_add_protection(
+//             &Sensors::current_sensor().reading, Boundary<float, ABOVE>{120});
+//         name = "DC bus current";
+//         set_protection_name(protection, name);
 
-        ProtectionManager::initialize();
-    }
-}
-
+//         ProtectionManager::initialize();
+//     }
+// }

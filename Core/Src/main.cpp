@@ -15,11 +15,13 @@ int main(void) {
     
    // HVBMS::Comms::start();
 
-   Scheduler::register_task(1000, [](){
-        BSM.check_transitions();
+    Scheduler::register_task(1000, [](){
+        state_machine.check_transitions();
     });
-    BSM.start();
 
+    //Esencial llamar a start por que si no el estado inicial no se procesará y no se
+    //ejecutarán sus acciones cíclicas ni demás acciones.
+    state_machine.start();
     
 
     
