@@ -47,7 +47,6 @@ static constinit auto state_machine = []() consteval {
     bms_sm.add_enter_action([](){HVBMS::Comms::start();}, connecting_state);
 
     // Al entrar a OPERATIONAL
-    //bms_sm.add_enter_action([](){HVBMS::Actuators::operational_led();}, operational_state);
     bms_sm.add_enter_action([](){HVBMS::Actuators::init();}, operational_state);
     bms_sm.add_enter_action([](){HVBMS::Sensors::init();}, operational_state);
 
@@ -56,12 +55,11 @@ static constinit auto state_machine = []() consteval {
 
     // Acciones CÍCLICAS
     using namespace std::chrono_literals;
-    bms_sm.add_cyclic_action(HVBMS::Actuators::operational_led, 1000ms, connecting_state);
     // Actualizar voltaje y corriente
-    bms_sm.add_cyclic_action(HVBMS::Sensors::update_voltage, 10ms, operational_state);
+    //bms_sm.add_cyclic_action(HVBMS::Sensors::update_voltage, 10ms, operational_state);
     // Luego tendre que crear otro de current con una frecuencia distinta
     // De momento se queda asi
-    bms_sm.add_cyclic_action(HVBMS::Sensors::update_current, 1ms, operational_state);
+    //bms_sm.add_cyclic_action(HVBMS::Sensors::update_current, 1ms, operational_state);
 
     return bms_sm;
 }();

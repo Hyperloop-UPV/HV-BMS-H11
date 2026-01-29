@@ -12,6 +12,8 @@ void Actuators::init() {
     led_operational();
     led_fault();
     sdc_obccu();
+
+    led_operational().turn_on();
 }
 
 void Actuators::open_HV() {
