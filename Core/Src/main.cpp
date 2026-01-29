@@ -25,6 +25,7 @@ int main(void) {
     
     while (1) {
         STLIB::update();
+        [[maybe_unused]]bool state = HVBMS::Comms::tcp_connected();
     }
 }
 
