@@ -46,7 +46,7 @@ consteval auto build_bms_state_machine() {
 
     // Al entrar a CONNECTING
  
-    //bms_sm.add_enter_action([](){HVBMS::Comms::start();}, connecting_state);
+    bms_sm.add_enter_action([](){HVBMS::Comms::start();}, connecting_state);
 
     // Al entrar a OPERATIONAL
     bms_sm.add_enter_action([](){HVBMS::Actuators::operational_led();}, operational_state);
