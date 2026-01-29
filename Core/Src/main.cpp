@@ -3,16 +3,18 @@
 #include "BMSStateMachine.hpp"
 #include "Comms/Comms.hpp"
 #include "Actuators/Actuators.hpp"
+#include "HVBMS.hpp"
+
 
 
 int main(void) {
 #ifdef SIM_ON
     SharedMemory::start();
-#endif
+#endif  
     using myBoard = ST_LIB::Board<led_PG7, led_PG8>;
     myBoard::init();   
-    HVBMS::operational_led = &myBoard::instance_of<led_PG8>();
-    HVBMS::fault_led = &myBoard::instance_of<led_PG7>();
+    HVBMS::Global.operational_led = &myBoard::instance_of<led_PG8>();
+    HVBMS::Global.fault_led = &myBoard::instance_of<led_PG7>();
 
     Hard_fault_check();
 
@@ -23,15 +25,18 @@ int main(void) {
     });
 
     Scheduler::register_task(1000, HVBMS::Comms::send_packets);
-    
+
     Scheduler::start();
 
     state_machine.start();
 
+    HVBMS::Global.operational_led->turn_on();
+    HVBMS::Global.fault_led->turn_on();
 
     while (1) {
         STLIB::update();
         Scheduler::update();
+        
     }
 }
 
@@ -40,3 +45,4 @@ void Error_Handler(void) {
     while (1) {
     }
 }
+

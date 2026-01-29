@@ -3,8 +3,6 @@
 
 namespace HVBMS {
 uint8_t Actuators::contactors_timeout_id;
-DigitalOutputDomain::Instance *fault_led;
-DigitalOutputDomain::Instance *operational_led;
 
 void Actuators::init() {
     contactor_low();
