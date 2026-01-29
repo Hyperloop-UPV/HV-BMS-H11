@@ -59,6 +59,7 @@ consteval auto build_bms_state_machine() {
 
     // Acciones CÍCLICAS
     using namespace std::chrono_literals;
+    bms_sm.add_cyclic_action(HVBMS::Actuators::operational_led, 1000ms, connecting_state);
     // Actualizar voltaje y corriente
     bms_sm.add_cyclic_action(HVBMS::Sensors::update_voltage, 10ms, operational_state);
     // Luego tendre que crear otro de current con una frecuencia distinta
