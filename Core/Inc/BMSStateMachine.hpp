@@ -17,24 +17,27 @@ enum BMSState : uint8_t{
 };
 
 // Crear estados 
-constexpr auto connecting_state = make_state(BMSState::CONNECTING,
-    Transition<BMSState>{BMSState::OPERATIONAL, [](){return HVBMS::Comms::tcp_connected();}}
-);
-
-constexpr auto operational_state = make_state(BMSState::OPERATIONAL);
-
-
-constexpr auto fault_state = make_state(BMSState::FAULT);
 
 
 // Crear maquina de estados
 static constinit auto state_machine = []() consteval {
+    
+    constexpr auto connecting_state = make_state(BMSState::CONNECTING,
+        Transition<BMSState>{BMSState::OPERATIONAL, [](){return HVBMS::Comms::tcp_connected();}}
+    );
+
+    constexpr auto operational_state = make_state(BMSState::OPERATIONAL);
+
+
+    constexpr auto fault_state = make_state(BMSState::FAULT);
+
     auto bms_sm = make_state_machine(
         BMSState::CONNECTING,
         connecting_state,
         operational_state,
         fault_state
     );
+
 
     // -- ACCIONES --
 
@@ -55,7 +58,6 @@ static constinit auto state_machine = []() consteval {
     // Al salir de OPERATIONAL
     bms_sm.add_exit_action([](){HVBMS::Actuators::operational_led();}, operational_state);
 
-
     // Acciones CÍCLICAS
     using namespace std::chrono_literals;
     bms_sm.add_cyclic_action(HVBMS::Actuators::operational_led, 1000ms, connecting_state);
@@ -69,31 +71,3 @@ static constinit auto state_machine = []() consteval {
 }();
 
 
-
-// Esto no debe ir aqui
-#define set_protection_name(protection, name)                 \
-    {                                                         \
-        protection->set_name((char*)malloc(name.size() + 1)); \
-        sprintf(protection->get_name(), "%s", name.c_str());  \
-    }
-
-// namespace HVBMS{
-//     void add_protections(){
-//         ProtectionManager::link_state_machine(state_machine(),
-//                                          BMSState::FAULT);
-
-//         // DC bus voltage
-//         Protection* protection = &ProtectionManager::_add_protection(
-//             &Sensors::voltage_sensor().reading, Boundary<float, ABOVE>{410});
-//         std::string name = "DC bus voltage";
-//         set_protection_name(protection, name);
-
-
-//         protection = &ProtectionManager::_add_protection(
-//             &Sensors::current_sensor().reading, Boundary<float, ABOVE>{120});
-//         name = "DC bus current";
-//         set_protection_name(protection, name);
-
-//         ProtectionManager::initialize();
-//     }
-// }
