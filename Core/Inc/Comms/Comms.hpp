@@ -6,8 +6,9 @@ namespace HVBMS {
 class Comms {
    public:
     enum class Target { CONTROL_STATION };
-
+    inline static bool tcp_state = false;
    private:
+    
     static std::unordered_map<Target, std::vector<HeapPacket*>> packets;
 
     // IPs

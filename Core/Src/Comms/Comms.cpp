@@ -13,6 +13,7 @@ void Comms::start() {
 }
 
 bool Comms::tcp_connected() {
+    tcp_state = order_endpoint->is_connected();
     return order_endpoint->is_connected();
 }
 
