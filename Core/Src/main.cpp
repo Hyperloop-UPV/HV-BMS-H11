@@ -15,7 +15,12 @@ int main(void) {
     
    // HVBMS::Comms::start();
 
+   Scheduler::register_task(1000, [](){
+        BSM.check_transitions();
+    });
     BSM.start();
+
+    
 
     
     while (1) {
