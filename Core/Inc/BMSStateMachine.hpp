@@ -17,20 +17,17 @@ enum BMSState : uint8_t{
 };
 
 // Crear estados 
+constexpr auto connecting_state = make_state(BMSState::CONNECTING,
+    Transition<BMSState>{BMSState::OPERATIONAL, [](){return HVBMS::Comms::tcp_connected();}}
+);
 
+constexpr auto operational_state = make_state(BMSState::OPERATIONAL);
+
+
+constexpr auto fault_state = make_state(BMSState::FAULT);
 
 // Crear maquina de estados
 static constinit auto state_machine = []() consteval {
-    
-    constexpr auto connecting_state = make_state(BMSState::CONNECTING,
-        Transition<BMSState>{BMSState::OPERATIONAL, [](){return HVBMS::Comms::tcp_connected();}}
-    );
-
-    constexpr auto operational_state = make_state(BMSState::OPERATIONAL);
-
-
-    constexpr auto fault_state = make_state(BMSState::FAULT);
-
     auto bms_sm = make_state_machine(
         BMSState::CONNECTING,
         connecting_state,
