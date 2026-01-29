@@ -9,9 +9,13 @@ int main(void) {
 #endif
     
     Hard_fault_check();
-    STLIB::start("00:aa:6b:ae:19:6b", "192.168.1.7");    
+    STLIB::start("00:aa:6b:ae:19:6b", "192.168.1.7");   
+    
+    Scheduler::register_task(1000, [](){
+        BSM.check_transitions();
+    });
+    
     BSM.start();
-    HVBMS::Comms::start();
 
     while (1) {
         STLIB::update();
