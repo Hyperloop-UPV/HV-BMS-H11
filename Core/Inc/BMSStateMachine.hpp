@@ -18,7 +18,7 @@ enum BMSState : uint8_t{
 
 // Crear estados 
 constexpr auto connecting_state = make_state(BMSState::CONNECTING,
-    Transition<BMSState>{BMSState::OPERATIONAL, [](){return HVBMS::Comms::tcp_state;}}
+    Transition<BMSState>{BMSState::OPERATIONAL, [](){return HVBMS::Comms::tcp_connected();}}
 );
 
 constexpr auto operational_state = make_state(BMSState::OPERATIONAL);

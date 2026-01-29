@@ -19,8 +19,6 @@ int main(void) {
         state_machine.check_transitions();
     });
 
-    //Esencial llamar a start por que si no el estado inicial no se procesará y no se
-    //ejecutarán sus acciones cíclicas ni demás acciones.
     state_machine.start();
     
 
