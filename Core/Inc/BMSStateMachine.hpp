@@ -1,14 +1,8 @@
 #pragma once
-#include "Actions/operational.hpp"
-#include "Actions/connecting.hpp"
-#include "Actions/fault.hpp"
-#include "Guards/guards.hpp"
-#include "Sensors/Sensors.hpp"
 #include "Actuators/Actuators.hpp"
 #include "Comms/Comms.hpp"
 #include "ST-LIB.hpp"
-#include "ST-LIB_HIGH/Protections/ProtectionManager.hpp"
-#include "main.h"
+#include "HVBMS.hpp"
 
 // Estados que necesita el sm basico
 enum BMSState : uint8_t{
@@ -22,16 +16,18 @@ constexpr auto connecting_state = make_state(BMSState::CONNECTING,
     Transition<BMSState>{BMSState::OPERATIONAL, [](){return HVBMS::Comms::tcp_connected();}}
 );
 
-constexpr auto operational_state = make_state(BMSState::OPERATIONAL);
+constexpr auto operational_state = make_state(BMSState::OPERATIONAL,
+    Transition<BMSState>{BMSState::FAULT, [](){return !HVBMS::Comms::tcp_connected();}}
+);
 
 
 constexpr auto fault_state = make_state(BMSState::FAULT);
 
 // Crear maquina de estados
-static constinit auto state_machine = []() consteval {
+inline constinit auto state_machine = []() consteval {
     auto bms_sm = make_state_machine(
         BMSState::CONNECTING,
-        connecting_state,
+        connecting_state,   
         operational_state,
         fault_state
     );
@@ -39,27 +35,24 @@ static constinit auto state_machine = []() consteval {
 
     // -- ACCIONES --
 
-    // Al entrar a FAULT
-    bms_sm.add_enter_action([](){HVBMS::Actuators::open_HV();}, fault_state);
-    bms_sm.add_enter_action([](){HVBMS::Actuators::open_sdc();}, fault_state);
-    //bms_sm.add_enter_action([](){HVBMS::fault_led->turn_on();}, fault_state);
-    
-    // Al entrar a CONNECTING
+    // Acciones ON ENTRY
+    // CONNECTING
     bms_sm.add_enter_action([](){HVBMS::Comms::start();}, connecting_state);
-    bms_sm.add_enter_action([](){HVBMS::Comms::create_packets();}, connecting_state);
-
-    //bms_sm.add_cyclic_action(HVBMS::operational_led->toggle, 1000ms, connecting_state);
     
-    // Al entrar a OPERATIONAL
-    bms_sm.add_enter_action([](){HVBMS::Actuators::init();}, operational_state);
-    bms_sm.add_enter_action([](){HVBMS::Sensors::init();}, operational_state);
-    //bms_sm.add_enter_action([](){HVBMS::operational_led->turn_on();}, operational_state);
-
-    // Al salir de OPERATIONAL
-    //bms_sm.add_exit_action([](){HVBMS::Actuators::operational_led();}, operational_state);
-
+    // FAULT
+    bms_sm.add_enter_action([](){HVBMS::Global::fault_led->turn_on();}, fault_state);
+    bms_sm.add_enter_action([](){HVBMS::Global::operational_led->turn_off();}, fault_state);
+    
+    // OPERATIONAL
+    bms_sm.add_enter_action([](){HVBMS::Global::operational_led->turn_on();}, operational_state);
+    //bms_sm.add_enter_action([](){HVBMS::Comms::create_packets();}, operational_state);
+    bms_sm.add_enter_action([](){HVBMS::Comms::create_packets();}, operational_state);
+   
     // Acciones CÍCLICAS
     using namespace std::chrono_literals;
+    // CONNECTING
+    bms_sm.add_cyclic_action(HVBMS::Actuators::toggle_operational_led, 1000ms, connecting_state);
+    bms_sm.add_cyclic_action(HVBMS::Comms::send_packets, 1000ms, operational_state);
     // Actualizar voltaje y corriente
     //bms_sm.add_cyclic_action(HVBMS::Sensors::update_voltage, 10ms, operational_state);
     // Luego tendre que crear otro de current con una frecuencia distinta
@@ -68,5 +61,4 @@ static constinit auto state_machine = []() consteval {
 
     return bms_sm;
 }();
-
 

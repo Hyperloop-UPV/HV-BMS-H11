@@ -5,6 +5,7 @@ namespace HVBMS {
 ServerSocket* Comms::order_endpoint{nullptr};
 DatagramSocket* Comms::control_station_endpoint{nullptr};
 std::unordered_map<Comms::Target, std::vector<HeapPacket*>> Comms::packets{};
+uint32_t Comms::state_id{0};
 
 void Comms::start() {
     order_endpoint = new ServerSocket(IPV4(HVBMS_IP), ORDER_PORT);
@@ -14,7 +15,6 @@ void Comms::start() {
 }
 
 bool Comms::tcp_connected() {
-    tcp_state = order_endpoint->is_connected();
     return order_endpoint->is_connected();
 }
 
@@ -23,6 +23,9 @@ void Comms::add_packet(Target target, HeapPacket* packet) {
 }
 
 void Comms::send_packets() {
+    // Actualizar estado de la gsm
+    state_id = static_cast<uint32_t>(state_machine.current_state);
+        
     for (auto& [target, packet] : packets) {
         for (auto& p : packet) {
             switch (target) {
@@ -35,8 +38,9 @@ void Comms::send_packets() {
 }
 
 void Comms::create_packets(){
-    auto paquete_prueba = new HeapPacket(static_cast<uint16_t>(HVBMS::Comms::IDPacket::CONSTANT), &state_machine.current_state);
-    HVBMS::Comms::add_packet(HVBMS::Comms::Target::CONTROL_STATION, paquete_prueba);
+    auto paquete_gsm_state = new HeapPacket(static_cast<uint16_t>(IDPacket::GENERAL_STATE_MACHINE_STATUS),
+                        &state_id);
+    add_packet(Target::CONTROL_STATION, paquete_gsm_state);
 }
 
 }  // namespace HVBMS

@@ -6,9 +6,8 @@ namespace HVBMS {
 class Comms {
    public:
     enum class Target { CONTROL_STATION };
-    inline static bool tcp_state = false;
+    static uint32_t state_id;
    private:
-    
     static std::unordered_map<Target, std::vector<HeapPacket*>> packets;
 
     // IPs
@@ -34,7 +33,7 @@ class Comms {
         BATTERY_8 = 917,
         BATTERY_9 = 918,
         BATTERY_10 = 919,
-        BATTERY_11 = 920,
+        //BATTERY_11 = 920,
         BATTERY_12 = 921,
         BATTERY_13 = 922,
         BATTERY_14 = 923,
@@ -46,8 +45,9 @@ class Comms {
         VOLTAGE = 930,
         CURRENT = 931,
         GENERAL_STATE_MACHINE_STATUS = 940,
+        PRUEBA = 920,
         SDC = 944,
-        CONSTANT = 904,
+        ESTADOS = 900,
     };
 
     enum class IDOrder : uint16_t {

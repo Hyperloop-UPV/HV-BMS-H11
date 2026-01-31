@@ -1,61 +1,30 @@
 #pragma once
 
 #include "Actuators/Contactor.hpp"
-
-#define CONTACTOR_LOW PG14
-#define CONTACTOR_HIGH PG12
-#define CONTACTOR_PRECHARGE PD4
-#define CONTACTOR_DISCHARGE PF4
-#define LED_OPERATIONAL PG8
-#define LED_FAULT PG7 
-#define IMD_BYPASS PF5
-#define SDC_OBCCU PA11
-
+#include "HVBMS.hpp"
 
 
 namespace HVBMS {
 
 class Actuators {
-   private:
-    static Contactor& contactor_low() {
-        static Contactor contactor_low{CONTACTOR_LOW, true};
-        return contactor_low;
-    }
-    static Contactor& contactor_high() {
-        static Contactor contactor_high{CONTACTOR_HIGH, true};
-        return contactor_high;
-    }
-    static Contactor& contactor_precharge() {
-        static Contactor contactor_precharge{CONTACTOR_PRECHARGE, true};
-        return contactor_precharge;
-    }
-    static Contactor& contactor_discharge() {
-        static Contactor contactor_discharge{CONTACTOR_DISCHARGE, false};
-        return contactor_discharge;
-    }
-
-    static uint8_t contactors_timeout_id;
-
-   public:
-    static DigitalOutput& sdc_obccu() {
-        static DigitalOutput sdc_obccu{SDC_OBCCU};
-        return sdc_obccu;
-    }
+    private:
+        static Contactor contactor_low;
+        static Contactor contactor_high;
+        static Contactor contactor_precharge;
+        static Contactor contactor_discharge;
 
 
-    inline static bool led_on = false; 
+        static uint8_t contactors_timeout_id;
 
-    static void init();
+    public:
+        static void open_HV();
+        static bool is_HV_open();
 
-    static void open_HV();
-    static bool is_HV_open();
+        static void close_HV();
+        static bool is_HV_closed();
 
-    static void close_HV();
-    static bool is_HV_closed();
-
-    static void start_precharge();
-    static bool is_precharging();
-
-    static void open_sdc();
+        static void start_precharge();
+        static bool is_precharging();
+        static void toggle_operational_led();
 };
 }  // namespace HVBMS

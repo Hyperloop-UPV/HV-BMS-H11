@@ -1,56 +1,53 @@
 #include "Actuators/Actuators.hpp"
-#include "main.h"
+#include "HVBMS.hpp"
 
 namespace HVBMS {
-uint8_t Actuators::contactors_timeout_id;
 
-void Actuators::init() {
-    contactor_low();
-    contactor_high();
-    contactor_precharge();
-    contactor_discharge();
+Contactor Actuators::contactor_low(HVBMS::Global::contactor_low, true);        
+Contactor Actuators::contactor_high(HVBMS::Global::contactor_high, true);      
+Contactor Actuators::contactor_precharge(HVBMS::Global::contactor_precharge, true);
+Contactor Actuators::contactor_discharge(HVBMS::Global::contactor_discharge, false);
 
-    sdc_obccu();
+
+void Actuators::open_HV(){
+    contactor_discharge.close();
+    contactor_low.open();
+    contactor_high.open();
+    contactor_precharge.open();
+
+}
+bool Actuators::is_HV_open(){
+    return contactor_discharge.is_closed() && contactor_low.is_open() &&
+           contactor_high.is_open() && contactor_precharge.is_open();
 }
 
-void Actuators::open_HV() {
-    contactor_discharge().close();
-    contactor_low().open();
-    contactor_high().open();
-    contactor_precharge().open();
+void Actuators::close_HV(){
+    contactor_discharge.open();
+    contactor_low.close();
+    contactor_precharge.open();
+    contactor_high.close();
 }
 
-bool Actuators::is_HV_open() {
-    return contactor_discharge().is_closed() && contactor_low().is_open() &&
-           contactor_high().is_open() && contactor_precharge().is_open();
+bool Actuators::is_HV_closed(){
+    return contactor_discharge.is_open() && contactor_low.is_closed() &&
+           contactor_high.is_closed() && contactor_precharge.is_open();
 }
 
-void Actuators::close_HV() {
-    contactor_discharge().open();
-    contactor_low().close();
-    contactor_precharge().open();
-    contactor_high().close();
+void Actuators::start_precharge(){
+    contactor_discharge.open();
+    contactor_low.close();
+    contactor_precharge.close();
+    contactor_high.open();
+}
+bool Actuators::is_precharging(){
+    return contactor_discharge.is_open() && contactor_low.is_closed() &&
+           contactor_high.is_open() && contactor_precharge.is_closed();
 }
 
-bool Actuators::is_HV_closed() {
-    return contactor_discharge().is_open() && contactor_low().is_closed() &&
-           contactor_high().is_closed() && contactor_precharge().is_open();
-}
-
-void Actuators::start_precharge() {
-    contactor_discharge().open();
-    contactor_low().close();
-    contactor_precharge().close();
-    contactor_high().open();
-}
-
-bool Actuators::is_precharging() {
-    return contactor_discharge().is_open() && contactor_low().is_closed() &&
-           contactor_high().is_open() && contactor_precharge().is_closed();
-}
-
-void Actuators::open_sdc(){
-    sdc_obccu().turn_on();
+// Dejo esto aqui porque no puedo pasarselo directamente a una accion ciclica
+// y no se donde meterlo
+void Actuators::toggle_operational_led(){
+    HVBMS::Global::operational_led->toggle();
 }
 
 

@@ -2,15 +2,17 @@
 
 #include "ST-LIB.hpp"
 
+using ST_LIB::DigitalOutputDomain;
+
 class Contactor {
     enum class State { OPEN, CLOSED };
 
-    DigitalOutput output;
+    DigitalOutputDomain::Instance *output;
     bool normally_opened;
     State state;
 
    public:
-    Contactor(Pin& pin, bool normally_opened);
+    Contactor(DigitalOutputDomain::Instance *output, bool normally_opened);
     void open();
     bool is_open();
 
