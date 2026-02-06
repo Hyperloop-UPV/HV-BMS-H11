@@ -119,10 +119,6 @@ bool UART::printf_ready = false;
 #ifdef HAL_TIM_MODULE_ENABLED
 #define BASE TimerPeripheral::TIM_TYPE::BASE
 
-TimerPeripheral encoder_timer(&htim8, {BASE, 0, 65535}, "TIM 8");
-
-map<pair<Pin, Pin>, TimerPeripheral*> Encoder::pin_timer_map = {
-    {{PC6, PC7}, &encoder_timer}};
 
 #endif
 /************************************************

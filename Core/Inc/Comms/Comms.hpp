@@ -33,7 +33,7 @@ class Comms {
         BATTERY_8 = 917,
         BATTERY_9 = 918,
         BATTERY_10 = 919,
-        //BATTERY_11 = 920,
+        BATTERY_11 = 920,
         BATTERY_12 = 921,
         BATTERY_13 = 922,
         BATTERY_14 = 923,
@@ -42,12 +42,13 @@ class Comms {
         BATTERY_17 = 926,
         BATTERY_18 = 927,
         TOTAL_VOLTAGE = 928,
+        BATTERIES_DATA = 929,
         VOLTAGE = 930,
         CURRENT = 931,
+        MINIMUM_SOC = 932,
+        DRIVER_DIAG = 933,
         GENERAL_STATE_MACHINE_STATUS = 940,
-        PRUEBA = 920,
         SDC = 944,
-        ESTADOS = 900,
     };
 
     enum class IDOrder : uint16_t {
