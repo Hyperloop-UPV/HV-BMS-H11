@@ -3,18 +3,18 @@ cmake_minimum_required(VERSION 3.14)
 project(template-project LANGUAGES ASM C CXX)
 
 set(EXECUTABLE ${PROJECT_NAME}.elf)
-set(Board "VCU") # User must change the Board name
+set(Board "PCU") # User must change the Board name
 set(STLIB_DIR ${CMAKE_CURRENT_LIST_DIR}/deps/ST-LIB)
-set(LD_SCRIPT  ${STLIB_DIR}/STM32H723ZGTX_FLASH.ld)
+set(LD_SCRIPT ${STLIB_DIR}/STM32H723ZGTX_FLASH.ld)
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
 set(GENERATOR_SCRIPT "${CMAKE_SOURCE_DIR}/Core/Inc/Code_generation/Generator.py")
 
-if(CMAKE_HOST_WIN32 )
-set(VENV_PYTHON ${CMAKE_SOURCE_DIR}/virtual/Scripts/python)
+if(CMAKE_HOST_WIN32)
+  set(VENV_PYTHON ${CMAKE_SOURCE_DIR}/virtual/Scripts/python)
 else()
-set(VENV_PYTHON ${CMAKE_SOURCE_DIR}/virtual/bin/python)
+  set(VENV_PYTHON ${CMAKE_SOURCE_DIR}/virtual/bin/python)
 endif()
 
 option(USE_ETHERNET "Enable ethernet peripheral" OFF)
@@ -39,14 +39,14 @@ if(USE_CCACHE)
   endif()
 endif()
 
-if (PROJECT_IS_TOP_LEVEL AND (NOT CMAKE_CROSSCOMPILING))
+if(PROJECT_IS_TOP_LEVEL AND (NOT CMAKE_CROSSCOMPILING))
   include(FetchContent)
   option(BUILD_GMOCK OFF)
   option(INSTALL_GTEST OFF)
   FetchContent_Declare(
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG        v1.15.2
+    GIT_TAG v1.15.2
   )
   FetchContent_MakeAvailable(googletest)
   add_library(GTest::GTest INTERFACE IMPORTED)
@@ -69,28 +69,28 @@ set(GENERATED_ORDER_PACKETS ${CMAKE_SOURCE_DIR}/Core/Inc/Communications/Packets/
 set(GENERATED_STATE_MACHINE ${CMAKE_SOURCE_DIR}/Core/Inc/state_machine.hpp)
 add_custom_command(
   OUTPUT
-    ${GENERATED_DATA_PACKETS}
-    ${GENERATED_ORDER_PACKETS}
-    ${GENERATED_STATE_MACHINE}
+  ${GENERATED_DATA_PACKETS}
+  ${GENERATED_ORDER_PACKETS}
+  ${GENERATED_STATE_MACHINE}
   COMMAND ${VENV_PYTHON} ${GENERATOR_SCRIPT} ${Board}
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   DEPENDS
-    ${GENERATOR_SCRIPT}
-    ${CMAKE_SOURCE_DIR}/Core/Inc/Code_generation/Packet_generation/Packet_generation.py
-    ${CMAKE_SOURCE_DIR}/Core/Inc/Code_generation/Packet_generation/DataTemplate.hpp
-    ${CMAKE_SOURCE_DIR}/Core/Inc/Code_generation/Packet_generation/OrderTemplate.hpp
-    ${CMAKE_SOURCE_DIR}/Core/Inc/Code_generation/State_machine_generation/State_machine_generation.py
-    ${CMAKE_SOURCE_DIR}/Core/Inc/Code_generation/State_machine_generation/State_machine_description.py
-    ${CMAKE_SOURCE_DIR}/state_machine.json
-    ${GENERATOR_JSONS}
+  ${GENERATOR_SCRIPT}
+  ${CMAKE_SOURCE_DIR}/Core/Inc/Code_generation/Packet_generation/Packet_generation.py
+  ${CMAKE_SOURCE_DIR}/Core/Inc/Code_generation/Packet_generation/DataTemplate.hpp
+  ${CMAKE_SOURCE_DIR}/Core/Inc/Code_generation/Packet_generation/OrderTemplate.hpp
+  ${CMAKE_SOURCE_DIR}/Core/Inc/Code_generation/State_machine_generation/State_machine_generation.py
+  ${CMAKE_SOURCE_DIR}/Core/Inc/Code_generation/State_machine_generation/State_machine_description.py
+  ${CMAKE_SOURCE_DIR}/state_machine.json
+  ${GENERATOR_JSONS}
   COMMENT "Generating packets and state machine"
 )
 
 add_custom_target(run_generator ALL
   DEPENDS
-    ${GENERATED_DATA_PACKETS}
-    ${GENERATED_ORDER_PACKETS}
-    ${GENERATED_STATE_MACHINE}
+  ${GENERATED_DATA_PACKETS}
+  ${GENERATED_ORDER_PACKETS}
+  ${GENERATED_STATE_MACHINE}
 )
 
 file(GLOB_RECURSE METADATA_SOURCES
@@ -111,9 +111,9 @@ add_custom_command(
   COMMAND ${VENV_PYTHON} ${METADATA_SCRIPT}
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   DEPENDS
-    ${METADATA_SCRIPT}
-    ${METADATA_TEMPLATE}
-    ${METADATA_SOURCES}
+  ${METADATA_SCRIPT}
+  ${METADATA_TEMPLATE}
+  ${METADATA_SOURCES}
   COMMENT "Generating binary metadata"
 )
 
@@ -122,10 +122,10 @@ add_custom_target(generate_binary_metadata
 )
 
 if(CMAKE_CROSSCOMPILING)
-  file(GLOB_RECURSE SOURCE_C    ${CMAKE_SOURCE_DIR}/Core/*.c)
-  file(GLOB_RECURSE SOURCE_CPP  ${CMAKE_SOURCE_DIR}/Core/*.cpp)
-  file(GLOB_RECURSE SOURCE_H    ${CMAKE_SOURCE_DIR}/Core/*.h)
-  file(GLOB_RECURSE SOURCE_HPP  ${CMAKE_SOURCE_DIR}/Core/*.hpp)
+  file(GLOB_RECURSE SOURCE_C ${CMAKE_SOURCE_DIR}/Core/*.c)
+  file(GLOB_RECURSE SOURCE_CPP ${CMAKE_SOURCE_DIR}/Core/*.cpp)
+  file(GLOB_RECURSE SOURCE_H ${CMAKE_SOURCE_DIR}/Core/*.h)
+  file(GLOB_RECURSE SOURCE_HPP ${CMAKE_SOURCE_DIR}/Core/*.hpp)
 
   if(NOT BUILD_EXAMPLES)
     file(GLOB_RECURSE EXAMPLE_CPP ${CMAKE_SOURCE_DIR}/Core/Src/Examples/*.cpp)
@@ -185,7 +185,7 @@ if(CMAKE_CROSSCOMPILING)
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Inc
   )
 
-  target_link_options(${EXECUTABLE} PRIVATE 
+  target_link_options(${EXECUTABLE} PRIVATE
     $<$<BOOL:${CMAKE_CROSSCOMPILING}>:-T${LD_SCRIPT}>
     $<$<BOOL:${CMAKE_CROSSCOMPILING}>:-mcpu=cortex-m7>
     $<$<BOOL:${CMAKE_CROSSCOMPILING}>:-mthumb>
@@ -210,11 +210,11 @@ if(CMAKE_CROSSCOMPILING)
   add_custom_command(TARGET ${EXECUTABLE} POST_BUILD
     # Create output directory
     COMMAND ${CMAKE_COMMAND} -E make_directory
-            ${CMAKE_SOURCE_DIR}/out/build
+    ${CMAKE_SOURCE_DIR}/out/build
     # Copy the built binary to out/build/latest.elf
     COMMAND ${CMAKE_COMMAND} -E copy
-            $<TARGET_FILE:${EXECUTABLE}>
-            ${CMAKE_SOURCE_DIR}/out/build/latest.elf
+    $<TARGET_FILE:${EXECUTABLE}>
+    ${CMAKE_SOURCE_DIR}/out/build/latest.elf
     COMMENT "Copying ${EXECUTABLE} to out/build/latest.elf"
   )
 
@@ -232,10 +232,10 @@ if(CMAKE_CROSSCOMPILING)
   endif()
 endif()
 
-if (PROJECT_IS_TOP_LEVEL)
+if(PROJECT_IS_TOP_LEVEL)
   execute_process(
     COMMAND ${CMAKE_COMMAND} -E create_symlink
-      ${CMAKE_BINARY_DIR}/compile_commands.json
-      ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json
+    ${CMAKE_BINARY_DIR}/compile_commands.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json
   )
 endif()
