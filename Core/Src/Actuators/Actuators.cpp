@@ -39,6 +39,7 @@ void Actuators::start_precharge(){
     contactor_precharge.close();
     contactor_high.open();
 }
+
 bool Actuators::is_precharging(){
     return contactor_discharge.is_open() && contactor_low.is_closed() &&
            contactor_high.is_open() && contactor_precharge.is_closed();

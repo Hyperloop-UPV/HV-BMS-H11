@@ -10,6 +10,7 @@ class SDC {
 
     HeapPacket packet;
     bool enabled{false};
+    bool triggered{false};
 
     void sdc_callback(void) {
         sdc_good.read();
@@ -24,7 +25,6 @@ class SDC {
    public:
     enum class STATUS : uint8_t { ENGAGED, DISENGAGED };
 
-    bool triggered{false};
     STATUS status{STATUS::DISENGAGED};
 
     SDC(Pin& pin, uint16_t id)
@@ -35,6 +35,8 @@ class SDC {
     };
 
     void enable() { enabled = true; };
+
+    bool is_sdc_open() { return triggered; };
 };
 }  // namespace HVBMS
 

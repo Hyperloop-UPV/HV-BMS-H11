@@ -22,16 +22,8 @@ class Sensors {
     static constexpr float CURRENT_SLOPE{92.27959442138672};
     static constexpr float CURRENT_OFFSET{-152.49656677246094};
 
-    // IMD
-    static constexpr Pin &M_LS_PIN{PF7};
-    static constexpr Pin &IMD_POW{PE2};
-    static constexpr Pin &IMD_OK{PA12};
-
     // SDC
     static constexpr Pin &SDC_GOOD_PIN{PB12};
-
-    static inline bool reading_sensors_flag{false};
-    static inline bool reading_batteries_flag{false};
 
 public:
 
@@ -56,7 +48,6 @@ public:
         static_cast<uint16_t>(Comms::IDPacket::SDC)};
 
 
-
     inline static BatteryPack<N_BATTERIES> batteries{
         static_cast<uint16_t>(Comms::IDPacket::TOTAL_VOLTAGE),
         static_cast<uint16_t>(Comms::IDPacket::DRIVER_DIAG),
@@ -64,8 +55,8 @@ public:
         static_cast<uint16_t>(Comms::IDPacket::MINIMUM_SOC),
         static_cast<uint16_t>(Comms::IDPacket::BATTERIES_DATA)};
 
-    static void start();
-    static void update();
+    static void update_sensors();
+    static void update_batteries();
 };
 }  // namespace HVBMS
 
