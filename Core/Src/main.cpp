@@ -5,13 +5,34 @@
 #include "Actuators/Actuators.hpp"
 #include "HVBMS.hpp"
 
+using ST_LIB::EthernetDomain;
+
+#if defined(USE_PHY_LAN8742)
+constexpr auto eth =
+    EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "00:80:e1:00:01:07",
+                             "192.168.1.7", "255.255.0.0");
+#elif defined(USE_PHY_LAN8700)
+constexpr auto eth =
+    EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "00:80:e1:00:01:07",
+                             "192.168.1.7", "255.255.0.0");
+
+#elif defined(USE_PHY_KSZ8041)
+constexpr auto eth =
+    EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "00:80:e1:00:01:07",
+                             "192.168.1.7", "255.255.0.0");
+#else
+#error "No PHY selected for Ethernet pinset selection"
+#endif
+
+using myBoard = ST_LIB::Board<eth, led_PG7, led_PG8, 
+                contactor_PG14, contactor_PG12, contactor_PD4, contactor_PF4,
+                sdc_PA11>;   
+                 
 int main(void) {
 #ifdef SIM_ON
     SharedMemory::start();  
 #endif  
-    using myBoard = ST_LIB::Board<led_PG7, led_PG8, 
-                    contactor_PG14, contactor_PG12, contactor_PD4, contactor_PF4,
-                    sdc_PA11>;    
+
     myBoard::init();   
     HVBMS::Global::operational_led = &myBoard::instance_of<led_PG8>();
     HVBMS::Global::fault_led = &myBoard::instance_of<led_PG7>();
@@ -20,10 +41,9 @@ int main(void) {
     HVBMS::Global::contactor_precharge = &myBoard::instance_of<contactor_PD4>();
     HVBMS::Global::contactor_discharge = &myBoard::instance_of<contactor_PF4>();
     HVBMS::Global::sdc_obccu = &myBoard::instance_of<sdc_PA11>();
+    auto eth_instance = &myBoard::instance_of<eth>();
 
     Hard_fault_check();
-    
-    STLIB::start("00:aa:6b:ae:19:6b", "192.168.1.7");   
 
     state_machine.start();
 
@@ -34,7 +54,7 @@ int main(void) {
     Scheduler::start();
     
     while (1) {
-        STLIB::update();
+        eth_instance->update();
         Scheduler::update();
     }
 }

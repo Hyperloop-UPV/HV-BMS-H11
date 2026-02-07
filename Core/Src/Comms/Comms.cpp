@@ -24,7 +24,7 @@ void Comms::add_packet(Target target, HeapPacket* packet) {
 
 void Comms::send_packets() {
     // Actualizar estado de la gsm
-    state_id = static_cast<uint32_t>(state_machine.current_state);
+    state_id = static_cast<uint32_t>(state_machine.get_current_state_id());
         
     for (auto& [target, packet] : packets) {
         for (auto& p : packet) {
