@@ -39,12 +39,12 @@ inline constinit auto state_machine = []() consteval {
     // CONNECTING
     bms_sm.add_enter_action([](){HVBMS::Comms::start();
                                  HVBMS::Sensors::sdc.enable();
-                                 HVBMS::Global::sdc_obccu->turn_on();},
+                                 HVBMS::Global::sdc_obccu->turn_on();
+                                 HVBMS::Comms::create_packets();},
                             connecting_state);
 
     // OPERATIONAL
-    bms_sm.add_enter_action([](){HVBMS::Global::operational_led->turn_on();
-                                 HVBMS::Comms::create_packets();},
+    bms_sm.add_enter_action([](){HVBMS::Global::operational_led->turn_on();},
                             operational_state);
    
     // FAULT

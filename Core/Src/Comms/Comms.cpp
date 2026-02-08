@@ -38,9 +38,10 @@ void Comms::send_packets() {
 }
 
 void Comms::create_packets(){
-    auto paquete_gsm_state = new HeapPacket(static_cast<uint16_t>(IDPacket::GENERAL_STATE_MACHINE_STATUS),
+    auto gsm_state_packet = new HeapPacket(static_cast<uint16_t>(IDPacket::GENERAL_STATE_MACHINE_STATUS),
                         &state_id);
-    add_packet(Target::CONTROL_STATION, paquete_gsm_state);
+    add_packet(Target::CONTROL_STATION, gsm_state_packet);
+
 }
 
 }  // namespace HVBMS
