@@ -2,13 +2,13 @@
 #define HVBMS_SDC_HPP
 
 #include "ST-LIB_LOW.hpp"
+#include "Communications/Packets/DataPackets.hpp"
 
 namespace HVBMS {
 class SDC {
     SensorInterrupt sdc_good;
     PinState sdc_good_value{ON};
 
-    HeapPacket packet;
     bool enabled{false};
     bool triggered{false};
 
@@ -16,24 +16,22 @@ class SDC {
         sdc_good.read();
         if (sdc_good_value == PinState::OFF) {
             if (enabled) triggered = true;
-            status = STATUS::DISENGAGED;
+            status = DataPackets::sdc_status::DISENGAGED;
         } else {
-            status = STATUS::ENGAGED;
+            status = DataPackets::sdc_status::ENGAGED;
         }
     }
 
    public:
-    enum class STATUS : uint8_t { ENGAGED, DISENGAGED };
+    DataPackets::sdc_status status{DataPackets::sdc_status::DISENGAGED};
 
-    STATUS status{STATUS::DISENGAGED};
-
-    SDC(Pin& pin, uint16_t id)
-        : sdc_good{pin, [&]() { sdc_callback(); }, &sdc_good_value,
-                   TRIGGER::BOTH_EDGES},
-          packet{id, &status} {
-        Comms::add_packet(Comms::Target::CONTROL_STATION, &packet);
-    };
-
+    SDC(Pin& pin)
+        : sdc_good {
+              pin,
+              [&]() { sdc_callback(); },
+              &sdc_good_value,
+              TRIGGER::BOTH_EDGES
+          } {}
     void enable() { enabled = true; };
 
     bool is_sdc_open() { return triggered; };

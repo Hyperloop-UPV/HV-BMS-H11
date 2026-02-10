@@ -9,7 +9,8 @@ class OrderBase {
     virtual void check_order() = 0;
 };
 
-template <Comms::IDOrder id>
+
+template <HVBMS::Comms::IDOrder id>
 class Order : public OrderBase {
    private:
     std::function<void()> callback;
@@ -21,15 +22,15 @@ class Order : public OrderBase {
     void check_order() override;
 };
 
-template <Comms::IDOrder id>
+template <HVBMS::Comms::IDOrder id>
 bool Order<id>::received = false;
 
-template <Comms::IDOrder id>
+template <HVBMS::Comms::IDOrder id>
 Order<id>::Order(std::function<void()> callback) : callback(callback) {
     order = new HeapOrder(static_cast<uint16_t>(id), []() { received = true; });
 }
 
-template <Comms::IDOrder id>
+template <HVBMS::Comms::IDOrder id>
 void Order<id>::check_order() {
     if (received) {
         callback();

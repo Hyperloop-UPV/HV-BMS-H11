@@ -90,14 +90,9 @@ class BatteryPack {
 
     HeapPacket total_voltage_packet;
     HeapPacket reading_period_packet;
-    HeapPacket minimum_soc_packet;
-    HeapPacket batteries_data_packet;
     array<std::unique_ptr<HeapPacket>, N_BATTERIES> battery_packets;
-    float minimum_soc{1.0};
-    float minimum_temp{100.0};
-    float maximum_temp{-100.0};
-    float minimum_cell_voltage{5.0};
-    float maximum_cell_voltage{0.0};
+
+
 
 #if TEMP_CHEAT
     FloatMovingAverage<100> temp_average{};
@@ -141,27 +136,26 @@ class BatteryPack {
     }
 
    public:
+    float minimum_soc{1.0};
+    float minimum_temp{100.0};
+    float maximum_temp{-100.0};
+    float minimum_cell_voltage{5.0};
+    float maximum_cell_voltage{0.0};
+
     array<Battery, N_BATTERIES> &batteries = bms.get_data();
     float total_voltage{FAKE_TOTAL_VOLTAGE};
     array<std::pair<uint, float>, N_BATTERIES> SoCs{};  // ms -> soc[0,1]
     array<array<float, 2>, N_BATTERIES> batteries_temp{};
 
     BatteryPack(uint16_t total_voltage_id, uint16_t reading_period_id,
-                uint16_t battery_id, uint16_t minimum_soc_id,
+                uint16_t battery_id,
                 uint16_t batteries_data_id)
         : total_voltage_packet{total_voltage_id, &total_voltage},
-          reading_period_packet{reading_period_id, &bms.get_period()},
-          minimum_soc_packet{minimum_soc_id, &minimum_soc},
-          batteries_data_packet{batteries_data_id, &minimum_cell_voltage,
-                                &maximum_cell_voltage, &minimum_temp,
-                                &maximum_temp} {
+          reading_period_packet{reading_period_id, &bms.get_period()}},{
         Comms::add_packet(Comms::Target::CONTROL_STATION,
                           &total_voltage_packet);
         Comms::add_packet(Comms::Target::CONTROL_STATION,
                           &reading_period_packet);
-        Comms::add_packet(Comms::Target::CONTROL_STATION, &minimum_soc_packet);
-        Comms::add_packet(Comms::Target::CONTROL_STATION,
-                          &batteries_data_packet);
         for (uint16_t i{0}; i < N_BATTERIES; ++i) {
             battery_packets[i] = std::make_unique<HeapPacket>(
                 battery_id + i, &SoCs[i].second, &batteries[i].cells[0],

@@ -18,9 +18,10 @@ class Sensors {
     static constexpr float VOLTAGE_OFFSET{-3.6849429607391357};
 
     // Current sensor for HVBMS with ID 1
+    // Hecho    
     static constexpr Pin &CURRENT_PIN{PA0};
-    static constexpr float CURRENT_SLOPE{92.27959442138672};
-    static constexpr float CURRENT_OFFSET{-152.49656677246094};
+    static constexpr float CURRENT_SLOPE{89.94180359377545};
+    static constexpr float CURRENT_OFFSET{-151.40450651439056};
 
     // SDC
     static constexpr Pin &SDC_GOOD_PIN{PB12};
@@ -29,30 +30,24 @@ public:
 
     inline static ADCLinearSensor<5> voltage_sensor{
         VOLTAGE_PIN,
-        static_cast<uint16_t>(Comms::IDPacket::VOLTAGE),
         VOLTAGE_SLOPE,
-        VOLTAGE_OFFSET,
-        {Comms::Target::CONTROL_STATION}};
+        VOLTAGE_OFFSET};
 
 
     inline static ADCLinearSensor<5> current_sensor{
         CURRENT_PIN,
-        static_cast<uint16_t>(Comms::IDPacket::CURRENT),
         CURRENT_SLOPE,
-        CURRENT_OFFSET,
-        {Comms::Target::CONTROL_STATION}};
+        CURRENT_OFFSET};
 
 
 
-    inline static SDC sdc{SDC_GOOD_PIN,
-        static_cast<uint16_t>(Comms::IDPacket::SDC)};
+    inline static SDC sdc{SDC_GOOD_PIN};
 
 
     inline static BatteryPack<N_BATTERIES> batteries{
         static_cast<uint16_t>(Comms::IDPacket::TOTAL_VOLTAGE),
         static_cast<uint16_t>(Comms::IDPacket::DRIVER_DIAG),
         static_cast<uint16_t>(Comms::IDPacket::BATTERY_1),
-        static_cast<uint16_t>(Comms::IDPacket::MINIMUM_SOC),
         static_cast<uint16_t>(Comms::IDPacket::BATTERIES_DATA)};
 
     static void update_sensors();

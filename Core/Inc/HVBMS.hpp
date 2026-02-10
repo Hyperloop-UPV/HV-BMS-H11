@@ -1,9 +1,10 @@
 #pragma once
 
 #include "ST-LIB.hpp"
+#include "Protections/Protection.hpp"
+#include "Protections/ProtectionManager.hpp"
 
 using ST_LIB::DigitalOutputDomain;
-
 
 constexpr DigitalOutputDomain::DigitalOutput led_PG8{ST_LIB::PG8};
 constexpr DigitalOutputDomain::DigitalOutput led_PG7{ST_LIB::PG7};
@@ -22,5 +23,5 @@ namespace HVBMS{
         inline DigitalOutputDomain::Instance *contactor_precharge;
         inline DigitalOutputDomain::Instance *contactor_discharge;
         inline DigitalOutputDomain::Instance *sdc_obccu;
-    };      
+    };   
 };
