@@ -147,28 +147,7 @@ class BatteryPack {
     array<std::pair<uint, float>, N_BATTERIES> SoCs{};  // ms -> soc[0,1]
     array<array<float, 2>, N_BATTERIES> batteries_temp{};
 
-    BatteryPack(uint16_t total_voltage_id, uint16_t reading_period_id,
-                uint16_t battery_id,
-                uint16_t batteries_data_id)
-        : total_voltage_packet{total_voltage_id, &total_voltage},
-          reading_period_packet{reading_period_id, &bms.get_period()}},{
-        Comms::add_packet(Comms::Target::CONTROL_STATION,
-                          &total_voltage_packet);
-        Comms::add_packet(Comms::Target::CONTROL_STATION,
-                          &reading_period_packet);
-        for (uint16_t i{0}; i < N_BATTERIES; ++i) {
-            battery_packets[i] = std::make_unique<HeapPacket>(
-                battery_id + i, &SoCs[i].second, &batteries[i].cells[0],
-                &batteries[i].cells[1], &batteries[i].cells[2],
-                &batteries[i].cells[3], &batteries[i].cells[4],
-                &batteries[i].cells[5], &batteries_temp[i][0],
-                &batteries_temp[i][1], &batteries[i].total_voltage,
-                &batteries[i].conv_rate);
-
-            Comms::add_packet(Comms::Target::CONTROL_STATION,
-                              battery_packets[i].get());
-        }
-
+    BatteryPack(){
         SoCs.fill({0, 1.0});
         BMSConfig::spi_id = SPI::inscribe(SPI::spi3);
     }

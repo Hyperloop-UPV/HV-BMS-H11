@@ -1,8 +1,6 @@
 #pragma once
 
 #include "ST-LIB.hpp"
-#include "Protections/Protection.hpp"
-#include "Protections/ProtectionManager.hpp"
 
 using ST_LIB::DigitalOutputDomain;
 

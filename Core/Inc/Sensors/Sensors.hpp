@@ -13,9 +13,10 @@
 namespace HVBMS {
 class Sensors {
     // Voltage sensor for HVBMS with ID 4
+    // Hecho tambien
     static constexpr Pin &VOLTAGE_PIN{PF13};
-    static constexpr float VOLTAGE_SLOPE{122.2523193359375};
-    static constexpr float VOLTAGE_OFFSET{-3.6849429607391357};
+    static constexpr float VOLTAGE_SLOPE{122.03744695176259};
+    static constexpr float VOLTAGE_OFFSET{-3.57028270765926};
 
     // Current sensor for HVBMS with ID 1
     // Hecho    
@@ -44,11 +45,11 @@ public:
     inline static SDC sdc{SDC_GOOD_PIN};
 
 
-    inline static BatteryPack<N_BATTERIES> batteries{
-        static_cast<uint16_t>(Comms::IDPacket::TOTAL_VOLTAGE),
-        static_cast<uint16_t>(Comms::IDPacket::DRIVER_DIAG),
-        static_cast<uint16_t>(Comms::IDPacket::BATTERY_1),
-        static_cast<uint16_t>(Comms::IDPacket::BATTERIES_DATA)};
+    // inline static BatteryPack<N_BATTERIES> batteries{
+    //     static_cast<uint16_t>(Comms::IDPacket::TOTAL_VOLTAGE),
+    //     static_cast<uint16_t>(Comms::IDPacket::DRIVER_DIAG),
+    //     static_cast<uint16_t>(Comms::IDPacket::BATTERY_1),
+    //     static_cast<uint16_t>(Comms::IDPacket::BATTERIES_DATA)};
 
     static void update_sensors();
     static void update_batteries();

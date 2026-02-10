@@ -44,12 +44,10 @@ int main(void) {
 
     Hard_fault_check();
 
-    state_machine.start();
+    HVBMS::SM::state_machine.start();
 
-    Scheduler::register_task(1000000, [](){
-        state_machine.check_transitions();
-    });
-    
+    Scheduler::register_task(1000000, []() { HVBMS::SM::state_machine.check_transitions(); });
+
     Scheduler::start();
     
     while (1) {

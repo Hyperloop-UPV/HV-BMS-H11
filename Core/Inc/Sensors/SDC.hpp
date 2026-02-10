@@ -1,8 +1,8 @@
 #ifndef HVBMS_SDC_HPP
 #define HVBMS_SDC_HPP
 
-#include "ST-LIB_LOW.hpp"
 #include "Communications/Packets/DataPackets.hpp"
+#include "ST-LIB_LOW.hpp"
 
 namespace HVBMS {
 class SDC {
@@ -26,16 +26,12 @@ class SDC {
     DataPackets::sdc_status status{DataPackets::sdc_status::DISENGAGED};
 
     SDC(Pin& pin)
-        : sdc_good {
-              pin,
-              [&]() { sdc_callback(); },
-              &sdc_good_value,
-              TRIGGER::BOTH_EDGES
-          } {}
+        : sdc_good{pin, [&]() { sdc_callback(); }, &sdc_good_value, TRIGGER::BOTH_EDGES} {}
+
     void enable() { enabled = true; };
 
     bool is_sdc_open() { return triggered; };
 };
-}  // namespace HVBMS
+};  // namespace HVBMS
 
 #endif
