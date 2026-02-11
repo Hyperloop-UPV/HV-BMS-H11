@@ -12,13 +12,11 @@
 class Sensors {
     // Voltage sensor for HVBMS with ID 4
     // Hecho tambien
-    static constexpr Pin& VOLTAGE_PIN{PF13};
     static constexpr float VOLTAGE_SLOPE{122.03744695176259};
     static constexpr float VOLTAGE_OFFSET{-3.57028270765926};
 
     // Current sensor for HVBMS with ID 1
     // Hecho
-    static constexpr Pin& CURRENT_PIN{PA0};
     static constexpr float CURRENT_SLOPE{89.94180359377545};
     static constexpr float CURRENT_OFFSET{-151.40450651439056};
 
@@ -26,9 +24,9 @@ class Sensors {
     static constexpr Pin& SDC_GOOD_PIN{PB12};
 
    public:
-    inline static ADCLinearSensor<5> voltage_sensor{VOLTAGE_PIN, VOLTAGE_SLOPE, VOLTAGE_OFFSET};
+    inline static ADCLinearSensor<5> voltage_sensor{ADC::adc_voltage, VOLTAGE_SLOPE, VOLTAGE_OFFSET};
 
-    inline static ADCLinearSensor<5> current_sensor{CURRENT_PIN, CURRENT_SLOPE, CURRENT_OFFSET};
+    inline static ADCLinearSensor<5> current_sensor{ADC::adc_current, CURRENT_SLOPE, CURRENT_OFFSET};
 
     inline static SDC sdc{SDC_GOOD_PIN};
 

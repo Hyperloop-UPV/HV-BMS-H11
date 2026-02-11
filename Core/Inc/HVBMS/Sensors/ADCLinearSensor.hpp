@@ -2,6 +2,9 @@
 
 #include "HVBMS/Comms/Comms.hpp"
 #include "ST-LIB_LOW.hpp"
+#include "ST-LIB.hpp"
+
+using ST_LIB::ADCDomain;
 
 template <std::size_t FilterSize>
 class ADCLinearSensor {
@@ -11,9 +14,9 @@ class ADCLinearSensor {
    public:
     float reading{};
 
-    ADCLinearSensor(Pin& pin, float slope, float offset)
+    ADCLinearSensor(ADCDomain::Instance* adc, float slope, float offset)
         : sensor {
-              pin,
+              *adc,
               slope,
               offset,
               reading,

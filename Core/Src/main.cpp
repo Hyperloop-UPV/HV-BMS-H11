@@ -22,7 +22,7 @@ constexpr auto eth =
 
 using myBoard = ST_LIB::Board<eth, led_PG7, led_PG8, 
                 contactor_PG14, contactor_PG12, contactor_PD4, contactor_PF4,
-                sdc_PA11>;   
+                sdc_PA11, adc_PF13, adc_PA0>;   
                  
 int main(void) {
 #ifdef SIM_ON
@@ -37,6 +37,9 @@ int main(void) {
     DO::contactor_precharge = &myBoard::instance_of<contactor_PD4>();
     DO::contactor_discharge = &myBoard::instance_of<contactor_PF4>();
     DO::sdc_obccu = &myBoard::instance_of<sdc_PA11>();
+    ADC::adc_voltage = &myBoard::instance_of<adc_PF13>();
+    ADC::adc_current = &myBoard::instance_of<adc_PA0>();
+
     auto eth_instance = &myBoard::instance_of<eth>();
 
     Hard_fault_check();
