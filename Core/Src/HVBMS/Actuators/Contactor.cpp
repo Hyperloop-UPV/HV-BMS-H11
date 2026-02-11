@@ -1,4 +1,4 @@
-#include "Actuators/Contactor.hpp"
+#include "HVBMS/Actuators/Contactor.hpp"
 
 Contactor::Contactor(DigitalOutputDomain::Instance *output, bool normally_opened)
     : output{output},

@@ -1,10 +1,5 @@
 #pragma once
-
-#include "Actuators/Contactor.hpp"
-#include "HVBMS.hpp"
-
-
-namespace HVBMS {
+#include "HVBMS/Actuators/Contactor.hpp"
 
 class Actuators {
     private:
@@ -27,4 +22,3 @@ class Actuators {
         static bool is_precharging();
         static void toggle_operational_led();
 };
-}  // namespace HVBMS

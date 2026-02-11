@@ -1,7 +1,7 @@
 #ifndef BATTERY_PACK_HPP
 #define BATTERY_PACK_HPP
 
-//#include "BMS.hpp"
+// #include "BMS.hpp"
 #include "../../../deps/LTC6810-Driver/Inc/BMS.hpp"
 
 #define READING_PERIOD_US 20000   // us
@@ -19,30 +19,28 @@
 
 #define TEMP_CHEAT 1  // Ñapa para temperaturas, esto no debería existir
 
-namespace HVBMS {
 template <size_t N_BATTERIES>
 class BatteryPack {
-    using Battery =
-        LTC6810Driver::LTC6810<6, READING_PERIOD_US, CONV_RATE_TIME_MS>;
+    using Battery = LTC6810Driver::LTC6810<6, READING_PERIOD_US, CONV_RATE_TIME_MS>;
     struct BMSConfig {
         static inline uint8_t spi_id{};
         static inline int32_t us_counter{};
 
         static constexpr size_t n_LTC6810{N_BATTERIES};
         static void SPI_transmit(const std::span<uint8_t> data) {
-            SPI::Instance *spi = SPI::registered_spi[spi_id];
+            SPI::Instance* spi = SPI::registered_spi[spi_id];
             HAL_SPI_Transmit(spi->hspi, data.data(), data.size(), 10);
         }
         static void SPI_receive(std::span<uint8_t> buffer) {
-            SPI::Instance *spi = SPI::registered_spi[spi_id];
+            SPI::Instance* spi = SPI::registered_spi[spi_id];
             HAL_SPI_Receive(spi->hspi, buffer.data(), buffer.size(), 10);
         }
         static void SPI_CS_turn_on(void) {
-            SPI::Instance *spi = SPI::registered_spi[spi_id];
+            SPI::Instance* spi = SPI::registered_spi[spi_id];
             SPI::turn_on_chip_select(spi);
         }
         static void SPI_CS_turn_off(void) {
-            SPI::Instance *spi = SPI::registered_spi[spi_id];
+            SPI::Instance* spi = SPI::registered_spi[spi_id];
             SPI::turn_off_chip_select(spi);
         }
         static int32_t get_tick(void) { return us_counter; }
@@ -88,23 +86,16 @@ class BatteryPack {
 
     const BMS<BMSConfig> bms{};
 
-    HeapPacket total_voltage_packet;
-    HeapPacket reading_period_packet;
-    array<std::unique_ptr<HeapPacket>, N_BATTERIES> battery_packets;
-
-
-
 #if TEMP_CHEAT
     FloatMovingAverage<100> temp_average{};
 #endif
 
-    void get_SoC(uint i, float current, float &temp_minimum_soc) {
+    void get_SoC(uint i, float current, float& temp_minimum_soc) {
         auto now = HAL_GetTick();
         float new_soc;
         if (std::abs(current) < 0.1) {  // Coulomb counting
             float delta_time = (now - SoCs[i].first) / 1000.0f;
-            float delta_soc =
-                (current * delta_time) / (NOMINAL_CAPACITY * 3600.0);
+            float delta_soc = (current * delta_time) / (NOMINAL_CAPACITY * 3600.0);
             new_soc = SoCs[i].second - delta_soc;
 
             SoCs[i] = std::make_pair(now, new_soc);
@@ -119,8 +110,8 @@ class BatteryPack {
     void read_temps(uint i) {
         for (auto j{0}; j < 2; ++j) {
             auto GPIO_voltage = batteries[i].GPIOs[j];
-            auto resistance = (GPIO_voltage * RESISTANCE_REFERENCE) /
-                              (VOLTAGE_REFERENCE - GPIO_voltage);
+            auto resistance =
+                (GPIO_voltage * RESISTANCE_REFERENCE) / (VOLTAGE_REFERENCE - GPIO_voltage);
 
             if constexpr (TEMP_CHEAT) {
                 auto temp = (resistance - R0) / (TCR * R0);
@@ -141,24 +132,27 @@ class BatteryPack {
     float maximum_temp{-100.0};
     float minimum_cell_voltage{5.0};
     float maximum_cell_voltage{0.0};
+    int32_t period{bms.get_period()};
 
-    array<Battery, N_BATTERIES> &batteries = bms.get_data();
+    array<Battery, N_BATTERIES>& batteries = bms.get_data();
     float total_voltage{FAKE_TOTAL_VOLTAGE};
     array<std::pair<uint, float>, N_BATTERIES> SoCs{};  // ms -> soc[0,1]
     array<array<float, 2>, N_BATTERIES> batteries_temp{};
 
-    BatteryPack(){
+    BatteryPack() {
         SoCs.fill({0, 1.0});
         BMSConfig::spi_id = SPI::inscribe(SPI::spi3);
     }
 
     void start() {
         SoCs.fill(std::pair<uint, float>{0, 1.0});
-        Time::register_high_precision_alarm(
-            500, +[]() { ++BMSConfig::us_counter; });
+        Time::register_high_precision_alarm(500, +[]() { ++BMSConfig::us_counter; });
     }
 
-    void update() { bms.update(); }
+    void update() {
+        bms.update();
+        update_bms_period();
+    }
 
     void read(float current) {
         float voltage{};
@@ -175,12 +169,12 @@ class BatteryPack {
 
             read_temps(i);
 
-            for (const auto &v : batteries[i].cells) {
+            for (const auto& v : batteries[i].cells) {
                 min_v_cell_temp = std::min(min_v_cell_temp, v);
                 max_v_cell_temp = std::max(max_v_cell_temp, v);
             }
 
-            for (const auto &t : batteries_temp[i]) {
+            for (const auto& t : batteries_temp[i]) {
                 min_temperature_temp = std::min(min_temperature_temp, t);
                 max_temperature_temp = std::max(max_temperature_temp, t);
             }
@@ -193,7 +187,8 @@ class BatteryPack {
         minimum_temp = min_temperature_temp;
         maximum_temp = max_temperature_temp;
     }
+
+    void update_bms_period() { period = bms.get_period(); }
 };
-}  // namespace HVBMS
 
 #endif

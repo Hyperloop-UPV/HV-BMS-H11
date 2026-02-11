@@ -1,13 +1,13 @@
-#include "Comms/Comms.hpp"
-#include "BMSStateMachine.hpp"
+#include "HVBMS/Comms/Comms.hpp"
+#include "HVBMS/HVBMS.hpp"
 
-namespace HVBMS {
 void Comms::start() {
-    // DataPackets::battery_1_init(
-    //     float& battery1_SOC, float& battery1_cell1, float& battery1_cell2,
-    //     float& battery1_cell3, float& battery1_cell4, float& battery1_cell5,
-    //     float& battery1_cell6, float& battery1_temperature1, float& battery1_temperature2,
-    //     float& battery1_total_voltage, float& battery1_conv_rate);
+    DataPackets::battery_1_init(
+        Sensors::batteries.SoCs[0].second, Sensors::batteries.batteries[0].cells[0],
+        Sensors::batteries.batteries[0].cells[1], Sensors::batteries.batteries[0].cells[2],
+        Sensors::batteries.batteries[0].cells[3], Sensors::batteries.batteries[0].cells[4],
+        Sensors::batteries.batteries[0].cells[5], Sensors::batteries.batteries[0].total_voltage,
+        Sensors::batteries.batteries[0].conv_rate);
     // DataPackets::battery_2_init(
     //     float& battery2_SOC, float& battery2_cell1, float& battery2_cell2,
     //     float& battery2_cell3, float& battery2_cell4, float& battery2_cell5,
@@ -105,30 +105,24 @@ void Comms::start() {
     //     float& battery18_cell6, float& battery18_temperature1, float& battery18_temperature2,
     //     float& battery18_total_voltage, float& battery18_conv_rate);
 
-    //DataPackets::batteries_voltage_init(float& batteries_voltage_reading);
+    DataPackets::batteries_voltage_init(Sensors::batteries.total_voltage);
 
     DataPackets::voltage_sensor_init(Sensors::voltage_sensor.reading);
 
     DataPackets::current_sensor_init(Sensors::current_sensor.reading);
 
-    DataPackets::general_state_machine_init(HVBMS::SM::gsm_state);
+    DataPackets::general_state_machine_init(HVBMS::current_gsm_state);
 
-    //DataPackets::driver_diagnosis_init(uint32_t& driver_reading_period);
+    DataPackets::driver_diagnosis_init(Sensors::batteries.period);
 
     DataPackets::sdc_init(Sensors::sdc.status);
 
-    //DataPackets::minimum_soc_init(Sensors::batteries.minimum_soc);
+    DataPackets::minimum_soc_init(Sensors::batteries.minimum_soc);
 
-    // DataPackets::bms_init(bms_status & bms_status);
-    // DataPackets::batteries_data_init(Sensors::batteries.minimum_cell_voltage, Sensors::batteries.maximum_cell_voltage, Sensors::batteries.minimum_temp,
-    // Sensors::batteries.maximum_temp);
+    DataPackets::bms_init(HVBMS::current_BMS_state);
+
+    DataPackets::batteries_data_init(Sensors::batteries.minimum_cell_voltage, Sensors::batteries.maximum_cell_voltage, Sensors::batteries.minimum_temp,
+    Sensors::batteries.maximum_temp);
 
     DataPackets::start();
 }
-
-void Comms::update() { 
-    if (SM::gsm_state == States_HVBMS::FAULT){
-        return;
-    }
-    SM::gsm_state = SM::state_machine.get_current_state(); }
-};  // namespace HVBMS

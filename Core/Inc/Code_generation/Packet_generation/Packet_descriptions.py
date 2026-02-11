@@ -161,9 +161,14 @@ class MeasurmentsDescription:
     
     @staticmethod
     def _unsigned_int_correction(type:str):
-        aux_type = type[:4]
-        if aux_type == "uint":
+        aux_type = type[:3]
+        if aux_type == "int":
             type += "_t"
-        elif type == "float32":
-            type = "float"
+        else:
+            aux_type = type[:4]
+            if aux_type == "uint":
+                type += "_t"
+            elif type == "float32":
+                type = "float"
+        
         return type

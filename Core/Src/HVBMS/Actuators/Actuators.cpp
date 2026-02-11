@@ -1,12 +1,11 @@
-#include "Actuators/Actuators.hpp"
-#include "HVBMS.hpp"
+#include "HVBMS/Actuators/Actuators.hpp"
+#include "HVBMS/Data/Data.hpp"
 
-namespace HVBMS {
 
-Contactor Actuators::contactor_low(HVBMS::Global::contactor_low, true);        
-Contactor Actuators::contactor_high(HVBMS::Global::contactor_high, true);      
-Contactor Actuators::contactor_precharge(HVBMS::Global::contactor_precharge, true);
-Contactor Actuators::contactor_discharge(HVBMS::Global::contactor_discharge, false);
+Contactor Actuators::contactor_low(DO::contactor_low, true);        
+Contactor Actuators::contactor_high(DO::contactor_high, true);      
+Contactor Actuators::contactor_precharge(DO::contactor_precharge, true);
+Contactor Actuators::contactor_discharge(DO::contactor_discharge, false);
 
 
 void Actuators::open_HV(){
@@ -45,11 +44,7 @@ bool Actuators::is_precharging(){
            contactor_high.is_open() && contactor_precharge.is_closed();
 }
 
-// Dejo esto aqui porque no puedo pasarselo directamente a una accion ciclica
-// y no se donde meterlo
 void Actuators::toggle_operational_led(){
-    HVBMS::Global::operational_led->toggle();
+    DO::operational_led->toggle();
 }
 
-
-}  // namespace HVBMS

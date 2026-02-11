@@ -1,10 +1,8 @@
-#ifndef HVBMS_VOLTAGE_SENSOR_HPP
-#define HVBMS_VOLTAGE_SENSOR_HPP
+#pragma once
 
-#include "Comms/Comms.hpp"
+#include "HVBMS/Comms/Comms.hpp"
 #include "ST-LIB_LOW.hpp"
 
-namespace HVBMS {
 template <std::size_t FilterSize>
 class ADCLinearSensor {
     FilteredLinearSensor<float, FilterSize> sensor;
@@ -24,6 +22,4 @@ class ADCLinearSensor {
 
     void read() { sensor.read(); };
 };
-}  // namespace HVBMS
 
-#endif

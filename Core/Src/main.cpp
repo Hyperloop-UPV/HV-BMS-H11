@@ -1,9 +1,6 @@
 #include "main.h"
 #include "ST-LIB.hpp" 
-#include "BMSStateMachine.hpp"
-#include "Comms/Comms.hpp"
-#include "Actuators/Actuators.hpp"
-#include "HVBMS.hpp"
+#include "HVBMS/HVBMS.hpp"
 
 using ST_LIB::EthernetDomain;
 
@@ -33,20 +30,20 @@ int main(void) {
 #endif  
 
     myBoard::init();   
-    HVBMS::Global::operational_led = &myBoard::instance_of<led_PG8>();
-    HVBMS::Global::fault_led = &myBoard::instance_of<led_PG7>();
-    HVBMS::Global::contactor_high = &myBoard::instance_of<contactor_PG12>();
-    HVBMS::Global::contactor_low = &myBoard::instance_of<contactor_PG14>();
-    HVBMS::Global::contactor_precharge = &myBoard::instance_of<contactor_PD4>();
-    HVBMS::Global::contactor_discharge = &myBoard::instance_of<contactor_PF4>();
-    HVBMS::Global::sdc_obccu = &myBoard::instance_of<sdc_PA11>();
+    DO::operational_led = &myBoard::instance_of<led_PG8>();
+    DO::fault_led = &myBoard::instance_of<led_PG7>();
+    DO::contactor_high = &myBoard::instance_of<contactor_PG12>();
+    DO::contactor_low = &myBoard::instance_of<contactor_PG14>();
+    DO::contactor_precharge = &myBoard::instance_of<contactor_PD4>();
+    DO::contactor_discharge = &myBoard::instance_of<contactor_PF4>();
+    DO::sdc_obccu = &myBoard::instance_of<sdc_PA11>();
     auto eth_instance = &myBoard::instance_of<eth>();
 
     Hard_fault_check();
 
-    HVBMS::SM::state_machine.start();
+    HVBMS::state_machine.start();
 
-    Scheduler::register_task(1000000, []() { HVBMS::SM::state_machine.check_transitions(); });
+    Scheduler::register_task(1000000, []() { HVBMS::state_machine.check_transitions(); });
 
     Scheduler::start();
     
