@@ -1,6 +1,7 @@
 #include "main.h"
 #include "ST-LIB.hpp" 
 #include "HVBMS/HVBMS.hpp"
+#include "HVBMS/Sensors/Sensors.hpp"
 
 using ST_LIB::EthernetDomain;
 
@@ -22,12 +23,13 @@ constexpr auto eth =
 
 using myBoard = ST_LIB::Board<eth, led_PG7, led_PG8, 
                 contactor_PG14, contactor_PG12, contactor_PD4, contactor_PF4,
-                sdc_PA11, adc_PF13, adc_PA0>;   
+                sdc_PA11, adc_PF13, adc_PA0, timer_us_tick_def, bms_spi3, bms_cs_pin>;   
                  
 int main(void) {
 #ifdef SIM_ON
     SharedMemory::start();  
 #endif  
+
 
     myBoard::init();   
     DO::operational_led = &myBoard::instance_of<led_PG8>();
@@ -37,20 +39,33 @@ int main(void) {
     DO::contactor_precharge = &myBoard::instance_of<contactor_PD4>();
     DO::contactor_discharge = &myBoard::instance_of<contactor_PF4>();
     DO::sdc_obccu = &myBoard::instance_of<sdc_PA11>();
+    DO::bms_cs = &myBoard::instance_of<bms_cs_pin>();
     ADC::adc_voltage = &myBoard::instance_of<adc_PF13>();
     ADC::adc_current = &myBoard::instance_of<adc_PA0>();
 
+    NewSPI::bms_spi_pins = &myBoard::instance_of<bms_spi3>();
+    NewSPI::bms_wrapper = ST_LIB::SPIDomain::SPIWrapper<bms_spi3>(*NewSPI::bms_spi_pins);
+
     auto eth_instance = &myBoard::instance_of<eth>();
+
+
+
+    TimerWrapper<timer_us_tick_def> us_timer =
+        get_timer_instance(myBoard, timer_us_tick_def);
+    GlobalTimer::global_us_timer = us_timer.instance->tim;
+    us_timer.set_prescaler(us_timer.get_clock_frequency() / 1000'000);
+    us_timer.counter_enable();
+
 
     Hard_fault_check();
 
     HVBMS::state_machine.start();
 
-    Scheduler::register_task(1000000, []() { HVBMS::state_machine.check_transitions(); });
-
     Scheduler::start();
     
     while (1) {
+        HVBMS::update();
+        //HVBMS::check_bms_status();
         eth_instance->update();
         Scheduler::update();
     }

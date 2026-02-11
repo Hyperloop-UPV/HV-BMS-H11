@@ -14,14 +14,14 @@ class SDC {
         sdc_good.read();
         if (sdc_good_value == PinState::OFF) {
             if (enabled) triggered = true;
-            status = States_SDC::DISENGAGED;
+            //status = States_SDC::DISENGAGED;
         } else {
-            status = States_SDC::ENGAGED;
+            //status = States_SDC::ENGAGED;
         }
     }
 
    public:
-    States_SDC status{States_SDC::DISENGAGED};
+    //States_SDC status{States_SDC::DISENGAGED};
 
     SDC(Pin& pin)
         : sdc_good{pin, [&]() { sdc_callback(); }, &sdc_good_value, TRIGGER::BOTH_EDGES} {}

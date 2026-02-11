@@ -3,6 +3,7 @@
 
 // #include "BMS.hpp"
 #include "../../../deps/LTC6810-Driver/Inc/BMS.hpp"
+#include "HVBMS/Data/Data.hpp"
 
 #define READING_PERIOD_US 20000   // us
 #define CONV_RATE_TIME_MS 1000    // ms
@@ -23,27 +24,22 @@ template <size_t N_BATTERIES>
 class BatteryPack {
     using Battery = LTC6810Driver::LTC6810<6, READING_PERIOD_US, CONV_RATE_TIME_MS>;
     struct BMSConfig {
-        static inline uint8_t spi_id{};
-        static inline int32_t us_counter{};
-
         static constexpr size_t n_LTC6810{N_BATTERIES};
+
+        // Estos métodos se llamarán durante el update(), cuando los punteros ya existan
         static void SPI_transmit(const std::span<uint8_t> data) {
-            SPI::Instance* spi = SPI::registered_spi[spi_id];
-            HAL_SPI_Transmit(spi->hspi, data.data(), data.size(), 10);
+            if (NewSPI::bms_wrapper) NewSPI::bms_wrapper->send(data);
         }
         static void SPI_receive(std::span<uint8_t> buffer) {
-            SPI::Instance* spi = SPI::registered_spi[spi_id];
-            HAL_SPI_Receive(spi->hspi, buffer.data(), buffer.size(), 10);
+            if (NewSPI::bms_wrapper) NewSPI::bms_wrapper->receive(buffer);
         }
         static void SPI_CS_turn_on(void) {
-            SPI::Instance* spi = SPI::registered_spi[spi_id];
-            SPI::turn_on_chip_select(spi);
+            if (NewSPI::bms_cs) NewSPI::bms_cs->turn_off();  // Activo Low
         }
         static void SPI_CS_turn_off(void) {
-            SPI::Instance* spi = SPI::registered_spi[spi_id];
-            SPI::turn_off_chip_select(spi);
+            if (NewSPI::bms_cs) NewSPI::bms_cs->turn_on();  // Inactivo High
         }
-        static int32_t get_tick(void) { return us_counter; }
+        static int32_t get_tick(void) { return GetMicroseconds(); }
         static constexpr int32_t tick_resolution_us{500};
         static constexpr int32_t period_us{READING_PERIOD_US};
         static constexpr int32_t conv_rate_time_ms{CONV_RATE_TIME_MS};
@@ -139,14 +135,10 @@ class BatteryPack {
     array<std::pair<uint, float>, N_BATTERIES> SoCs{};  // ms -> soc[0,1]
     array<array<float, 2>, N_BATTERIES> batteries_temp{};
 
-    BatteryPack() {
-        SoCs.fill({0, 1.0});
-        BMSConfig::spi_id = SPI::inscribe(SPI::spi3);
-    }
+    BatteryPack() = default;
 
     void start() {
         SoCs.fill(std::pair<uint, float>{0, 1.0});
-        Time::register_high_precision_alarm(500, +[]() { ++BMSConfig::us_counter; });
     }
 
     void update() {

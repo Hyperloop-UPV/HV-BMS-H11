@@ -11,11 +11,6 @@ public:
         OPERATIONAL = 1,
         FAULT = 2,
     };
-    enum class sdc_status : uint8_t 
-    {
-        ENGAGED = 0,
-        DISENGAGED = 1,
-    };
     enum class bms_status : uint8_t 
     {
         OK = 0,
@@ -138,11 +133,6 @@ public:
         driver_diagnosis_packet = new HeapPacket(static_cast<uint16_t>(942), &driver_reading_period);
     }
     
-    static void sdc_init(sdc_status &sdc_status)
-    {
-        sdc_packet = new HeapPacket(static_cast<uint16_t>(944), &sdc_status);
-    }
-    
     static void minimum_soc_init(float &minimum_soc)
     {
         minimum_soc_packet = new HeapPacket(static_cast<uint16_t>(945), &minimum_soc);
@@ -182,7 +172,6 @@ public:
     inline static HeapPacket *current_sensor_packet{nullptr};
     inline static HeapPacket *general_state_machine_packet{nullptr};
     inline static HeapPacket *driver_diagnosis_packet{nullptr};
-    inline static HeapPacket *sdc_packet{nullptr};
     inline static HeapPacket *minimum_soc_packet{nullptr};
     inline static HeapPacket *bms_packet{nullptr};
     inline static HeapPacket *batteries_data_packet{nullptr};
@@ -262,9 +251,6 @@ public:
         if (driver_diagnosis_packet == nullptr) {
             ErrorHandler("Packet driver_diagnosis not initialized");
         }
-        if (sdc_packet == nullptr) {
-            ErrorHandler("Packet sdc not initialized");
-        }
         if (minimum_soc_packet == nullptr) {
             ErrorHandler("Packet minimum_soc not initialized");
         }
@@ -280,6 +266,36 @@ public:
         control_station_udp = new DatagramSocket("192.168.1.7",50400,"192.168.0.9",50400);
         
         
+        Scheduler::register_task(50000, +[](){
+            
+            DataPackets::control_station_udp->send_packet(*DataPackets::battery_1_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::battery_2_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::battery_3_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::battery_4_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::battery_5_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::battery_6_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::battery_7_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::battery_8_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::battery_9_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::battery_10_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::battery_11_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::battery_12_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::battery_13_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::battery_14_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::battery_15_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::battery_16_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::battery_17_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::battery_18_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::batteries_voltage_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::voltage_sensor_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::current_sensor_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::general_state_machine_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::driver_diagnosis_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::minimum_soc_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::bms_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::batteries_data_packet);
+            
+        });
     }
 
 

@@ -2,6 +2,7 @@
 
 #include "HVBMS/HVBMS.hpp"
 
+
 void Comms::start() {
     DataPackets::battery_1_init(
         Sensors::batteries.SoCs[0].second, Sensors::batteries.batteries[0].cells[0],
@@ -139,7 +140,7 @@ void Comms::start() {
 
     DataPackets::driver_diagnosis_init(Sensors::batteries.period);
 
-    DataPackets::sdc_init(Sensors::sdc.status);
+    //DataPackets::sdc_init(Sensors::sdc.status);
 
     DataPackets::minimum_soc_init(Sensors::batteries.minimum_soc);
 
@@ -151,3 +152,4 @@ void Comms::start() {
 
     DataPackets::start();
 }
+

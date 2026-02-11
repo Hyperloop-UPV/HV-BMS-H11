@@ -7,7 +7,7 @@
 #include "SDC.hpp"
 
 #define BATTERIES_CONNECTED 1
-#define N_BATTERIES 15
+#define N_BATTERIES 3
 
 class Sensors {
     // Voltage sensor for HVBMS with ID 4
@@ -28,9 +28,19 @@ class Sensors {
 
     inline static ADCLinearSensor<5> current_sensor{ADC::adc_current, CURRENT_SLOPE, CURRENT_OFFSET};
 
-    inline static SDC sdc{SDC_GOOD_PIN};
+    //inline static SDC sdc{SDC_GOOD_PIN};
 
     inline static BatteryPack<N_BATTERIES> batteries;
+
+    static void init(ST_LIB::SPIDomain::SPIWrapper<bms_spi>& wrapper,
+                     ST_LIB::DigitalOutputDomain::Instance& cs) {
+        // Asignamos los punteros que el BatteryPack usará internamente
+        NewSPI::bms_wrapper = &wrapper;
+        NewSPI::bms_cs = &cs;
+
+        // Ponemos el Chip Select en estado inactivo inicial
+        NewSPI::bms_cs->turn_on();
+    }
 
     static void update_sensors();
     static void update_batteries();

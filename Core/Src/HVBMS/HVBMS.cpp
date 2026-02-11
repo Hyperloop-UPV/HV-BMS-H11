@@ -9,10 +9,6 @@
 void HVBMS::update() {
     state_machine.check_transitions();
 
-    if (current_gsm_state == States_HVBMS::FAULT) {
-        return;
-    }
-
     current_gsm_state = state_machine.get_current_state();
 }
 
