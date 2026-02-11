@@ -1,4 +1,5 @@
 #include "HVBMS/Comms/Comms.hpp"
+
 #include "HVBMS/HVBMS.hpp"
 
 void Comms::start() {
@@ -8,102 +9,125 @@ void Comms::start() {
         Sensors::batteries.batteries[0].cells[3], Sensors::batteries.batteries[0].cells[4],
         Sensors::batteries.batteries[0].cells[5], Sensors::batteries.batteries[0].total_voltage,
         Sensors::batteries.batteries[0].conv_rate);
-    // DataPackets::battery_2_init(
-    //     float& battery2_SOC, float& battery2_cell1, float& battery2_cell2,
-    //     float& battery2_cell3, float& battery2_cell4, float& battery2_cell5,
-    //     float& battery2_cell6, float& battery2_temperature1, float& battery2_temperature2,
-    //     float& battery2_total_voltage, float& battery2_conv_rate);
 
-    // DataPackets::battery_3_init(
-    //     float& battery3_SOC, float& battery3_cell1, float& battery3_cell2,
-    //     float& battery3_cell3, float& battery3_cell4, float& battery3_cell5,
-    //     float& battery3_cell6, float& battery3_temperature1, float& battery3_temperature2,
-    //     float& battery3_total_voltage, float& battery3_conv_rate);
-    // DataPackets::battery_4_init(
-    //     float& battery4_SOC, float& battery4_cell1, float& battery4_cell2,
-    //     float& battery4_cell3, float& battery4_cell4, float& battery4_cell5,
-    //     float& battery4_cell6, float& battery4_temperature1, float& battery4_temperature2,
-    //     float& battery4_total_voltage, float& battery4_conv_rate);
+    DataPackets::battery_2_init(
+        Sensors::batteries.SoCs[1].second, Sensors::batteries.batteries[1].cells[0],
+        Sensors::batteries.batteries[1].cells[1], Sensors::batteries.batteries[1].cells[2],
+        Sensors::batteries.batteries[1].cells[3], Sensors::batteries.batteries[1].cells[4],
+        Sensors::batteries.batteries[1].cells[5], Sensors::batteries.batteries[1].total_voltage,
+        Sensors::batteries.batteries[1].conv_rate);
 
-    // DataPackets::battery_5_init(
-    //     float& battery5_SOC, float& battery5_cell1, float& battery5_cell2,
-    //     float& battery5_cell3, float& battery5_cell4, float& battery5_cell5,
-    //     float& battery5_cell6, float& battery5_temperature1, float& battery5_temperature2,
-    //     float& battery5_total_voltage, float& battery5_conv_rate);
+    DataPackets::battery_3_init(
+        Sensors::batteries.SoCs[2].second, Sensors::batteries.batteries[2].cells[0],
+        Sensors::batteries.batteries[2].cells[1], Sensors::batteries.batteries[2].cells[2],
+        Sensors::batteries.batteries[2].cells[3], Sensors::batteries.batteries[2].cells[4],
+        Sensors::batteries.batteries[2].cells[5], Sensors::batteries.batteries[2].total_voltage,
+        Sensors::batteries.batteries[2].conv_rate);
 
-    // DataPackets::battery_6_init(
-    //     float& battery6_SOC, float& battery6_cell1, float& battery6_cell2,
-    //     float& battery6_cell3, float& battery6_cell4, float& battery6_cell5,
-    //     float& battery6_cell6, float& battery6_temperature1, float& battery6_temperature2,
-    //     float& battery6_total_voltage, float& battery6_conv_rate);
-    // DataPackets::battery_7_init(
-    //     float& battery7_SOC, float& battery7_cell1, float& battery7_cell2,
-    //     float& battery7_cell3, float& battery7_cell4, float& battery7_cell5,
-    //     float& battery7_cell6, float& battery7_temperature1, float& battery7_temperature2,
-    //     float& battery7_total_voltage, float& battery7_conv_rate);
+    DataPackets::battery_4_init(
+        Sensors::batteries.SoCs[3].second, Sensors::batteries.batteries[3].cells[0],
+        Sensors::batteries.batteries[3].cells[1], Sensors::batteries.batteries[3].cells[2],
+        Sensors::batteries.batteries[3].cells[3], Sensors::batteries.batteries[3].cells[4],
+        Sensors::batteries.batteries[3].cells[5], Sensors::batteries.batteries[3].total_voltage,
+        Sensors::batteries.batteries[3].conv_rate);
 
-    // DataPackets::battery_8_init(
-    //     float& battery8_SOC, float& battery8_cell1, float& battery8_cell2,
-    //     float& battery8_cell3, float& battery8_cell4, float& battery8_cell5,
-    //     float& battery8_cell6, float& battery8_temperature1, float& battery8_temperature2,
-    //     float& battery8_total_voltage, float& battery8_conv_rate);
+    DataPackets::battery_5_init(
+        Sensors::batteries.SoCs[4].second, Sensors::batteries.batteries[4].cells[0],
+        Sensors::batteries.batteries[4].cells[1], Sensors::batteries.batteries[4].cells[2],
+        Sensors::batteries.batteries[4].cells[3], Sensors::batteries.batteries[4].cells[4],
+        Sensors::batteries.batteries[4].cells[5], Sensors::batteries.batteries[4].total_voltage,
+        Sensors::batteries.batteries[4].conv_rate);
 
-    // DataPackets::battery_9_init(
-    //     float& battery9_SOC, float& battery9_cell1, float& battery9_cell2,
-    //     float& battery9_cell3, float& battery9_cell4, float& battery9_cell5,
-    //     float& battery9_cell6, float& battery9_temperature1, float& battery9_temperature2,
-    //     float& battery9_total_voltage, float& battery9_conv_rate);
-    // DataPackets::battery_10_init(
-    //     float& battery10_SOC, float& battery10_cell1, float& battery10_cell2,
-    //     float& battery10_cell3, float& battery10_cell4, float& battery10_cell5,
-    //     float& battery10_cell6, float& battery10_temperature1, float& battery10_temperature2,
-    //     float& battery10_total_voltage, float& battery10_conv_rate);
+    DataPackets::battery_6_init(
+        Sensors::batteries.SoCs[5].second, Sensors::batteries.batteries[5].cells[0],
+        Sensors::batteries.batteries[5].cells[1], Sensors::batteries.batteries[5].cells[2],
+        Sensors::batteries.batteries[5].cells[3], Sensors::batteries.batteries[5].cells[4],
+        Sensors::batteries.batteries[5].cells[5], Sensors::batteries.batteries[5].total_voltage,
+        Sensors::batteries.batteries[5].conv_rate);
 
-    // DataPackets::battery_11_init(
-    //     float& battery11_SOC, float& battery11_cell1, float& battery11_cell2,
-    //     float& battery11_cell3, float& battery11_cell4, float& battery11_cell5,
-    //     float& battery11_cell6, float& battery11_temperature1, float& battery11_temperature2,
-    //     float& battery11_total_voltage, float& battery11_conv_rate);
+    DataPackets::battery_7_init(
+        Sensors::batteries.SoCs[6].second, Sensors::batteries.batteries[6].cells[0],
+        Sensors::batteries.batteries[6].cells[1], Sensors::batteries.batteries[6].cells[2],
+        Sensors::batteries.batteries[6].cells[3], Sensors::batteries.batteries[6].cells[4],
+        Sensors::batteries.batteries[6].cells[5], Sensors::batteries.batteries[6].total_voltage,
+        Sensors::batteries.batteries[6].conv_rate);
 
-    // DataPackets::battery_12_init(
-    //     float& battery12_SOC, float& battery12_cell1, float& battery12_cell2,
-    //     float& battery12_cell3, float& battery12_cell4, float& battery12_cell5,
-    //     float& battery12_cell6, float& battery12_temperature1, float& battery12_temperature2,
-    //     float& battery12_total_voltage, float& battery12_conv_rate);
-    // DataPackets::battery_13_init(
-    //     float& battery13_SOC, float& battery13_cell1, float& battery13_cell2,
-    //     float& battery13_cell3, float& battery13_cell4, float& battery13_cell5,
-    //     float& battery13_cell6, float& battery13_temperature1, float& battery13_temperature2,
-    //     float& battery13_total_voltage, float& battery13_conv_rate);
+    DataPackets::battery_8_init(
+        Sensors::batteries.SoCs[7].second, Sensors::batteries.batteries[7].cells[0],
+        Sensors::batteries.batteries[7].cells[1], Sensors::batteries.batteries[7].cells[2],
+        Sensors::batteries.batteries[7].cells[3], Sensors::batteries.batteries[7].cells[4],
+        Sensors::batteries.batteries[7].cells[5], Sensors::batteries.batteries[7].total_voltage,
+        Sensors::batteries.batteries[7].conv_rate);
 
-    // DataPackets::battery_14_init(
-    //     float& battery14_SOC, float& battery14_cell1, float& battery14_cell2,
-    //     float& battery14_cell3, float& battery14_cell4, float& battery14_cell5,
-    //     float& battery14_cell6, float& battery14_temperature1, float& battery14_temperature2,
-    //     float& battery14_total_voltage, float& battery14_conv_rate);
+    DataPackets::battery_9_init(
+        Sensors::batteries.SoCs[8].second, Sensors::batteries.batteries[8].cells[0],
+        Sensors::batteries.batteries[8].cells[1], Sensors::batteries.batteries[8].cells[2],
+        Sensors::batteries.batteries[8].cells[3], Sensors::batteries.batteries[8].cells[4],
+        Sensors::batteries.batteries[8].cells[5], Sensors::batteries.batteries[8].total_voltage,
+        Sensors::batteries.batteries[8].conv_rate);
 
-    // DataPackets::battery_15_init(
-    //     float& battery15_SOC, float& battery15_cell1, float& battery15_cell2,
-    //     float& battery15_cell3, float& battery15_cell4, float& battery15_cell5,
-    //     float& battery15_cell6, float& battery15_temperature1, float& battery15_temperature2,
-    //     float& battery15_total_voltage, float& battery15_conv_rate);
-    // DataPackets::battery_16_init(
-    //     float& battery16_SOC, float& battery16_cell1, float& battery16_cell2,
-    //     float& battery16_cell3, float& battery16_cell4, float& battery16_cell5,
-    //     float& battery16_cell6, float& battery16_temperature1, float& battery16_temperature2,
-    //     float& battery16_total_voltage, float& battery16_conv_rate);
+    DataPackets::battery_10_init(
+        Sensors::batteries.SoCs[9].second, Sensors::batteries.batteries[9].cells[0],
+        Sensors::batteries.batteries[9].cells[1], Sensors::batteries.batteries[9].cells[2],
+        Sensors::batteries.batteries[9].cells[3], Sensors::batteries.batteries[9].cells[4],
+        Sensors::batteries.batteries[9].cells[5], Sensors::batteries.batteries[9].total_voltage,
+        Sensors::batteries.batteries[9].conv_rate);
 
-    // DataPackets::battery_17_init(
-    //     float& battery17_SOC, float& battery17_cell1, float& battery17_cell2,
-    //     float& battery17_cell3, float& battery17_cell4, float& battery17_cell5,
-    //     float& battery17_cell6, float& battery17_temperature1, float& battery17_temperature2,
-    //     float& battery17_total_voltage, float& battery17_conv_rate);
+    DataPackets::battery_11_init(
+        Sensors::batteries.SoCs[10].second, Sensors::batteries.batteries[10].cells[0],
+        Sensors::batteries.batteries[10].cells[1], Sensors::batteries.batteries[10].cells[2],
+        Sensors::batteries.batteries[10].cells[3], Sensors::batteries.batteries[10].cells[4],
+        Sensors::batteries.batteries[10].cells[5], Sensors::batteries.batteries[10].total_voltage,
+        Sensors::batteries.batteries[10].conv_rate);
 
-    // DataPackets::battery_18_init(
-    //     float& battery18_SOC, float& battery18_cell1, float& battery18_cell2,
-    //     float& battery18_cell3, float& battery18_cell4, float& battery18_cell5,
-    //     float& battery18_cell6, float& battery18_temperature1, float& battery18_temperature2,
-    //     float& battery18_total_voltage, float& battery18_conv_rate);
+    DataPackets::battery_12_init(
+        Sensors::batteries.SoCs[11].second, Sensors::batteries.batteries[11].cells[0],
+        Sensors::batteries.batteries[11].cells[1], Sensors::batteries.batteries[11].cells[2],
+        Sensors::batteries.batteries[11].cells[3], Sensors::batteries.batteries[11].cells[4],
+        Sensors::batteries.batteries[11].cells[5], Sensors::batteries.batteries[11].total_voltage,
+        Sensors::batteries.batteries[11].conv_rate);
+
+    DataPackets::battery_13_init(
+        Sensors::batteries.SoCs[12].second, Sensors::batteries.batteries[12].cells[0],
+        Sensors::batteries.batteries[12].cells[1], Sensors::batteries.batteries[12].cells[2],
+        Sensors::batteries.batteries[12].cells[3], Sensors::batteries.batteries[12].cells[4],
+        Sensors::batteries.batteries[12].cells[5], Sensors::batteries.batteries[12].total_voltage,
+        Sensors::batteries.batteries[12].conv_rate);
+
+    DataPackets::battery_14_init(
+        Sensors::batteries.SoCs[13].second, Sensors::batteries.batteries[13].cells[0],
+        Sensors::batteries.batteries[13].cells[1], Sensors::batteries.batteries[13].cells[2],
+        Sensors::batteries.batteries[13].cells[3], Sensors::batteries.batteries[13].cells[4],
+        Sensors::batteries.batteries[13].cells[5], Sensors::batteries.batteries[13].total_voltage,
+        Sensors::batteries.batteries[13].conv_rate);
+
+    DataPackets::battery_15_init(
+        Sensors::batteries.SoCs[14].second, Sensors::batteries.batteries[14].cells[0],
+        Sensors::batteries.batteries[14].cells[1], Sensors::batteries.batteries[14].cells[2],
+        Sensors::batteries.batteries[14].cells[3], Sensors::batteries.batteries[14].cells[4],
+        Sensors::batteries.batteries[14].cells[5], Sensors::batteries.batteries[14].total_voltage,
+        Sensors::batteries.batteries[14].conv_rate);
+
+    DataPackets::battery_16_init(
+        Sensors::batteries.SoCs[15].second, Sensors::batteries.batteries[15].cells[0],
+        Sensors::batteries.batteries[15].cells[1], Sensors::batteries.batteries[15].cells[2],
+        Sensors::batteries.batteries[15].cells[3], Sensors::batteries.batteries[15].cells[4],
+        Sensors::batteries.batteries[15].cells[5], Sensors::batteries.batteries[15].total_voltage,
+        Sensors::batteries.batteries[15].conv_rate);
+
+    DataPackets::battery_17_init(
+        Sensors::batteries.SoCs[16].second, Sensors::batteries.batteries[16].cells[0],
+        Sensors::batteries.batteries[16].cells[1], Sensors::batteries.batteries[16].cells[2],
+        Sensors::batteries.batteries[16].cells[3], Sensors::batteries.batteries[16].cells[4],
+        Sensors::batteries.batteries[16].cells[5], Sensors::batteries.batteries[16].total_voltage,
+        Sensors::batteries.batteries[16].conv_rate);
+
+    DataPackets::battery_18_init(
+        Sensors::batteries.SoCs[17].second, Sensors::batteries.batteries[17].cells[0],
+        Sensors::batteries.batteries[17].cells[1], Sensors::batteries.batteries[17].cells[2],
+        Sensors::batteries.batteries[17].cells[3], Sensors::batteries.batteries[17].cells[4],
+        Sensors::batteries.batteries[17].cells[5], Sensors::batteries.batteries[17].total_voltage,
+        Sensors::batteries.batteries[17].conv_rate);
 
     DataPackets::batteries_voltage_init(Sensors::batteries.total_voltage);
 
@@ -121,8 +145,9 @@ void Comms::start() {
 
     DataPackets::bms_init(HVBMS::current_BMS_state);
 
-    DataPackets::batteries_data_init(Sensors::batteries.minimum_cell_voltage, Sensors::batteries.maximum_cell_voltage, Sensors::batteries.minimum_temp,
-    Sensors::batteries.maximum_temp);
+    DataPackets::batteries_data_init(
+        Sensors::batteries.minimum_cell_voltage, Sensors::batteries.maximum_cell_voltage,
+        Sensors::batteries.minimum_temp, Sensors::batteries.maximum_temp);
 
     DataPackets::start();
 }
