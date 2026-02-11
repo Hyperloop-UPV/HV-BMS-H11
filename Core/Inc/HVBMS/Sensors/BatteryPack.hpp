@@ -15,7 +15,7 @@
 
 #define RESISTANCE_REFERENCE 1000.0  // Ohmios
 #define VOLTAGE_REFERENCE 3.0        // V
-#define R0 100.0                     // Ohmios
+#define R0 100.0                     // Ohmios+
 #define TCR 0.00385
 
 #define TEMP_CHEAT 1  // Ñapa para temperaturas, esto no debería existir
@@ -24,20 +24,21 @@ template <size_t N_BATTERIES>
 class BatteryPack {
     using Battery = LTC6810Driver::LTC6810<6, READING_PERIOD_US, CONV_RATE_TIME_MS>;
     struct BMSConfig {
+        inline static auto bms_wrapper = ST_LIB::SPIDomain::SPIWrapper<bms_spi3>(NewSPI::bms_spi_pins);
         static constexpr size_t n_LTC6810{N_BATTERIES};
 
         // Estos métodos se llamarán durante el update(), cuando los punteros ya existan
         static void SPI_transmit(const std::span<uint8_t> data) {
-            if (NewSPI::bms_wrapper) NewSPI::bms_wrapper->send(data);
+            bms_wrapper.send(data);
         }
         static void SPI_receive(std::span<uint8_t> buffer) {
-            if (NewSPI::bms_wrapper) NewSPI::bms_wrapper->receive(buffer);
+            bms_wrapper.receive(buffer);
         }
         static void SPI_CS_turn_on(void) {
-            if (NewSPI::bms_cs) NewSPI::bms_cs->turn_off();  // Activo Low
+            DO::bms_cs->turn_off();  // Activo Low
         }
         static void SPI_CS_turn_off(void) {
-            if (NewSPI::bms_cs) NewSPI::bms_cs->turn_on();  // Inactivo High
+            DO::bms_cs->turn_on();  // Inactivo High
         }
         static int32_t get_tick(void) { return GetMicroseconds(); }
         static constexpr int32_t tick_resolution_us{500};
@@ -135,7 +136,9 @@ class BatteryPack {
     array<std::pair<uint, float>, N_BATTERIES> SoCs{};  // ms -> soc[0,1]
     array<array<float, 2>, N_BATTERIES> batteries_temp{};
 
-    BatteryPack() = default;
+    BatteryPack(){
+        SoCs.fill({0, 1.0});
+    }
 
     void start() {
         SoCs.fill(std::pair<uint, float>{0, 1.0});

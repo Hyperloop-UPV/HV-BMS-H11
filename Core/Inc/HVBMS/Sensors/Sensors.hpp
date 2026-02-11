@@ -32,16 +32,6 @@ class Sensors {
 
     inline static BatteryPack<N_BATTERIES> batteries;
 
-    static void init(ST_LIB::SPIDomain::SPIWrapper<bms_spi>& wrapper,
-                     ST_LIB::DigitalOutputDomain::Instance& cs) {
-        // Asignamos los punteros que el BatteryPack usará internamente
-        NewSPI::bms_wrapper = &wrapper;
-        NewSPI::bms_cs = &cs;
-
-        // Ponemos el Chip Select en estado inactivo inicial
-        NewSPI::bms_cs->turn_on();
-    }
-
     static void update_sensors();
     static void update_batteries();
 };

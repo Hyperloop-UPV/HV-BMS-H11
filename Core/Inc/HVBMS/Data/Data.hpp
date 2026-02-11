@@ -73,8 +73,7 @@ inline TIM_TypeDef* global_us_timer;
 };  // namespace GlobalTimer
 
 namespace NewSPI {
-inline SPIDomain::Instance* bms_spi_pins;
-extern SPIDomain::SPIWrapper<bms_spi3> bms_wrapper;
+inline SPIDomain::Instance bms_spi_pins;
 }  // namespace NewSPI
 
 #define GetMicroseconds() GlobalTimer::global_us_timer->CNT
