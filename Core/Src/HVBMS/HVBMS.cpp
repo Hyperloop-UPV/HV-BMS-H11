@@ -12,14 +12,15 @@ void HVBMS::update() {
     current_gsm_state = state_machine.get_current_state();
 }
 
-void HVBMS::check_bms_status() {
+bool HVBMS::check_protections() {
     for (auto& p : protections) {
         if (p->check_state() == Protections::FaultType::FAULT) {
             current_BMS_state = States_BMS::FAULT;
-            return;
+            return true;
         }
     }
     current_BMS_state = States_BMS::OK;
+    return false;
 }
 
 void HVBMS::add_protections() {
@@ -28,14 +29,14 @@ void HVBMS::add_protections() {
 
     // DC bus voltage
     Protection* protection = &ProtectionManager::_add_protection(&Sensors::voltage_sensor.reading,
-                                                                 Boundary<float, ABOVE>{430});
+                                                                 Boundary<float, ABOVE>{410});
     std::string name = "DC bus voltage";
     set_protection_name(protection, name);
     protections.push_back(protection);
 
     // Batteries current
     protection = &ProtectionManager::_add_protection(&Sensors::current_sensor.reading,
-                                                     Boundary<float, OUT_OF_RANGE>{-15, 85});
+                                                     Boundary<float, OUT_OF_RANGE>{-15, 120});
     name = "Battery pack current";
     set_protection_name(protection, name);
     protections.push_back(protection);
@@ -64,12 +65,12 @@ void HVBMS::add_protections() {
     // Batteries temperature
     id = 1;
     for (auto& temp : Sensors::batteries.batteries_temp) {
-        protection = &ProtectionManager::_add_protection(&temp[0], Boundary<float, ABOVE>(50.0));
+        protection = &ProtectionManager::_add_protection(&temp[0], Boundary<float, ABOVE>(60.0));
         name = "Temperature 1 battery " + std::to_string(id);
         set_protection_name(protection, name);
         protections.push_back(protection);
 
-        protection = &ProtectionManager::_add_protection(&temp[1], Boundary<float, ABOVE>(50.0));
+        protection = &ProtectionManager::_add_protection(&temp[1], Boundary<float, ABOVE>(60.0));
         name = "Temperature 2 battery " + std::to_string(id);
         set_protection_name(protection, name);
         protections.push_back(protection);

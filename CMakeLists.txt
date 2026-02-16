@@ -5,7 +5,10 @@ include(CTest)
 enable_testing()
 
 set(EXECUTABLE ${PROJECT_NAME}.elf)
-set(Board "HVBMS") # User must change the Board name
+set(BOARD_NAME "HVBMS" CACHE STRING "HVBMS")
+if(BOARD_NAME STREQUAL "")
+    message(FATAL_ERROR "BOARD_NAME cannot be empty")
+endif()
 set(STLIB_DIR ${CMAKE_CURRENT_LIST_DIR}/deps/ST-LIB)
 set(LD_SCRIPT ${STLIB_DIR}/STM32H723ZGTX_FLASH.ld)
 

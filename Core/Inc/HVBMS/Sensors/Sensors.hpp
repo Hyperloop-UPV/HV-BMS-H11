@@ -28,7 +28,7 @@ class Sensors {
 
     inline static ADCLinearSensor<5> current_sensor{ADC::adc_current, CURRENT_SLOPE, CURRENT_OFFSET};
 
-    //inline static SDC sdc{SDC_GOOD_PIN};
+    inline static SDC sdc{*EXTI_SDC::sdc_interrupt};
 
     inline static BatteryPack<N_BATTERIES> batteries;
 
