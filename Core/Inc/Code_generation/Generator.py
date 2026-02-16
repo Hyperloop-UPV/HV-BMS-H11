@@ -24,5 +24,3 @@ def main():
     Generate_OrderPackets_hpp(board)
 
 
-if __name__ == "__main__":
-    main()
