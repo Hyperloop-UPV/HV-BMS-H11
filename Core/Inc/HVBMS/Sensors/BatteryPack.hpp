@@ -24,21 +24,36 @@ template <size_t N_BATTERIES>
 class BatteryPack {
     using Battery = LTC6810Driver::LTC6810<6, READING_PERIOD_US, CONV_RATE_TIME_MS>;
     struct BMSConfig {
-        inline static auto bms_wrapper = ST_LIB::SPIDomain::SPIWrapper<bms_spi3>(NewSPI::bms_spi_pins);
         static constexpr size_t n_LTC6810{N_BATTERIES};
+        static inline uint32_t spi_tx_fail_count{0};
+        static inline uint32_t spi_rx_fail_count{0};
 
         // Estos métodos se llamarán durante el update(), cuando los punteros ya existan
         static void SPI_transmit(const std::span<uint8_t> data) {
-            bms_wrapper.send(data);
+            if (NewSPI::bms_spi_pins == nullptr) {
+                ++spi_tx_fail_count;
+                return;
+            }
+            auto bms_wrapper = ST_LIB::SPIDomain::SPIWrapper<bms_spi3>(*NewSPI::bms_spi_pins);
+            if (!bms_wrapper.send(data)) {
+                ++spi_tx_fail_count;
+            }
         }
         static void SPI_receive(std::span<uint8_t> buffer) {
-            bms_wrapper.receive(buffer);
+            if (NewSPI::bms_spi_pins == nullptr) {
+                ++spi_rx_fail_count;
+                return;
+            }
+            auto bms_wrapper = ST_LIB::SPIDomain::SPIWrapper<bms_spi3>(*NewSPI::bms_spi_pins);
+            if (!bms_wrapper.receive(buffer)) {
+                ++spi_rx_fail_count;
+            }
         }
         static void SPI_CS_turn_on(void) {
-            DO::bms_cs->turn_off();  // Activo Low
+            DO::bms_cs->turn_on();  // Inactivo High
         }
         static void SPI_CS_turn_off(void) {
-            DO::bms_cs->turn_on();  // Inactivo High
+            DO::bms_cs->turn_off();  // Activo Low
         }
         static int32_t get_tick(void) { return GetMicroseconds(); }
         static constexpr int32_t tick_resolution_us{500};
@@ -135,6 +150,9 @@ class BatteryPack {
     float total_voltage{FAKE_TOTAL_VOLTAGE};
     array<std::pair<uint, float>, N_BATTERIES> SoCs{};  // ms -> soc[0,1]
     array<array<float, 2>, N_BATTERIES> batteries_temp{};
+
+    static uint32_t get_spi_tx_fail_count() { return BMSConfig::spi_tx_fail_count; }
+    static uint32_t get_spi_rx_fail_count() { return BMSConfig::spi_rx_fail_count; }
 
     BatteryPack(){
         SoCs.fill({0, 1.0});
