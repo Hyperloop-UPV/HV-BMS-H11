@@ -24,7 +24,7 @@ using myBoard = ST_LIB::Board<eth, led_PG7, led_PG8, contactor_PG14, contactor_P
                               bms_spi3, bms_cs_pin>;
 
 int main(void) {
-    myBoard::init();
+c    myBoard::init();
     DO::operational_led = &myBoard::instance_of<led_PG8>();
     DO::fault_led = &myBoard::instance_of<led_PG7>();
     DO::contactor_high = &myBoard::instance_of<contactor_PG12>();
@@ -38,10 +38,8 @@ int main(void) {
 
     Actuators::init();
 
-    
     NewSPI::bms_spi_pins = &myBoard::instance_of<bms_spi3>();
-    
-    auto bms_wrapper = ST_LIB::SPIDomain::SPIWrapper<bms_spi3>(*NewSPI::bms_spi_pins);
+    NewSPI::bms_wrapper.emplace(*NewSPI::bms_spi_pins);
     auto eth_instance = &myBoard::instance_of<eth>();
 
     TimerWrapper<timer_us_tick_def> us_timer = get_timer_instance(myBoard, timer_us_tick_def);

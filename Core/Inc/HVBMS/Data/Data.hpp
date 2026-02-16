@@ -74,6 +74,7 @@ inline TIM_TypeDef* global_us_timer;
 
 namespace NewSPI {
 inline SPIDomain::Instance* bms_spi_pins;
+inline std::optional<SPIDomain::SPIWrapper<bms_spi3>> bms_wrapper;
 }  // namespace NewSPI
 
 #define GetMicroseconds() GlobalTimer::global_us_timer->CNT
