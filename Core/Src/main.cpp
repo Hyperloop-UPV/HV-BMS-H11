@@ -24,7 +24,7 @@ using myBoard = ST_LIB::Board<eth, led_PG7, led_PG8, contactor_PG14, contactor_P
                               bms_spi3, bms_cs_pin>;
 
 int main(void) {
-c    myBoard::init();
+    myBoard::init();
     DO::operational_led = &myBoard::instance_of<led_PG8>();
     DO::fault_led = &myBoard::instance_of<led_PG7>();
     DO::contactor_high = &myBoard::instance_of<contactor_PG12>();
