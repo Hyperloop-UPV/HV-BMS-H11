@@ -5,7 +5,7 @@
 #include "../../../deps/LTC6810-Driver/Inc/BMS.hpp"
 #include "HVBMS/Data/Data.hpp"
 
-#define READING_PERIOD_US 20000   // us
+#define READING_PERIOD_US 20000  // us
 #define CONV_RATE_TIME_MS 1000    // ms
 #define FAKE_TOTAL_VOLTAGE 250.0  // V
 #define NOMINAL_CAPACITY 6        // Ah
@@ -24,21 +24,23 @@ template <size_t N_BATTERIES>
 class BatteryPack {
     using Battery = LTC6810Driver::LTC6810<6, READING_PERIOD_US, CONV_RATE_TIME_MS>;
     struct BMSConfig {
-        inline static auto bms_wrapper = ST_LIB::SPIDomain::SPIWrapper<bms_spi3>(NewSPI::bms_spi_pins);
+        
         static constexpr size_t n_LTC6810{N_BATTERIES};
 
         // Estos métodos se llamarán durante el update(), cuando los punteros ya existan
         static void SPI_transmit(const std::span<uint8_t> data) {
-            bms_wrapper.send(data);
+            //bms_wrapper.send(data);
+            HAL_SPI_Transmit(&NewSPI::bms_spi_pins.hspi, data.data(), data.size(), 10);
         }
         static void SPI_receive(std::span<uint8_t> buffer) {
-            bms_wrapper.receive(buffer);
+            //bms_wrapper.receive(buffer);
+            HAL_SPI_Transmit(&NewSPI::bms_spi_pins.hspi, buffer.data(), buffer.size(), 10);
         }
         static void SPI_CS_turn_on(void) {
-            DO::bms_cs->turn_off();  // Activo Low
+            DO::bms_cs->turn_on();  // Activo Low
         }
         static void SPI_CS_turn_off(void) {
-            DO::bms_cs->turn_on();  // Inactivo High
+            DO::bms_cs->turn_off();  // Inactivo High
         }
         static int32_t get_tick(void) { return GetMicroseconds(); }
         static constexpr int32_t tick_resolution_us{500};
@@ -134,7 +136,7 @@ class BatteryPack {
     array<Battery, N_BATTERIES>& batteries = bms.get_data();
     float total_voltage{FAKE_TOTAL_VOLTAGE};
     array<std::pair<uint, float>, N_BATTERIES> SoCs{};  // ms -> soc[0,1]
-    array<array<float, 2>, N_BATTERIES> batteries_temp{};
+    array   <array<float, 2>, N_BATTERIES> batteries_temp{};
 
     BatteryPack(){
         SoCs.fill({0, 1.0});

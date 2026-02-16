@@ -23,8 +23,8 @@ class SDC {
    public:
     //States_SDC status{States_SDC::DISENGAGED};
 
-    SDC(Pin& pin)
-        : sdc_good{pin, [&]() { sdc_callback(); }, &sdc_good_value, TRIGGER::BOTH_EDGES} {}
+    // SDC(Pin& pin)
+    //     : sdc_good{pin, [&]() { sdc_callback(); }, &sdc_good_value, TRIGGER::BOTH_EDGES} {}
 
     void enable() { enabled = true; };
 

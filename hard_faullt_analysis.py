@@ -107,15 +107,6 @@ def addr2line(addr):
     except Exception as e:
         return f"addr2line failed: {e}"
     
-def analyze_call_stack(calltrace_depth, calltrace_pcs, context=2):
-    """
-    Muestra el call stack, omitiendo frames sin fuente y mostrando snippet de código.
-    """
-    print("\n==== Call Stack Trace ====")
-    if calltrace_depth == 0:
-        print("No call trace available.")
-        return
-
 def analyze_call_stack(calltrace_depth, calltrace_pcs, context=0):
     """
     Muestra el call stack, mostrando snippet de código de la línea exacta
@@ -160,21 +151,23 @@ def print_code_context(lines, context=2):
         if not os.path.exists(file_path):
             print("Source file not found")
         return
-
-    with open(file_path, "r") as f:
-        file_lines = f.readlines()
-
-    start = max(0, line_no - context)
-    end = min(len(file_lines), line_no + context + 1)
-
-    print(f"\nSource snippet from {file_path}:")
-    for i in range(start, end):
-        code = file_lines[i].rstrip()
-        # Si es la línea del error, la ponemos en rojo
-        if i == line_no:
-            print(f"\033[91m{i+1:>4}: {code}\033[0m")  # rojo
-        else:
-            print(f"{i+1:>4}: {code}")
+    try:
+        with open(file_path, "r") as f:
+            file_lines = f.readlines()
+            start = max(0, line_no - context)
+            end = min(len(file_lines), line_no + context + 1)
+            print(f"start:{start} y end: {end} ")
+            print(f"\nSource snippet from {file_path}:")
+            for i in range(start, end):
+                code = file_lines[i].rstrip()
+            # Si es la línea del error, la ponemos en rojo
+                if i == line_no:
+                    print(f"\033[91m{i+1:>4}: {code}\033[0m")  # rojo
+                else:
+                    print(f"{i+1:>4}: {code}")
+    except:
+        print("Error al encontrar el file")
+        print(line_no)
 
 def hard_fault_analysis(memory_string):
     raw = bytes.fromhex(memory_string)
@@ -212,7 +205,7 @@ def hard_fault_analysis(memory_string):
     
     print(f"  Program Counter : 0x{hf['pc']:08X} -> {pc_loc}")
     print_code_context(pc_loc)
-    
+
     analyze_call_stack(hf["calltrace_depth"],hf["calltrace_pcs"])
     
     print("======================================================")

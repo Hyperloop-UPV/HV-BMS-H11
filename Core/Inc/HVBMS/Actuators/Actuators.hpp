@@ -12,6 +12,7 @@ class Actuators {
         static uint8_t contactors_timeout_id;
 
     public:
+        static void init();
         static void open_HV();
         static bool is_HV_open();
 

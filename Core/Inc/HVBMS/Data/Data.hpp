@@ -48,7 +48,7 @@ consteval SPIDomain::SPIConfig get_bms_config() {
 // Dispositivo SPI3
 inline constexpr auto bms_spi3 =
     SPIDomain::Device<DMA_Domain::Stream::dma2_stream0, DMA_Domain::Stream::dma2_stream1>(
-        SPIDomain::SPIMode::MASTER, SPIDomain::SPIPeripheral::spi3, uint32_t(-1), ST_LIB::PC10,
+        SPIDomain::SPIMode::MASTER, SPIDomain::SPIPeripheral::spi3, 1000000, ST_LIB::PC10,
         ST_LIB::PC11, ST_LIB::PC12, get_bms_config());
 
 namespace DO {
@@ -73,7 +73,7 @@ inline TIM_TypeDef* global_us_timer;
 };  // namespace GlobalTimer
 
 namespace NewSPI {
-inline SPIDomain::Instance bms_spi_pins;
+inline SPIDomain::Instance* bms_spi_pins;
 }  // namespace NewSPI
 
 #define GetMicroseconds() GlobalTimer::global_us_timer->CNT
