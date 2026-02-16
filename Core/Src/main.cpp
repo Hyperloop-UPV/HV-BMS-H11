@@ -23,6 +23,8 @@ using myBoard = ST_LIB::Board<eth, led_PG7, led_PG8, contactor_PG14, contactor_P
                               contactor_PF4, sdc_PA11, adc_PF13, adc_PA0, timer_us_tick_def,
                               bms_spi3, bms_cs_pin>;
 
+#if !defined(EXAMPLE_ADC) && !defined(EXAMPLE_ETHERNET) && !defined(EXAMPLE_MPU) &&                \
+    !defined(EXAMPLE_HARDFAULT)
 int main(void) {
     myBoard::init();
     DO::operational_led = &myBoard::instance_of<led_PG8>();
