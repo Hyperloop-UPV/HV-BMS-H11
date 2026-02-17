@@ -58,7 +58,7 @@ class HVBMS {
             bms_sm.add_enter_action(
                 []() {
                     Comms::start();
-                    Sensors::batteries.start();
+                    Sensors::batteries->start();
                     DO::sdc_obccu->turn_on();
                 },
                 connecting_state);

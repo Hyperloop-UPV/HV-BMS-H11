@@ -30,8 +30,9 @@ class Sensors {
 
     inline static SDC sdc{*EXTI_SDC::sdc_interrupt};
 
-    inline static BatteryPack<N_BATTERIES> batteries;
+    inline static BatteryPack<N_BATTERIES>* batteries;
 
+    static void init();
     static void update_sensors();
     static void update_batteries();
 };
