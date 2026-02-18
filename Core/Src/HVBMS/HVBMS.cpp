@@ -24,8 +24,8 @@ bool HVBMS::check_protections() {
 }
 
 void HVBMS::add_protections() {
-    ProtectionManager::link_state_machine(state_machine,
-                                          static_cast<ProtectionManager::state_id>(States_HVBMS::FAULT));
+    ProtectionManager::link_state_machine(
+        state_machine, static_cast<ProtectionManager::state_id>(States_HVBMS::FAULT));
 
     // DC bus voltage
     Protection* protection = &ProtectionManager::_add_protection(&Sensors::voltage_sensor.reading,
@@ -43,7 +43,7 @@ void HVBMS::add_protections() {
 
     // SoCs
     auto id{1};
-    for (auto& [_, soc] : Sensors::batteries->SoCs) {
+    for (auto& [_, soc] : Sensors::batteries.SoCs) {
         protection = &ProtectionManager::_add_protection(&soc, Boundary<float, BELOW>(0.24));
         name = "SoC battery " + std::to_string(id);
         set_protection_name(protection, name);
@@ -53,7 +53,7 @@ void HVBMS::add_protections() {
 
     // Batteries conversion rate
     id = 1;
-    for (auto& battery : Sensors::batteries->batteries) {
+    for (auto& battery : Sensors::batteries.batteries) {
         protection =
             &ProtectionManager::_add_protection(&battery.conv_rate, Boundary<float, BELOW>(0.5));
         name = "Conversion rate battery " + std::to_string(id);
@@ -64,7 +64,7 @@ void HVBMS::add_protections() {
 
     // Batteries temperature
     id = 1;
-    for (auto& temp : Sensors::batteries->batteries_temp) {
+    for (auto& temp : Sensors::batteries.batteries_temp) {
         protection = &ProtectionManager::_add_protection(&temp[0], Boundary<float, ABOVE>(60.0));
         name = "Temperature 1 battery " + std::to_string(id);
         set_protection_name(protection, name);
