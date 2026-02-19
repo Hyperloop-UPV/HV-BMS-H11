@@ -45,7 +45,6 @@ constexpr TimerDomain::Timer timer_us_tick_def{{
     .request = TimerRequest::GeneralPurpose32bit_5,
 }};
 
-
 namespace GlobalTimer {
 // inline TimerWrapper<timer_us_tick_def> global_us_timer;
 inline TIM_TypeDef* global_us_timer;
@@ -103,3 +102,7 @@ constexpr EXTIDomain::Device sdc_PB12{ST_LIB::PB12, EXTIDomain::Trigger::BOTH_ED
 using States_HVBMS = DataPackets::gsm_status;
 using States_BMS = DataPackets::bms_status;
 using States_SDC = DataPackets::sdc_status;
+
+// Tasks and timeouts id
+inline uint16_t id_timeout_precharge;
+inline uint16_t id_check_precharge;

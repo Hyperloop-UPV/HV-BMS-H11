@@ -14,6 +14,13 @@ class SDC {
 
     static bool is_sdc_open() {
         if (!enabled) return false;
-        return EXTI_SDC::sdc_state;
+        if (EXTI_SDC::sdc_state){
+            status = States_SDC::DISENGAGED;
+            return true;
+        }
+        else{
+            status = States_SDC::ENGAGED;
+            return false;
+        }
     }
 };

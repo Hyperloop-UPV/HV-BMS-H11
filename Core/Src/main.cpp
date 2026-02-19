@@ -10,7 +10,7 @@ using ST_LIB::EthernetDomain;
 constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "00:80:e1:00:01:07",
                                               "192.168.1.7", "255.255.0.0");
 #elif defined(USE_PHY_LAN8700)
-constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "00:80:e1:00:01:07",
+constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "50:50:71:40:01:67",
                                               "192.168.1.7", "255.255.255.0");
 #elif defined(USE_PHY_KSZ8041)
 constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "00:80:e1:00:01:07",
@@ -23,8 +23,7 @@ using myBoard = ST_LIB::Board<eth, led_PG7, led_PG8, contactor_PG14, contactor_P
                               contactor_PF4, sdc_PA11, adc_PF13, adc_PA0, timer_us_tick_def,
                               bms_spi3, bms_cs_pin, sdc_PB12>;
 
-uint16_t id_timeout;
-uint16_t id_task;
+
 
 int main(void) {
     Hard_fault_check();
@@ -64,36 +63,6 @@ int main(void) {
         HVBMS::update();
         eth_instance->update();
         Scheduler::update();
-        if (OrderPackets::start_precharge_flag) {
-            OrderPackets::start_precharge_flag = false;
-
-            Actuators::start_precharge();
-            id_timeout = Scheduler::set_timeout(4000000, []() {
-                Scheduler::unregister_task(id_task);
-                Actuators::open_HV();
-                HVBMS::state_machine.force_change_state((std::size_t)States_HVBMS::FAULT);
-            });
-
-            id_task = Scheduler::register_task(100, []() {
-                if (Sensors::voltage_sensor.reading / Sensors::batteries.total_voltage >= 0.95) {
-                    Scheduler::cancel_timeout(id_timeout);
-                    Actuators::close_HV();
-                    Scheduler::unregister_task(id_task);
-                }
-            });
-
-
-        }
-        if (OrderPackets::open_contactors_flag) {
-            OrderPackets::open_contactors_flag = false;
-            Actuators::open_HV();
-            Scheduler::cancel_timeout(id_timeout);
-            Scheduler::unregister_task(id_task);
-        }
-        if (OrderPackets::close_contactors_flag) {
-            OrderPackets::close_contactors_flag = false;
-            Actuators::close_HV();
-        }
     }
 }
 
