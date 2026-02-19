@@ -1,40 +1,19 @@
 #pragma once
+#include "ST-LIB.hpp"
 
-#include "HVBMS/Data/Data.hpp"
-#include "ST-LIB_LOW.hpp"
+using ST_LIB::EXTIDomain;
 
 class SDC {
-    SensorInterrupt sdc_good;
-    GPIO_PinState sdc_good_value{GPIO_PIN_SET};
-
-    bool enabled{false};
-    bool triggered{false};
+    inline static bool enabled{false};
+    inline static GPIO_PinState start_state{GPIO_PinState::GPIO_PIN_SET};
 
    public:
-    States_SDC status{States_SDC::DISENGAGED};
+    inline static States_SDC status{States_SDC::DISENGAGED};
 
-    SDC(ST_LIB::EXTIDomain::Instance exti) : sdc_good(exti, sdc_good_value) {
-        Callbacks::sdc_instance = this;
+    static void enable() { enabled = true; }
+
+    static bool is_sdc_open() {
+        if (!enabled) return false;
+        return EXTI_SDC::sdc_state;
     }
-
-    void sdc_callback() {
-        sdc_good.read();
-        if (sdc_good_value == GPIO_PinState::GPIO_PIN_RESET) {
-            if (enabled) triggered = true;
-            status = States_SDC::DISENGAGED;
-        } else {
-            status = States_SDC::ENGAGED;
-        }
-    }
-
-    void enable() { enabled = true; }
-    bool is_sdc_open() { return triggered; }
 };
-
-namespace Callbacks {
-inline void sdc_exti_callback() {
-    if (sdc_instance) {
-        sdc_instance->sdc_callback();
-    }
-}
-}  // namespace Callbacks

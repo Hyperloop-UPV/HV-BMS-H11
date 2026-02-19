@@ -1,28 +1,30 @@
-#pragma once
+    #pragma once
 
-#include "HVBMS/Comms/Comms.hpp"
-#include "ST-LIB_LOW.hpp"
-#include "ST-LIB.hpp"
+    #include "HVBMS/Comms/Comms.hpp"
+    #include "ST-LIB_LOW.hpp"
+    #include "ST-LIB.hpp"
 
-using ST_LIB::ADCDomain;
+    using ST_LIB::ADCDomain;
 
-template <std::size_t FilterSize>
-class ADCLinearSensor {
-    FilteredLinearSensor<float, FilterSize> sensor;
-    MovingAverage<FilterSize> filter{};
+    template <std::size_t FilterSize>
+    class ADCLinearSensor {
+        
+        ADCDomain::Instance* adc_instance{nullptr};
+        float slope;
+        float offset;
 
-   public:
-    float reading{};
+        MovingAverage<FilterSize> filter{};
 
-    ADCLinearSensor(ADCDomain::Instance* adc, float slope, float offset)
-        : sensor {
-              *adc,
-              slope,
-              offset,
-              reading,
-              filter
-          } {}
+    public:
+        float reading{};
 
-    void read() { sensor.read(); };
-};
+        ADCLinearSensor(float slope_, float offset_) : slope{slope_}, offset{offset_} {}
 
+        void bind(ADCDomain::Instance* adc) { adc_instance = adc; }
+
+        void read() {
+            if (!adc_instance) return;
+
+            reading = slope * adc_instance->get_value() + offset;
+        }
+    };

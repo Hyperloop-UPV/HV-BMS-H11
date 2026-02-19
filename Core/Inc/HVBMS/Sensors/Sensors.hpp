@@ -7,7 +7,7 @@
 #include "SDC.hpp"
 
 #define BATTERIES_CONNECTED 1
-#define N_BATTERIES 1
+#define N_BATTERIES 16
 
 class Sensors {
     // Voltage sensor for HVBMS with ID 4
@@ -22,14 +22,15 @@ class Sensors {
 
 
    public:
-    inline static ADCLinearSensor<5> voltage_sensor{ADC::adc_voltage, VOLTAGE_SLOPE, VOLTAGE_OFFSET};
+    inline static ADCLinearSensor<5> voltage_sensor{VOLTAGE_SLOPE, VOLTAGE_OFFSET};
 
-    inline static ADCLinearSensor<5> current_sensor{ADC::adc_current, CURRENT_SLOPE, CURRENT_OFFSET};
+    inline static ADCLinearSensor<5> current_sensor{CURRENT_SLOPE, CURRENT_OFFSET};
 
-    inline static SDC sdc{*EXTI_SDC::sdc_interrupt};
+    inline static SDC sdc;
 
     inline static BatteryPack<N_BATTERIES> batteries;
 
+    static void init();
     static void update_sensors();
     static void update_batteries();
 };

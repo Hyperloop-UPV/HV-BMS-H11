@@ -60,6 +60,7 @@ class HVBMS {
                     Comms::start();
                     Sensors::batteries.start();
                     DO::sdc_obccu->turn_on();
+                    //add_protections();
                 },
                 connecting_state);
 
@@ -70,6 +71,7 @@ class HVBMS {
             bms_sm.add_enter_action(
                 []() {
                     Actuators::open_HV();
+                    DO::operational_led->turn_off();
                     DO::sdc_obccu->turn_off();
                     DO::fault_led->turn_on();
                 },
@@ -78,15 +80,13 @@ class HVBMS {
             // Acciones CÍCLICAS
             using namespace std::chrono_literals;
             // CONNECTING
-            bms_sm.add_cyclic_action(Actuators::toggle_operational_led, 1000ms, connecting_state);
+            bms_sm.add_cyclic_action(Actuators::toggle_operational_led, 300ms, connecting_state);
+            bms_sm.add_cyclic_action(Sensors::update_batteries, 10ms, connecting_state);
 
             // OPERATIONAL
-            bms_sm.add_cyclic_action(Sensors::update_sensors, 10ms, operational_state);
+            bms_sm.add_cyclic_action(Sensors::update_sensors, 1ms, operational_state);
             bms_sm.add_cyclic_action(Sensors::update_batteries, 10ms, operational_state);
 
-            // Acciones ON EXIT
-            // OPERATIONAL
-            bms_sm.add_exit_action([]() { DO::operational_led->turn_off(); }, operational_state);
 
             return bms_sm;
         }();

@@ -150,5 +150,9 @@ void Comms::start() {
         Sensors::batteries.minimum_temp, Sensors::batteries.maximum_temp);
 
     DataPackets::start();
+
+    OrderPackets::open_contactors_init();
+    OrderPackets::close_contactors_init();
+    OrderPackets::start_precharge_init();
     OrderPackets::start();
 }

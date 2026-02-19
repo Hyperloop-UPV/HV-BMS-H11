@@ -9,7 +9,7 @@ constexpr DigitalOutputDomain::DigitalOutput led_PG7{ST_LIB::PG7};
 constexpr DigitalOutputDomain::DigitalOutput contactor_PG14{ST_LIB::PG14};
 constexpr DigitalOutputDomain::DigitalOutput contactor_PG12{ST_LIB::PG12};
 constexpr DigitalOutputDomain::DigitalOutput contactor_PD4{ST_LIB::PD4};
-constexpr DigitalOutputDomain::DigitalOutput contactor_PF4{ST_LIB::PF5};
+constexpr DigitalOutputDomain::DigitalOutput contactor_PF4{ST_LIB::PF4};
 constexpr DigitalOutputDomain::DigitalOutput sdc_PA11{ST_LIB::PA11};
 constexpr DigitalOutputDomain::DigitalOutput bms_cs_pin{ST_LIB::PD3};
 
@@ -45,6 +45,7 @@ constexpr TimerDomain::Timer timer_us_tick_def{{
     .request = TimerRequest::GeneralPurpose32bit_5,
 }};
 
+
 namespace GlobalTimer {
 // inline TimerWrapper<timer_us_tick_def> global_us_timer;
 inline TIM_TypeDef* global_us_timer;
@@ -78,21 +79,26 @@ inline std::optional<SPIDomain::SPIWrapper<bms_spi3>> bms_wrapper;
 }  // namespace NewSPI
 
 using ST_LIB::EXTIDomain;
-// Forward declaration
-class SDC;
-
-// Namespace para callbacks
-namespace Callbacks {
-inline SDC* sdc_instance = nullptr;
-void sdc_exti_callback();
-}  // namespace Callbacks
-
-constexpr EXTIDomain::Device sdc_PB12{ST_LIB::PB12, EXTIDomain::Trigger::BOTH_EDGES,
-                                      Callbacks::sdc_exti_callback};
 
 namespace EXTI_SDC {
 inline EXTIDomain::Instance* sdc_interrupt;
+
+inline bool sdc_state{false};
+
+inline void sdc_callback() {
+    if (!EXTI_SDC::sdc_interrupt) return;
+
+    if (EXTI_SDC::sdc_interrupt->read() == GPIO_PinState::GPIO_PIN_RESET) {
+        sdc_state = true;
+    } else {
+        sdc_state = false;
+    }
 }
+}  // namespace EXTI_SDC
+
+constexpr EXTIDomain::Device sdc_PB12{ST_LIB::PB12, EXTIDomain::Trigger::BOTH_EDGES,
+                                      EXTI_SDC::sdc_callback};
+
 // Enums
 using States_HVBMS = DataPackets::gsm_status;
 using States_BMS = DataPackets::bms_status;
