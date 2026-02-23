@@ -14,6 +14,7 @@ public:
     inline static bool open_contactors_flag{false};
     inline static bool sdc_obccu_flag{false};
     inline static bool start_precharge_flag{false};
+    inline static bool bypass_imd_flag{false};
     
 
     OrderPackets() = default;
@@ -23,6 +24,7 @@ public:
     inline static HeapOrder *open_contactors_order{nullptr};
     inline static HeapOrder *sdc_obccu_order{nullptr};
     inline static HeapOrder *start_precharge_order{nullptr};
+    inline static HeapOrder *bypass_imd_order{nullptr};
     
 
     static void FAULT_init()
@@ -44,6 +46,10 @@ public:
     static void start_precharge_init()
     {
         start_precharge_order = new HeapOrder(903, &start_precharge_cb);
+    }
+    static void bypass_imd_init()
+    {
+        bypass_imd_order = new HeapOrder(904, &bypass_imd_cb);
     }
     
 
@@ -67,6 +73,9 @@ public:
         }
         if (start_precharge_order == nullptr) {
             ErrorHandler("Order start_precharge not initialized");
+        }
+        if (bypass_imd_order == nullptr) {
+            ErrorHandler("Order bypass_imd not initialized");
         }
         
 
@@ -94,6 +103,10 @@ private:
     static void start_precharge_cb()
     {
         start_precharge_flag = true;
+    }
+    static void bypass_imd_cb()
+    {
+        bypass_imd_flag = true;
     }
     
 };

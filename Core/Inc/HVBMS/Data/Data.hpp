@@ -12,6 +12,7 @@ constexpr DigitalOutputDomain::DigitalOutput contactor_PD4{ST_LIB::PD4};
 constexpr DigitalOutputDomain::DigitalOutput contactor_PF4{ST_LIB::PF4};
 constexpr DigitalOutputDomain::DigitalOutput sdc_PA11{ST_LIB::PA11};
 constexpr DigitalOutputDomain::DigitalOutput bms_cs_pin{ST_LIB::PD3};
+constexpr DigitalOutputDomain::DigitalOutput imd_PF5{ST_LIB::PF5};
 
 namespace DO {
 inline DigitalOutputDomain::Instance* operational_led;
@@ -22,6 +23,7 @@ inline DigitalOutputDomain::Instance* contactor_precharge;
 inline DigitalOutputDomain::Instance* contactor_discharge;
 inline DigitalOutputDomain::Instance* sdc_obccu;
 inline DigitalOutputDomain::Instance* bms_cs;
+inline DigitalOutputDomain::Instance* imd_bypass;
 };  // namespace DO
 
 using ST_LIB::ADCDomain;
@@ -77,31 +79,6 @@ inline SPIDomain::Instance* bms_spi_pins;
 inline std::optional<SPIDomain::SPIWrapper<bms_spi3>> bms_wrapper;
 }  // namespace NewSPI
 
-using ST_LIB::EXTIDomain;
-
-namespace EXTI_SDC {
-inline EXTIDomain::Instance* sdc_interrupt;
-
-inline bool sdc_state{false};
-
-inline void sdc_callback() {
-    if (!EXTI_SDC::sdc_interrupt) return;
-
-    if (EXTI_SDC::sdc_interrupt->read() == GPIO_PinState::GPIO_PIN_RESET) {
-        sdc_state = true;
-    } else {
-        sdc_state = false;
-    }
-}
-}  // namespace EXTI_SDC
-
-constexpr EXTIDomain::Device sdc_PB12{ST_LIB::PB12, EXTIDomain::Trigger::BOTH_EDGES,
-                                      EXTI_SDC::sdc_callback};
-
-// Enums
-using States_HVBMS = DataPackets::gsm_status;
-using States_BMS = DataPackets::bms_status;
-using States_SDC = DataPackets::sdc_status;
 
 // Tasks and timeouts id
 inline uint16_t id_timeout_precharge;

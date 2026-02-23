@@ -1,26 +1,28 @@
 #pragma once
+#include "Communications/Packets/DataPackets.hpp"
 #include "ST-LIB.hpp"
 
 using ST_LIB::EXTIDomain;
 
 class SDC {
-    inline static bool enabled{false};
-    inline static GPIO_PinState start_state{GPIO_PinState::GPIO_PIN_SET};
-
    public:
-    inline static States_SDC status{States_SDC::DISENGAGED};
+    inline static EXTIDomain::Instance* sdc_interrupt{nullptr};
+    inline static DataPackets::sdc_status status{DataPackets::sdc_status::DISENGAGED};
+    inline static bool enabled{false};
 
-    static void enable() { enabled = true; }
+    static void init(EXTIDomain::Instance* instance) { sdc_interrupt = instance; }
 
-    static bool is_sdc_open() {
-        if (!enabled) return false;
-        if (EXTI_SDC::sdc_state){
-            status = States_SDC::DISENGAGED;
-            return true;
-        }
-        else{
-            status = States_SDC::ENGAGED;
-            return false;
+    static void enable() {
+        if (!sdc_interrupt) return;
+
+        if (sdc_interrupt->read() == GPIO_PinState::GPIO_PIN_SET) {
+            status = DataPackets::sdc_status::ENGAGED;
+            enabled = true;
         }
     }
+
+    static void sdc_callback();
 };
+
+constexpr EXTIDomain::Device sdc_PB12{ST_LIB::PB12, EXTIDomain::Trigger::BOTH_EDGES,
+                                      SDC::sdc_callback};

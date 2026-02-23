@@ -154,6 +154,7 @@ void Comms::start() {
     OrderPackets::open_contactors_init();
     OrderPackets::close_contactors_init();
     OrderPackets::start_precharge_init();
+    OrderPackets::bypass_imd_init();
     
     OrderPackets::start();
 }

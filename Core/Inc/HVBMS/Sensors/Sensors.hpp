@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ADCLinearSensor.hpp"
-// #include "BMS.hpp"
 #include "../../../deps/LTC6810-Driver/Inc/BMS.hpp"
 #include "BatteryPack.hpp"
 #include "SDC.hpp"
@@ -22,9 +21,9 @@ class Sensors {
 
 
    public:
-    inline static ADCLinearSensor<5> voltage_sensor{VOLTAGE_SLOPE, VOLTAGE_OFFSET};
-
-    inline static ADCLinearSensor<5> current_sensor{CURRENT_SLOPE, CURRENT_OFFSET};
+    inline static ADCLinearSensor voltage_sensor{VOLTAGE_SLOPE, VOLTAGE_OFFSET};
+    
+    inline static ADCLinearSensor current_sensor{CURRENT_SLOPE, CURRENT_OFFSET};
 
     inline static SDC sdc;
 

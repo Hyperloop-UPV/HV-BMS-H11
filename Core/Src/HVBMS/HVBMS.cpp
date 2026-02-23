@@ -18,7 +18,7 @@ void HVBMS::update() {
         id_timeout_precharge = Scheduler::set_timeout(4000000, []() {
             Scheduler::unregister_task(id_check_precharge);
             Actuators::open_HV();
-            HVBMS::state_machine.force_change_state((std::size_t)States_HVBMS::FAULT);
+            HVBMS::state_machine.force_change_state((std::size_t)DataPackets::gsm_status::FAULT);
         });
 
         id_check_precharge = Scheduler::register_task(100, []() {
@@ -39,6 +39,10 @@ void HVBMS::update() {
         OrderPackets::close_contactors_flag = false;
         Actuators::close_HV();
     }
+    if (OrderPackets::bypass_imd_flag) {
+        OrderPackets::bypass_imd_flag = false;
+        DO::imd_bypass->toggle();
+    }
 
     current_gsm_state = state_machine.get_current_state();
 }
@@ -46,17 +50,17 @@ void HVBMS::update() {
 bool HVBMS::check_protections() {
     for (auto& p : protections) {
         if (p->check_state() == Protections::FaultType::FAULT) {
-            current_BMS_state = States_BMS::FAULT;
+            current_BMS_state = DataPackets::bms_status::FAULT;
             return true;
         }
     }
-    current_BMS_state = States_BMS::OK;
+    current_BMS_state = DataPackets::bms_status::OK;
     return false;
 }
 
 void HVBMS::add_protections() {
     ProtectionManager::link_state_machine(
-        state_machine, static_cast<ProtectionManager::state_id>(States_HVBMS::FAULT));
+        state_machine, static_cast<ProtectionManager::state_id>(DataPackets::gsm_status::FAULT));
 
     // DC bus voltage
     Protection* protection = &ProtectionManager::_add_protection(&Sensors::voltage_sensor.reading,
