@@ -11,7 +11,7 @@ constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "00:80
                                               "192.168.1.7", "255.255.0.0");
 #elif defined(USE_PHY_LAN8700)
 constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "50:50:71:40:01:67",
-                                              "192.168.1.7", "255.255.255.0");
+                                              "192.168.1.7", "255.255.0.0");
 #elif defined(USE_PHY_KSZ8041)
 constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "00:80:e1:00:01:07",
                                               "192.168.1.7", "255.255.0.0");

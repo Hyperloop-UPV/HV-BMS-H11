@@ -12,9 +12,8 @@ void SDC::sdc_callback(){
             enabled = true;
         });
         return;
-    } 
-    
+    }
 
-    HVBMS::state_machine.force_change_state(static_cast<std::size_t>(DataPackets::gsm_status::FAULT));
+    HVBMS::state_machine.force_change_state((std::size_t)DataPackets::gsm_status::FAULT);
 }
 

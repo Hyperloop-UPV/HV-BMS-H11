@@ -14,20 +14,27 @@ void HVBMS::update() {
     if (OrderPackets::start_precharge_flag) {
         OrderPackets::start_precharge_flag = false;
 
-        Actuators::start_precharge();
-        id_timeout_precharge = Scheduler::set_timeout(4000000, []() {
-            Scheduler::unregister_task(id_check_precharge);
-            Actuators::open_HV();
-            HVBMS::state_machine.force_change_state((std::size_t)DataPackets::gsm_status::FAULT);
-        });
-
-        id_check_precharge = Scheduler::register_task(100, []() {
-            if (Sensors::voltage_sensor.reading / Sensors::batteries.total_voltage >= 0.95) {
-                Scheduler::cancel_timeout(id_timeout_precharge);
-                Actuators::close_HV();
+        if (SDC::status == DataPackets::sdc_status::DISENGAGED) {
+            WARNING("SDC is disengaged, cannot start precharge");
+        }
+        else{
+            Actuators::start_precharge();
+            id_timeout_precharge = Scheduler::set_timeout(4000000, []() {
                 Scheduler::unregister_task(id_check_precharge);
-            }
-        });
+                Actuators::open_HV();
+                HVBMS::state_machine.force_change_state(
+                    (std::size_t)DataPackets::gsm_status::FAULT);
+            });
+
+            id_check_precharge = Scheduler::register_task(100, []() {
+                if (Sensors::voltage_sensor.reading / Sensors::batteries.total_voltage >= 0.95) {
+                    Scheduler::cancel_timeout(id_timeout_precharge);
+                    Actuators::close_HV();
+                    Scheduler::unregister_task(id_check_precharge);
+                }
+            });
+        }
+
     }
     if (OrderPackets::open_contactors_flag) {
         OrderPackets::open_contactors_flag = false;
@@ -35,6 +42,7 @@ void HVBMS::update() {
         Scheduler::cancel_timeout(id_timeout_precharge);
         Scheduler::unregister_task(id_check_precharge);
     }
+    // DANGEROUS
     if (OrderPackets::close_contactors_flag) {
         OrderPackets::close_contactors_flag = false;
         Actuators::close_HV();

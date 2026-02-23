@@ -67,8 +67,8 @@ class HVBMS {
             bms_sm.add_enter_action(
                 []() {
                     Actuators::open_HV();
-                    DO::operational_led->turn_off();
                     DO::sdc_obccu->turn_off();
+                    DO::operational_led->turn_off();
                     DO::fault_led->turn_on();
                 },
                 fault_state);
@@ -82,6 +82,9 @@ class HVBMS {
             // OPERATIONAL
             bms_sm.add_cyclic_action(Sensors::update_sensors, 1ms, operational_state);
             bms_sm.add_cyclic_action(Sensors::update_batteries, 10ms, operational_state);
+
+            // FAULT
+            bms_sm.add_cyclic_action(Sensors::update_batteries, 10ms, fault_state);
 
             return bms_sm;
         }();

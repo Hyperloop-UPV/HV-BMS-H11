@@ -10,8 +10,6 @@ class SDC {
     inline static DataPackets::sdc_status status{DataPackets::sdc_status::DISENGAGED};
     inline static bool enabled{false};
 
-    static void init(EXTIDomain::Instance* instance) { sdc_interrupt = instance; }
-
     static void enable() {
         if (!sdc_interrupt) return;
 

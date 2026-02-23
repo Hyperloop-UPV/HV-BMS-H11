@@ -277,7 +277,7 @@ public:
 
         control_station_udp = new DatagramSocket("192.168.1.7",50400,"192.168.0.9",50400);
         
-        Scheduler::register_task(50000, +[](){
+        Scheduler::register_task(15000, +[](){
             DataPackets::control_station_udp->send_packet(*DataPackets::battery_1_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::battery_2_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::battery_3_packet);
