@@ -6,7 +6,7 @@
 #include "SDC.hpp"
 
 #define BATTERIES_CONNECTED 1
-#define N_BATTERIES 2
+#define N_BATTERIES 16
 
 class Sensors {
     // Voltage sensor for HVBMS with ID 4
