@@ -69,13 +69,14 @@ class HVBMS {
             // Acciones CÍCLICAS
             using namespace std::chrono_literals;
             // CONNECTING
-            bms_sm.add_cyclic_action(Actuators::toggle_operational_led, 300ms, connecting_state);
-            bms_sm.add_cyclic_action(Sensors::update_sensors, 10ms, connecting_state);
+            bms_sm.add_cyclic_action([](){
+                Actuators::toggle_operational_led();}, 300ms, connecting_state);
+            bms_sm.add_cyclic_action([](){Sensors::update_sensors();}, 10ms, connecting_state);
 
             // OPERATIONAL
-            bms_sm.add_cyclic_action(Sensors::update_sensors, 1ms, operational_state);
+            bms_sm.add_cyclic_action([](){Sensors::update_sensors();}, 1ms, operational_state);
             // FAULT
-            bms_sm.add_cyclic_action(Sensors::update_sensors, 10ms, fault_state);
+            bms_sm.add_cyclic_action([](){Sensors::update_sensors();}, 10ms, fault_state);
 
             return bms_sm;
         }();
