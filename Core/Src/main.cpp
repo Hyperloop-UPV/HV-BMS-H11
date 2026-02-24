@@ -54,6 +54,8 @@ int main(void) {
     Actuators::init();
     Sensors::init();
 
+    HVBMS::add_protections();
+
     HVBMS::state_machine.start();
 
     Scheduler::start();

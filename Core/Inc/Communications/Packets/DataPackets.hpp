@@ -16,11 +16,6 @@ public:
         ENGAGED = 0,
         DISENGAGED = 1,
     };
-    enum class bms_status : uint8_t
-    {
-        OK = 0,
-        FAULT = 1,
-    };
     
 
     static void battery_1_init(float &battery1_SOC, float &battery1_cell1, float &battery1_cell2, float &battery1_cell3, float &battery1_cell4, float &battery1_cell5, float &battery1_cell6, float &battery1_total_voltage, float &battery1_conv_rate)
@@ -148,11 +143,6 @@ public:
         minimum_soc_packet = new HeapPacket(static_cast<uint16_t>(945), &minimum_soc);
     }
 
-    static void bms_init(bms_status &bms_status)
-    {
-        bms_packet = new HeapPacket(static_cast<uint16_t>(946), &bms_status);
-    }
-
     static void batteries_data_init(float &voltage_min, float &voltage_max, float &temp_min, float &temp_max)
     {
         batteries_data_packet = new HeapPacket(static_cast<uint16_t>(947), &voltage_min, &voltage_max, &temp_min, &temp_max);
@@ -184,7 +174,6 @@ public:
     inline static HeapPacket *driver_diagnosis_packet{nullptr};
     inline static HeapPacket *sdc_packet{nullptr};
     inline static HeapPacket *minimum_soc_packet{nullptr};
-    inline static HeapPacket *bms_packet{nullptr};
     inline static HeapPacket *batteries_data_packet{nullptr};
     
     inline static DatagramSocket *control_station_udp{nullptr};
@@ -267,9 +256,6 @@ public:
         if (minimum_soc_packet == nullptr) {
             ErrorHandler("Packet minimum_soc not initialized");
         }
-        if (bms_packet == nullptr) {
-            ErrorHandler("Packet bms not initialized");
-        }
         if (batteries_data_packet == nullptr) {
             ErrorHandler("Packet batteries_data not initialized");
         }
@@ -303,7 +289,6 @@ public:
             DataPackets::control_station_udp->send_packet(*DataPackets::driver_diagnosis_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::sdc_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::minimum_soc_packet);
-            DataPackets::control_station_udp->send_packet(*DataPackets::bms_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::batteries_data_packet);
             });
     }

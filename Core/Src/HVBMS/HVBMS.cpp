@@ -16,8 +16,7 @@ void HVBMS::update() {
 
         if (SDC::status == DataPackets::sdc_status::DISENGAGED) {
             WARNING("SDC is disengaged, cannot start precharge");
-        }
-        else{
+        } else {
             Actuators::start_precharge();
             id_timeout_precharge = Scheduler::set_timeout(4000000, []() {
                 Scheduler::unregister_task(id_check_precharge);
@@ -34,7 +33,6 @@ void HVBMS::update() {
                 }
             });
         }
-
     }
     if (OrderPackets::open_contactors_flag) {
         OrderPackets::open_contactors_flag = false;
@@ -51,75 +49,51 @@ void HVBMS::update() {
         OrderPackets::bypass_imd_flag = false;
         DO::imd_bypass->toggle();
     }
+    if (OrderPackets::FAULT_flag) {
+        ProtectionManager::fault_and_propagate();
+    }
 
     current_gsm_state = state_machine.get_current_state();
 }
 
-bool HVBMS::check_protections() {
-    for (auto& p : protections) {
-        if (p->check_state() == Protections::FaultType::FAULT) {
-            current_BMS_state = DataPackets::bms_status::FAULT;
-            return true;
-        }
-    }
-    current_BMS_state = DataPackets::bms_status::OK;
-    return false;
-}
-
 void HVBMS::add_protections() {
-    ProtectionManager::link_state_machine(
-        state_machine, static_cast<ProtectionManager::state_id>(DataPackets::gsm_status::FAULT));
+    ProtectionManager::link_state_machine(HVBMS::state_machine,
+                                          static_cast<uint8_t>(DataPackets::gsm_status::FAULT));
+
+    //ProtectionManager::add_standard_protections();
+    ProtectionManager::initialize();
 
     // DC bus voltage
-    Protection* protection = &ProtectionManager::_add_protection(&Sensors::voltage_sensor.reading,
-                                                                 Boundary<float, ABOVE>{410});
-    std::string name = "DC bus voltage";
-    set_protection_name(protection, name);
-    protections.push_back(protection);
+    ProtectionManager::_add_protection(&Sensors::voltage_sensor.reading,
+                                       Boundary<float, ABOVE>{410});
 
     // Batteries current
-    protection = &ProtectionManager::_add_protection(&Sensors::current_sensor.reading,
-                                                     Boundary<float, OUT_OF_RANGE>{-15, 120});
-    name = "Battery pack current";
-    set_protection_name(protection, name);
-    protections.push_back(protection);
+    ProtectionManager::_add_protection(&Sensors::current_sensor.reading,
+                                       Boundary<float, OUT_OF_RANGE>{-15, 70});
 
-    // SoCs
-    auto id{1};
-    for (auto& [_, soc] : Sensors::batteries.SoCs) {
-        protection = &ProtectionManager::_add_protection(&soc, Boundary<float, BELOW>(0.24));
-        name = "SoC battery " + std::to_string(id);
-        set_protection_name(protection, name);
-        protections.push_back(protection);
-        ++id;
-    }
 
-    // Batteries conversion rate
-    id = 1;
-    for (auto& battery : Sensors::batteries.batteries) {
-        protection =
-            &ProtectionManager::_add_protection(&battery.conv_rate, Boundary<float, BELOW>(0.5));
-        name = "Conversion rate battery " + std::to_string(id);
-        set_protection_name(protection, name);
-        protections.push_back(protection);
-        ++id;
-    }
+    Scheduler::register_task(1000, [](){ProtectionManager::check_protections();});
+    
+    // // SoCs
+    // auto id{1};
+    // for (auto& [_, soc] : Sensors::batteries.SoCs) {
+    //     ProtectionManager::_add_protection(&soc, Boundary<float, BELOW>(0.24));
+    //     ++id;
+    // }
 
-    // Batteries temperature
-    id = 1;
-    for (auto& temp : Sensors::batteries.batteries_temp) {
-        protection = &ProtectionManager::_add_protection(&temp[0], Boundary<float, ABOVE>(60.0));
-        name = "Temperature 1 battery " + std::to_string(id);
-        set_protection_name(protection, name);
-        protections.push_back(protection);
+    // // Batteries conversion rate
+    // id = 1;
+    // for (auto& battery : Sensors::batteries.batteries) {
+    //     ProtectionManager::_add_protection(&battery.conv_rate, Boundary<float, BELOW>(0.5));
 
-        protection = &ProtectionManager::_add_protection(&temp[1], Boundary<float, ABOVE>(60.0));
-        name = "Temperature 2 battery " + std::to_string(id);
-        set_protection_name(protection, name);
-        protections.push_back(protection);
+    //     ++id;
+    // }
 
-        ++id;
-    }
-
-    ProtectionManager::initialize();
+    // // Batteries temperature
+    // id = 1;
+    // for (auto& temp : Sensors::batteries.batteries_temp) {
+    //     ProtectionManager::_add_protection(&temp[0], Boundary<float, ABOVE>(60.0));
+    //     ProtectionManager::_add_protection(&temp[1], Boundary<float, ABOVE>(60.0));
+    //     ++id;
+    // }
 }

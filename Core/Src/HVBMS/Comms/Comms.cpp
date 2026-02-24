@@ -143,8 +143,6 @@ void Comms::start() {
 
     DataPackets::minimum_soc_init(Sensors::batteries.minimum_soc);
 
-    DataPackets::bms_init(HVBMS::current_BMS_state);
-
     DataPackets::batteries_data_init(
         Sensors::batteries.minimum_cell_voltage, Sensors::batteries.maximum_cell_voltage,
         Sensors::batteries.minimum_temp, Sensors::batteries.maximum_temp);
@@ -155,6 +153,7 @@ void Comms::start() {
     OrderPackets::close_contactors_init();
     OrderPackets::start_precharge_init();
     OrderPackets::bypass_imd_init();
+    OrderPackets::FAULT_init();
     
     OrderPackets::start();
 }

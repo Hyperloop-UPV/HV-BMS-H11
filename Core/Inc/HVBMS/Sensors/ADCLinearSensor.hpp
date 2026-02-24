@@ -12,7 +12,7 @@ class ADCLinearSensor {
     float offset;
 
    public:
-    float reading{};
+    float reading{0.0};
 
     ADCLinearSensor(float slope_, float offset_) : slope{slope_}, offset{offset_} {}
 
