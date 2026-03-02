@@ -2,10 +2,10 @@
 
 #include "HVBMS/Data/Data.hpp"
 
-#define set_protection_name(protection, name)                 \
-    {                                                         \
-        protection->set_name((char*)malloc(name.size() + 1)); \
-        sprintf(protection->get_name(), "%s", name.c_str());  \
+#define set_protection_name(protection, name)                                                      \
+    {                                                                                              \
+        protection->set_name((char*)malloc(name.size() + 1));                                      \
+        sprintf(protection->get_name(), "%s", name.c_str());                                       \
     }
 
 void HVBMS::update() {
@@ -21,8 +21,7 @@ void HVBMS::update() {
             id_timeout_precharge = Scheduler::set_timeout(4000000, []() {
                 Scheduler::unregister_task(id_check_precharge);
                 Actuators::open_HV();
-                HVBMS::state_machine.force_change_state(
-                    (std::size_t)DataPackets::gsm_status::FAULT);
+                ErrorHandler("Precharge failed");
             });
 
             id_check_precharge = Scheduler::register_task(100, []() {
@@ -40,11 +39,6 @@ void HVBMS::update() {
         Scheduler::cancel_timeout(id_timeout_precharge);
         Scheduler::unregister_task(id_check_precharge);
     }
-    // DANGEROUS
-    if (OrderPackets::close_contactors_flag) {
-        OrderPackets::close_contactors_flag = false;
-        Actuators::close_HV();
-    }
     if (OrderPackets::bypass_imd_flag) {
         OrderPackets::bypass_imd_flag = false;
         DO::imd_bypass->toggle();
@@ -57,23 +51,27 @@ void HVBMS::update() {
 }
 
 void HVBMS::add_protections() {
-    ProtectionManager::link_state_machine(HVBMS::state_machine,
-                                          static_cast<uint8_t>(DataPackets::gsm_status::FAULT));
+    ProtectionManager::link_state_machine(
+        HVBMS::state_machine,
+        static_cast<uint8_t>(DataPackets::gsm_status::FAULT)
+    );
 
-    //ProtectionManager::add_standard_protections();
-    ProtectionManager::initialize();
+    ProtectionManager::add_standard_protections();
 
     // DC bus voltage
-    ProtectionManager::_add_protection(&Sensors::voltage_sensor.reading,
-                                       Boundary<float, ABOVE>{410});
+    ProtectionManager::_add_protection(
+        &Sensors::voltage_sensor.reading,
+        Boundary<float, ABOVE>{410}
+    );
 
     // Batteries current
-    ProtectionManager::_add_protection(&Sensors::current_sensor.reading,
-                                       Boundary<float, OUT_OF_RANGE>{-15, 70});
+    ProtectionManager::_add_protection(
+        &Sensors::current_sensor.reading,
+        Boundary<float, OUT_OF_RANGE>{-15, 70}
+    );
 
+    Scheduler::register_task(1000, []() { ProtectionManager::check_protections(); });
 
-    Scheduler::register_task(1000, [](){ProtectionManager::check_protections();});
-    
     // // SoCs
     // auto id{1};
     // for (auto& [_, soc] : Sensors::batteries.SoCs) {
@@ -96,4 +94,5 @@ void HVBMS::add_protections() {
     //     ProtectionManager::_add_protection(&temp[1], Boundary<float, ABOVE>(60.0));
     //     ++id;
     // }
+    ProtectionManager::initialize();
 }
