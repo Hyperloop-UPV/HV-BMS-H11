@@ -752,5 +752,3 @@ g_pfnVectors:
 
    .weak      TIM24_IRQHandler
    .thumb_set TIM24_IRQHandler,Default_Handler
-
-

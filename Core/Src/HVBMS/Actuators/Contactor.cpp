@@ -1,8 +1,7 @@
 #include "HVBMS/Actuators/Contactor.hpp"
 
-Contactor::Contactor(DigitalOutputDomain::Instance *output, bool normally_opened)
-    : output{output},
-      normally_opened(normally_opened),
+Contactor::Contactor(DigitalOutputDomain::Instance* output, bool normally_opened)
+    : output{output}, normally_opened(normally_opened),
       state(normally_opened ? State::OPEN : State::CLOSED) {}
 
 void Contactor::open() {

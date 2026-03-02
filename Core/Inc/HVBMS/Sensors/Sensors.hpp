@@ -19,10 +19,9 @@ class Sensors {
     static constexpr float CURRENT_SLOPE{89.94180359377545};
     static constexpr float CURRENT_OFFSET{-151.40450651439056};
 
-
-   public:
+public:
     inline static ADCLinearSensor voltage_sensor{VOLTAGE_SLOPE, VOLTAGE_OFFSET};
-    
+
     inline static ADCLinearSensor current_sensor{CURRENT_SLOPE, CURRENT_OFFSET};
 
     inline static SDC sdc;
@@ -33,4 +32,3 @@ class Sensors {
     static void update_sensors();
     static void update_batteries();
 };
-

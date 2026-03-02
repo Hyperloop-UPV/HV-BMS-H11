@@ -11,7 +11,7 @@ class ADCLinearSensor {
     float slope;
     float offset;
 
-   public:
+public:
     float reading{0.0};
 
     ADCLinearSensor(float slope_, float offset_) : slope{slope_}, offset{offset_} {}
@@ -19,7 +19,8 @@ class ADCLinearSensor {
     void bind(ADCDomain::Instance* adc) { adc_instance = adc; }
 
     void read() {
-        if (!adc_instance) return;
+        if (!adc_instance)
+            return;
 
         reading = slope * adc_instance->get_value() + offset;
     }

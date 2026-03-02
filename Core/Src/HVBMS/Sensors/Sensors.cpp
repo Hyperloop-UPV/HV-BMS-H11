@@ -1,11 +1,11 @@
 #include "HVBMS/Sensors/Sensors.hpp"
 
-void Sensors::init(){
+void Sensors::init() {
     voltage_sensor.bind(ADC::adc_voltage);
     current_sensor.bind(ADC::adc_current);
     sdc.enable();
-    
-    Scheduler::register_task(10000, [](){Sensors::update_batteries();});
+
+    Scheduler::register_task(10000, []() { Sensors::update_batteries(); });
 }
 
 void Sensors::update_batteries() {
@@ -19,4 +19,3 @@ void Sensors::update_sensors() {
     voltage_sensor.read();
     current_sensor.read();
 }
-

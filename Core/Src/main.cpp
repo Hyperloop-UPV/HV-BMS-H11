@@ -7,21 +7,46 @@
 using ST_LIB::EthernetDomain;
 
 #if defined(USE_PHY_LAN8742)
-constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "00:80:e1:00:01:07",
-                                              "192.168.1.7", "255.255.0.0");
+constexpr auto eth = EthernetDomain::Ethernet(
+    EthernetDomain::PINSET_H10,
+    "00:80:e1:00:01:07",
+    "192.168.1.7",
+    "255.255.0.0"
+);
 #elif defined(USE_PHY_LAN8700)
-constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "50:50:71:40:01:67",
-                                              "192.168.1.7", "255.255.255.0");
+constexpr auto eth = EthernetDomain::Ethernet(
+    EthernetDomain::PINSET_H10,
+    "50:50:71:40:01:67",
+    "192.168.1.7",
+    "255.255.255.0"
+);
 #elif defined(USE_PHY_KSZ8041)
-constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "00:80:e1:00:01:07",
-                                              "192.168.1.7", "255.255.0.0");
+constexpr auto eth = EthernetDomain::Ethernet(
+    EthernetDomain::PINSET_H11,
+    "00:80:e1:00:01:07",
+    "192.168.1.7",
+    "255.255.0.0"
+);
 #else
 #error "No PHY selected for Ethernet pinset selection"
 #endif
 
-using myBoard = ST_LIB::Board<eth, led_PG7, led_PG8, contactor_PG14, contactor_PG12, contactor_PD4,
-                              contactor_PF4, sdc_PA11, adc_PF13, adc_PA0, timer_us_tick_def,
-                              bms_spi3, bms_cs_pin, sdc_PB12, imd_PF5>;
+using myBoard = ST_LIB::Board<
+    eth,
+    led_PG7,
+    led_PG8,
+    contactor_PG14,
+    contactor_PG12,
+    contactor_PD4,
+    contactor_PF4,
+    sdc_PA11,
+    adc_PF13,
+    adc_PA0,
+    timer_us_tick_def,
+    bms_spi3,
+    bms_cs_pin,
+    sdc_PB12,
+    imd_PF5>;
 
 int main(void) {
     Hard_fault_check();

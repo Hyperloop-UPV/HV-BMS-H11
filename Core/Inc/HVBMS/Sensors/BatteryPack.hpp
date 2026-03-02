@@ -5,28 +5,27 @@
 #include "../../../deps/LTC6810-Driver/Inc/BMS.hpp"
 #include "HVBMS/Data/Data.hpp"
 
-#define READING_PERIOD_US 20000   // us
-#define CONV_RATE_TIME_MS 1000    // ms
-#define FAKE_TOTAL_VOLTAGE 250.0  // V
-#define NOMINAL_CAPACITY 6        // Ah
-#define MIN_VOLTAGE 22.0          // V
-#define MAX_VOLTAGE 25.0          // V
+#define READING_PERIOD_US 20000  // us
+#define CONV_RATE_TIME_MS 1000   // ms
+#define FAKE_TOTAL_VOLTAGE 250.0 // V
+#define NOMINAL_CAPACITY 6       // Ah
+#define MIN_VOLTAGE 22.0         // V
+#define MAX_VOLTAGE 25.0         // V
 #define OCV_POINTS 256
 
-#define RESISTANCE_REFERENCE 1000.0  // Ohmios
-#define VOLTAGE_REFERENCE 3.0        // V
-#define R0 100.0                     // Ohmios+
+#define RESISTANCE_REFERENCE 1000.0 // Ohmios
+#define VOLTAGE_REFERENCE 3.0       // V
+#define R0 100.0                    // Ohmios+
 #define TCR 0.00385
 
-#define TEMP_CHEAT 1  // Ñapa para temperaturas, esto no debería existir
+#define TEMP_CHEAT 1 // Ñapa para temperaturas, esto no debería existir
 
-template <size_t N_BATTERIES>
-class BatteryPack {
+template <size_t N_BATTERIES> class BatteryPack {
     using Battery = LTC6810Driver::LTC6810<6, READING_PERIOD_US, CONV_RATE_TIME_MS>;
     struct BMSConfig {
         static constexpr size_t n_LTC6810{N_BATTERIES};
-        //NewSPI::bms_wrapper = SPIDomain::SPIWrapper<bms_spi3>(*bms_spi_pins);
-        // Estos métodos se llamarán durante el update(), cuando los punteros ya existan
+        // NewSPI::bms_wrapper = SPIDomain::SPIWrapper<bms_spi3>(*bms_spi_pins);
+        //  Estos métodos se llamarán durante el update(), cuando los punteros ya existan
         static void SPI_transmit(const std::span<uint8_t> data) {
             NewSPI::bms_wrapper->send(data);
             // HAL_SPI_Transmit(&NewSPI::bms_spi_pins->hspi, data.data(), data.size(), 10);
@@ -35,20 +34,15 @@ class BatteryPack {
             NewSPI::bms_wrapper->receive(buffer);
             // HAL_SPI_Transmit(&NewSPI::bms_spi_pins->hspi, buffer.data(), buffer.size(), 10);
         }
-        static void SPI_CS_turn_on(void) {
-            DO::bms_cs->turn_on();  
-        }
-        static void SPI_CS_turn_off(void) {
-            DO::bms_cs->turn_off(); 
-        }
+        static void SPI_CS_turn_on(void) { DO::bms_cs->turn_on(); }
+        static void SPI_CS_turn_off(void) { DO::bms_cs->turn_off(); }
         static int32_t get_tick(void) { return GetMicroseconds(); }
         static constexpr int32_t tick_resolution_us{500};
         static constexpr int32_t period_us{READING_PERIOD_US};
         static constexpr int32_t conv_rate_time_ms{CONV_RATE_TIME_MS};
     };
 
-    template <size_t points>
-    constexpr array<std::pair<float, float>, points> calculate_OCV() {
+    template <size_t points> constexpr array<std::pair<float, float>, points> calculate_OCV() {
         float A{-0.008697};
         float B{0.521307};
         float C{-9.736016};
@@ -71,7 +65,8 @@ class BatteryPack {
         constexpr float delta = (MAX_VOLTAGE - MIN_VOLTAGE) / (OCV_POINTS - 1);
         size_t index = static_cast<size_t>((voltage - MIN_VOLTAGE) / delta);
 
-        if (index >= OCV_POINTS - 1) return ocv.back().second;
+        if (index >= OCV_POINTS - 1)
+            return ocv.back().second;
 
         float x0 = ocv[index].first;
         float y0 = ocv[index].second;
@@ -91,13 +86,13 @@ class BatteryPack {
     void get_SoC(uint i, float current, float& temp_minimum_soc) {
         auto now = HAL_GetTick();
         float new_soc;
-        if (std::abs(current) < 0.1) {  // Coulomb counting
+        if (std::abs(current) < 0.1) { // Coulomb counting
             float delta_time = (now - SoCs[i].first) / 1000.0f;
             float delta_soc = (current * delta_time) / (NOMINAL_CAPACITY * 3600.0);
             new_soc = SoCs[i].second - delta_soc;
 
             SoCs[i] = std::make_pair(now, new_soc);
-        } else {  // OCV
+        } else { // OCV
             new_soc = lookup_OCV(batteries[i].total_voltage);
             SoCs[i] = std::make_pair(now, new_soc);
         }
@@ -124,7 +119,7 @@ class BatteryPack {
         }
     }
 
-   public:
+public:
     float minimum_soc{1.0};
     float minimum_temp{100.0};
     float maximum_temp{-100.0};
@@ -134,7 +129,7 @@ class BatteryPack {
 
     array<Battery, N_BATTERIES>& batteries = bms.get_data();
     float total_voltage{FAKE_TOTAL_VOLTAGE};
-    array<std::pair<uint, float>, N_BATTERIES> SoCs{};  // ms -> soc[0,1]
+    array<std::pair<uint, float>, N_BATTERIES> SoCs{}; // ms -> soc[0,1]
     array<array<float, 2>, N_BATTERIES> batteries_temp{};
 
     BatteryPack() { SoCs.fill({0, 1.0}); }

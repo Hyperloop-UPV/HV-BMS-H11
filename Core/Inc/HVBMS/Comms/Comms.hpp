@@ -5,9 +5,6 @@
 
 class Comms {
 
-   public:
+public:
     static void start();
 };
-
-
-

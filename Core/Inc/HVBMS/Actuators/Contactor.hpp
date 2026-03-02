@@ -11,7 +11,7 @@ class Contactor {
     bool normally_opened;
     State state;
 
-   public:
+public:
     Contactor() = default;
     Contactor(DigitalOutputDomain::Instance* output, bool normally_opened);
     void open();

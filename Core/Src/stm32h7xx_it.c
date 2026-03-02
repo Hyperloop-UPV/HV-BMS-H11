@@ -203,6 +203,7 @@ scan_call_stack(sContextStateFrame* frame, HardFaultLog* log_hard_fault) {
 __attribute__((noreturn, optimize("O0"))) void my_fault_handler_c(sContextStateFrame* frame) {
     volatile uint32_t real_fault_pc = frame->return_address & ~1;
     volatile HardFaultLog log_hard_fault;
+    memset((void*)&log_hard_fault, 0, sizeof(log_hard_fault));
 
     volatile uint32_t* cfsr = (volatile uint32_t*)0xE000ED28;
     // keep the log in the estructure
@@ -260,7 +261,7 @@ __attribute__((noreturn, optimize("O0"))) void my_fault_handler_c(sContextStateF
         const uint16_t INVSTATE = usage_fault & 0x0002;   // Invalid processor state
         const uint16_t UNDEFINSTR = usage_fault & 0x0001; // Undefined instruction.
     }
-    if (usage_fault | bus_fault) {
+    if (usage_fault | bus_fault | memory_fault) {
         scan_call_stack(frame, &log_hard_fault);
     }
     volatile uint8_t metadata_buffer[0x100];
@@ -404,53 +405,50 @@ void FMAC_IRQHandler(void) { HAL_FMAC_IRQHandler(&hfmac); }
 void ETH_IRQHandler(void) {
     /* USER CODE BEGIN ETH_IRQn 0 */
 
-  /* USER CODE END ETH_IRQn 0 */
-  HAL_ETH_IRQHandler(&heth);
-  /* USER CODE BEGIN ETH_IRQn 1 */
+    /* USER CODE END ETH_IRQn 0 */
+    HAL_ETH_IRQHandler(&heth);
+    /* USER CODE BEGIN ETH_IRQn 1 */
 
-  /* USER CODE END ETH_IRQn 1 */
+    /* USER CODE END ETH_IRQn 1 */
 }
 
 /**
-  * @brief This function handles LPTIM1 global interrupt.
-  */
-void LPTIM1_IRQHandler(void)
-{
-  /* USER CODE BEGIN LPTIM1_IRQn 0 */
+ * @brief This function handles LPTIM1 global interrupt.
+ */
+void LPTIM1_IRQHandler(void) {
+    /* USER CODE BEGIN LPTIM1_IRQn 0 */
 
-  /* USER CODE END LPTIM1_IRQn 0 */
-  HAL_LPTIM_IRQHandler(&hlptim1);
-  /* USER CODE BEGIN LPTIM1_IRQn 1 */
+    /* USER CODE END LPTIM1_IRQn 0 */
+    HAL_LPTIM_IRQHandler(&hlptim1);
+    /* USER CODE BEGIN LPTIM1_IRQn 1 */
 
-  /* USER CODE END LPTIM1_IRQn 1 */
+    /* USER CODE END LPTIM1_IRQn 1 */
 }
 
 /**
-  * @brief This function handles LPTIM2 global interrupt.
-  */
-void LPTIM2_IRQHandler(void)
-{
-  /* USER CODE BEGIN LPTIM2_IRQn 0 */
+ * @brief This function handles LPTIM2 global interrupt.
+ */
+void LPTIM2_IRQHandler(void) {
+    /* USER CODE BEGIN LPTIM2_IRQn 0 */
 
-  /* USER CODE END LPTIM2_IRQn 0 */
-  HAL_LPTIM_IRQHandler(&hlptim2);
-  /* USER CODE BEGIN LPTIM2_IRQn 1 */
+    /* USER CODE END LPTIM2_IRQn 0 */
+    HAL_LPTIM_IRQHandler(&hlptim2);
+    /* USER CODE BEGIN LPTIM2_IRQn 1 */
 
-  /* USER CODE END LPTIM2_IRQn 1 */
+    /* USER CODE END LPTIM2_IRQn 1 */
 }
 
 /**
-  * @brief This function handles LPTIM3 global interrupt.
-  */
-void LPTIM3_IRQHandler(void)
-{
-  /* USER CODE BEGIN LPTIM3_IRQn 0 */
+ * @brief This function handles LPTIM3 global interrupt.
+ */
+void LPTIM3_IRQHandler(void) {
+    /* USER CODE BEGIN LPTIM3_IRQn 0 */
 
-  /* USER CODE END LPTIM3_IRQn 0 */
-  HAL_LPTIM_IRQHandler(&hlptim3);
-  /* USER CODE BEGIN LPTIM3_IRQn 1 */
+    /* USER CODE END LPTIM3_IRQn 0 */
+    HAL_LPTIM_IRQHandler(&hlptim3);
+    /* USER CODE BEGIN LPTIM3_IRQn 1 */
 
-  /* USER CODE END LPTIM3_IRQn 1 */
+    /* USER CODE END LPTIM3_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
