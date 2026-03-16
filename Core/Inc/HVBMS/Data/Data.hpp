@@ -12,7 +12,8 @@ constexpr DigitalOutputDomain::DigitalOutput contactor_PD4{ST_LIB::PD4};
 constexpr DigitalOutputDomain::DigitalOutput contactor_PF4{ST_LIB::PF4};
 constexpr DigitalOutputDomain::DigitalOutput sdc_PA11{ST_LIB::PA11};
 constexpr DigitalOutputDomain::DigitalOutput bms_cs_pin{ST_LIB::PD3};
-constexpr DigitalOutputDomain::DigitalOutput imd_PF5{ST_LIB::PF5};
+constexpr DigitalOutputDomain::DigitalOutput imd_PF5{ST_LIB::PF5};  // Esto es para el bypass
+constexpr DigitalOutputDomain::DigitalOutput imd_pow_PE2{ST_LIB::PE2};
 
 namespace DO {
 inline DigitalOutputDomain::Instance* operational_led;
@@ -24,7 +25,16 @@ inline DigitalOutputDomain::Instance* contactor_discharge;
 inline DigitalOutputDomain::Instance* sdc_obccu;
 inline DigitalOutputDomain::Instance* bms_cs;
 inline DigitalOutputDomain::Instance* imd_bypass;
-}; // namespace DO
+inline DigitalOutputDomain::Instance* imd_pow;
+};  // namespace DO
+
+using ST_LIB::DigitalInputDomain;
+
+constexpr DigitalInputDomain::DigitalInput imd_ok_PA12{ST_LIB::PA12};
+
+namespace DI {
+inline DigitalInputDomain::Instance* imd_ok;
+}
 
 using ST_LIB::ADCDomain;
 
@@ -37,7 +47,7 @@ constexpr ADCDomain::ADC adc_PA0{ST_LIB::PA0, current_reading};
 namespace ADC {
 inline ADCDomain::Instance* adc_voltage;
 inline ADCDomain::Instance* adc_current;
-}; // namespace ADC
+};  // namespace ADC
 
 using ST_LIB::TimerDomain;
 using ST_LIB::TimerRequest;
@@ -50,7 +60,7 @@ constexpr TimerDomain::Timer timer_us_tick_def{{
 namespace GlobalTimer {
 // inline TimerWrapper<timer_us_tick_def> global_us_timer;
 inline TIM_TypeDef* global_us_timer;
-}; // namespace GlobalTimer
+};  // namespace GlobalTimer
 
 #define GetMicroseconds() GlobalTimer::global_us_timer->CNT
 
@@ -60,10 +70,9 @@ using ST_LIB::SPIDomain;
 // Configuración SPI para LTC6810
 consteval SPIDomain::SPIConfig get_bms_config() {
     SPIDomain::SPIConfig c{
-        SPIDomain::ClockPolarity::HIGH,
-        SPIDomain::ClockPhase::SECOND_EDGE,
+        SPIDomain::ClockPolarity::HIGH, SPIDomain::ClockPhase::SECOND_EDGE,
         SPIDomain::BitOrder::MSB_FIRST,
-        SPIDomain::NSSMode::SOFTWARE // Manejamos CS manualmente
+        SPIDomain::NSSMode::SOFTWARE  // Manejamos CS manualmente
     };
     c.data_size = ST_LIB::SPIDomain::DataSize::SIZE_8BIT;
     return c;
@@ -72,19 +81,13 @@ consteval SPIDomain::SPIConfig get_bms_config() {
 // Dispositivo SPI3
 inline constexpr auto bms_spi3 =
     SPIDomain::Device<DMA_Domain::Stream::dma2_stream0, DMA_Domain::Stream::dma2_stream1>(
-        SPIDomain::SPIMode::MASTER,
-        SPIDomain::SPIPeripheral::spi3,
-        1000000,
-        ST_LIB::PC10,
-        ST_LIB::PC11,
-        ST_LIB::PC12,
-        get_bms_config()
-    );
+        SPIDomain::SPIMode::MASTER, SPIDomain::SPIPeripheral::spi3, 1000000, ST_LIB::PC10,
+        ST_LIB::PC11, ST_LIB::PC12, get_bms_config());
 
 namespace NewSPI {
 inline SPIDomain::Instance* bms_spi_pins;
 inline std::optional<SPIDomain::SPIWrapper<bms_spi3>> bms_wrapper;
-} // namespace NewSPI
+}  // namespace NewSPI
 
 // Tasks and timeouts id
 inline uint16_t id_timeout_precharge;

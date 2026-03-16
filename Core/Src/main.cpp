@@ -46,7 +46,9 @@ using myBoard = ST_LIB::Board<
     bms_spi3,
     bms_cs_pin,
     sdc_PB12,
-    imd_PF5>;
+    imd_PF5,
+    imd_pow_PE2,
+    imd_ok_PA12>;
 
 int main(void) {
     Hard_fault_check();
@@ -60,10 +62,13 @@ int main(void) {
     DO::sdc_obccu = &myBoard::instance_of<sdc_PA11>();
     DO::bms_cs = &myBoard::instance_of<bms_cs_pin>();
     DO::imd_bypass = &myBoard::instance_of<imd_PF5>();
+    DO::imd_pow = &myBoard::instance_of<imd_pow_PE2>();
 
-    ADC::adc_voltage = &myBoard::instance_of<adc_PF13>();
+    DI::imd_ok = &myBoard::instance_of<imd_ok_PA12>();
+
+    ADC::adc_voltage = &myBoard::instance_of<adc_PF13>(); 
     ADC::adc_current = &myBoard::instance_of<adc_PA0>();
-
+    
     NewSPI::bms_spi_pins = &myBoard::instance_of<bms_spi3>();
     NewSPI::bms_wrapper.emplace(*NewSPI::bms_spi_pins);
 
@@ -74,7 +79,7 @@ int main(void) {
     us_timer.set_prescaler(us_timer.get_clock_frequency() / 1000'000);
     us_timer.counter_enable();
 
-    SDC::sdc_interrupt = &myBoard::instance_of<sdc_PB12>();
+    SDC::sdc_interrupt = &myBoard::instance_of<sdc_PB12>(); // hay que hacer esto con un bind y tenerlo privado
 
     Actuators::init();
     Sensors::init();

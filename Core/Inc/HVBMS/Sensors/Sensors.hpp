@@ -4,6 +4,7 @@
 #include "../../../deps/LTC6810-Driver/Inc/BMS.hpp"
 #include "BatteryPack.hpp"
 #include "SDC.hpp"
+#include "IMD.hpp"
 
 #define BATTERIES_CONNECTED 1
 #define N_BATTERIES 16
@@ -27,6 +28,8 @@ public:
     inline static SDC sdc;
 
     inline static BatteryPack<N_BATTERIES> batteries;
+
+    inline static IMD imd;
 
     static void init();
     static void update_sensors();

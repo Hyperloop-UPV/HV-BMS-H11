@@ -3,6 +3,8 @@
 void Sensors::init() {
     voltage_sensor.bind(ADC::adc_voltage);
     current_sensor.bind(ADC::adc_current);
+    imd.bind(DO::imd_pow, DI::imd_ok);
+
     sdc.enable();
 
     Scheduler::register_task(10000, []() { Sensors::update_batteries(); });

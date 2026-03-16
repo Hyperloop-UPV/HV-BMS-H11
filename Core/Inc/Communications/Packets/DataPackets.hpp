@@ -16,6 +16,15 @@ public:
         OPERATIONAL = 1,
         FAULT = 2,
     };
+    enum class imd_status : uint8_t
+    {
+        SHORTCIRCUIT = 0,
+        NORMAL = 1,
+        UNDERVOLTAGE = 2,
+        FAST_EVAL = 3,
+        EQUIPMENT_FAULT = 4,
+        GROUNDING_FAULT = 5,
+    };
     
 
     static void batteries_voltage_init(float &batteries_voltage_reading)
@@ -138,6 +147,11 @@ public:
         driver_diagnosis_packet = new HeapPacket(static_cast<uint16_t>(942), &driver_reading_period);
     }
 
+    static void imd_init(imd_status &imd_status, float &imd_resistance, bool &imd_is_ok)
+    {
+        imd_packet = new HeapPacket(static_cast<uint16_t>(943), &imd_status, &imd_resistance, &imd_is_ok);
+    }
+
     static void minimum_soc_init(float &minimum_soc)
     {
         minimum_soc_packet = new HeapPacket(static_cast<uint16_t>(945), &minimum_soc);
@@ -173,6 +187,7 @@ public:
     inline static HeapPacket *battery_18_packet{nullptr};
     inline static HeapPacket *general_state_machine_packet{nullptr};
     inline static HeapPacket *driver_diagnosis_packet{nullptr};
+    inline static HeapPacket *imd_packet{nullptr};
     inline static HeapPacket *minimum_soc_packet{nullptr};
     inline static HeapPacket *batteries_data_packet{nullptr};
     
@@ -253,6 +268,9 @@ public:
         if (driver_diagnosis_packet == nullptr) {
             ErrorHandler("Packet driver_diagnosis not initialized");
         }
+        if (imd_packet == nullptr) {
+            ErrorHandler("Packet imd not initialized");
+        }
         if (minimum_soc_packet == nullptr) {
             ErrorHandler("Packet minimum_soc not initialized");
         }
@@ -288,6 +306,7 @@ public:
             DataPackets::control_station_udp->send_packet(*DataPackets::battery_18_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::general_state_machine_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::driver_diagnosis_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::imd_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::minimum_soc_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::batteries_data_packet);
             });
