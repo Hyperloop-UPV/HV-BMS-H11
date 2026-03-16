@@ -18,28 +18,34 @@ class IMD {
     //PWMSensor<float> m_ls;
     inline static DigitalOutputDomain::Instance* pow{nullptr};
     inline static DigitalInputDomain::Instance* ok{nullptr};
-    float freq{};
-    float duty{};
+    inline static float freq{};
+    inline static float duty{};
 
-    uint8_t status{static_cast<uint8_t>(DataPackets::imd_status::FAST_EVAL)};
-    float resistance{};
-
-   public:
-    GPIO_PinState ok_status{GPIO_PIN_SET};
-    bool is_ok{true};
-
+    
+    public:
+    inline static GPIO_PinState ok_status{GPIO_PIN_SET};
+    
+    // No estaria mal que esto estuviese privado y hacer gets. para todo en general
+    inline static bool is_ok{true};
+    inline static DataPackets::imd_status status{DataPackets::imd_status::FAST_EVAL};
+    inline static float resistance{};
+    
     //IMD(Pin& m_ls_pin) : m_ls{m_ls_pin, freq, duty} {}
 
-    void bind(DigitalOutputDomain::Instance* pow_pin, DigitalInputDomain::Instance* ok_pin) {
+    static void bind(DigitalOutputDomain::Instance* pow_pin, DigitalInputDomain::Instance* ok_pin) {
         pow = pow_pin;
         ok = ok_pin;
     }  // meter aqui los demas cuando los tenga
     
-    void power_on() { pow->turn_on(); }
+    static void power_on() { pow->turn_on(); }
 
-    void calculate_resistance() { resistance = ((90 * 1.2e6) / (duty - 5)) - 1.2e6; }
+    static void calculate_resistance() { resistance = ((90 * 1.2e6) / (duty - 5)) - 1.2e6; }
 
-    void read() {
+    static void read() {
+        if (!ok_status){
+            return;
+        }
+
         ok_status = ok->read();
 
         if (ok_status == GPIO_PinState::GPIO_PIN_RESET) {
@@ -50,29 +56,29 @@ class IMD {
 
         //m_ls.read();
         if (lessError(freq, 0, 0.1)) {
-            status = static_cast<uint8_t>(DataPackets::imd_status::SHORTCIRCUIT);
+            status = DataPackets::imd_status::SHORTCIRCUIT;
             return;
         }
         if (lessError(freq, 10, 0.1)) {
-            status = static_cast<uint8_t>(DataPackets::imd_status::NORMAL);
+            status = DataPackets::imd_status::NORMAL;
             calculate_resistance();
             return;
         }
         if (lessError(freq, 20, 0.1)) {
-            status = static_cast<uint8_t>(DataPackets::imd_status::UNDERVOLTAGE);
+            status = DataPackets::imd_status::UNDERVOLTAGE;
             calculate_resistance();
             return;
         }
         if (lessError(freq, 30, 0.1)) {
-            status = static_cast<uint8_t>(DataPackets::imd_status::FAST_EVAL);
+            status = DataPackets::imd_status::FAST_EVAL;
             return;
         }
         if (lessError(freq, 40, 0.1)) {
-            status = static_cast<uint8_t>(DataPackets::imd_status::EQUIPMENT_FAULT);
+            status = DataPackets::imd_status::EQUIPMENT_FAULT;
             return;
         }
         if (lessError(freq, 50, 0.1)) {
-            status = static_cast<uint8_t>(DataPackets::imd_status::GROUNDING_FAULT);
+            status = DataPackets::imd_status::GROUNDING_FAULT;
             return;
         }
     }
