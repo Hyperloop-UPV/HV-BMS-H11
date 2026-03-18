@@ -49,17 +49,31 @@ inline ADCDomain::Instance* adc_voltage;
 inline ADCDomain::Instance* adc_current;
 };  // namespace ADC
 
+using ST_LIB::TimerAF;
+using ST_LIB::TimerChannel;
 using ST_LIB::TimerDomain;
+using ST_LIB::TimerPin;
 using ST_LIB::TimerRequest;
 using ST_LIB::TimerWrapper;
 
 constexpr TimerDomain::Timer timer_us_tick_def{{
-    .request = TimerRequest::GeneralPurpose32bit_5,
+    .request = TimerRequest::GeneralPurpose32bit_5
 }};
+
+namespace GlobalTimer{
+constexpr TimerPin ic_pin = {
+    .af = TimerAF::InputCapture, .pin = ST_LIB::PF7, .channel = TimerChannel::CHANNEL_1};
+};
+
+
+constexpr TimerDomain::Timer timer_imd{{
+    .request = TimerRequest::GeneralPurpose32bit_24
+}, GlobalTimer::ic_pin};
 
 namespace GlobalTimer {
 // inline TimerWrapper<timer_us_tick_def> global_us_timer;
 inline TIM_TypeDef* global_us_timer;
+inline TimerWrapper<timer_imd> input_timer;
 };  // namespace GlobalTimer
 
 #define GetMicroseconds() GlobalTimer::global_us_timer->CNT

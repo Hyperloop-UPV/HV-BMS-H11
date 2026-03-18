@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ST-LIB_LOW.hpp"
 #include "HVBMS/Data/Data.hpp"
+#include "ST-LIB_LOW.hpp"
 
 template <typename A, typename B>
 concept Substractable = requires(A a, B b) {
@@ -13,36 +13,39 @@ template <typename A, typename B, typename E>
 inline bool lessError(const A& a, const B& b, const E& error) {
     return std::abs(a - b) < error;
 }
-class IMD {
 
-    //PWMSensor<float> m_ls;
+
+
+class IMD {
+    inline static auto ic = GlobalTimer::input_timer
+                      .get_input_capture<GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>();
     inline static DigitalOutputDomain::Instance* pow{nullptr};
     inline static DigitalInputDomain::Instance* ok{nullptr};
     inline static float freq{};
     inline static float duty{};
 
-    
-    public:
+   public:
     inline static GPIO_PinState ok_status{GPIO_PIN_SET};
-    
-    // No estaria mal que esto estuviese privado y hacer gets. para todo en general
+
     inline static bool is_ok{true};
     inline static DataPackets::imd_status status{DataPackets::imd_status::FAST_EVAL};
     inline static float resistance{};
-    
-    //IMD(Pin& m_ls_pin) : m_ls{m_ls_pin, freq, duty} {}
+
+    IMD() {
+        ic.turn_on();
+    }
 
     static void bind(DigitalOutputDomain::Instance* pow_pin, DigitalInputDomain::Instance* ok_pin) {
         pow = pow_pin;
         ok = ok_pin;
-    }  // meter aqui los demas cuando los tenga
-    
+    }
+
     static void power_on() { pow->turn_on(); }
 
     static void calculate_resistance() { resistance = ((90 * 1.2e6) / (duty - 5)) - 1.2e6; }
 
     static void read() {
-        if (!ok_status){
+        if (!ok_status) {
             return;
         }
 
@@ -54,7 +57,8 @@ class IMD {
             is_ok = true;
         }
 
-        //m_ls.read();
+        freq = ic.get_frequency();
+        duty = ic.get_duty_cycle();
         if (lessError(freq, 0, 0.1)) {
             status = DataPackets::imd_status::SHORTCIRCUIT;
             return;
