@@ -65,8 +65,6 @@ int main(void) {
 
     HVBMS::state_machine.start();
 
-    Scheduler::start();
-
     while (1) {
         eth_instance->update();
         HVBMS::update();
