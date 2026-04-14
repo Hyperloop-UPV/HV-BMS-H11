@@ -24,8 +24,8 @@ public:
     static void sdc_callback();
 };
 
-constexpr EXTIDomain::Device sdc_PB12{
-    ST_LIB::PB12,
+constexpr EXTIDomain::Device sdc_PB5{
+    ST_LIB::PB5,
     EXTIDomain::Trigger::BOTH_EDGES,
     SDC::sdc_callback
 };

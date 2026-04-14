@@ -10,7 +10,7 @@ using ST_LIB::EthernetDomain;
 constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "00:80:e1:00:01:07",
                                               "192.168.1.7", "255.255.0.0");
 #elif defined(USE_PHY_LAN8700)
-constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "50:50:71:40:01:67",
+constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "50:50:71:40:01:67",
                                               "192.168.1.7", "255.255.255.0");
 #elif defined(USE_PHY_KSZ8041)
 constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "00:80:e1:00:01:07",
@@ -20,28 +20,29 @@ constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "00:80
 #endif
 
 using myBoard =
-    ST_LIB::Board<eth, led_PG7, led_PG8, contactor_PG14, contactor_PG12, contactor_PD4,
-                  contactor_PF4, sdc_PA11, adc_PF13, adc_PA0, timer_us_tick_def, timer_imd,
-                  bms_spi3, bms_cs_pin, sdc_PB12, imd_PF5, imd_pow_PE2, imd_ok_PA12>;
+    ST_LIB::Board<eth, led_PG13, led_PG9, contactor_PD8, contactor_PD9, contactor_PD10,
+                  contactor_PB14, sdc_PB4, adc_PA3, adc_PA4, adc_PA5, timer_us_tick_def, timer_imd,
+                  bms_spi3, bms_cs_pin, sdc_PB5, imd_enable_PE11, imd_ok_PE12>; 
 
 int main(void) {
     Hard_fault_check();
     myBoard::init();
-    DO::operational_led = &myBoard::instance_of<led_PG8>();
-    DO::fault_led = &myBoard::instance_of<led_PG7>();
-    DO::contactor_high = &myBoard::instance_of<contactor_PG12>();
-    DO::contactor_low = &myBoard::instance_of<contactor_PG14>();
-    DO::contactor_precharge = &myBoard::instance_of<contactor_PD4>();
-    DO::contactor_discharge = &myBoard::instance_of<contactor_PF4>();
-    DO::sdc_obccu = &myBoard::instance_of<sdc_PA11>();
+    DO::operational_led = &myBoard::instance_of<led_PG9>();
+    DO::fault_led = &myBoard::instance_of<led_PG13>();
+    DO::contactor_high = &myBoard::instance_of<contactor_PD8>();
+    DO::contactor_low = &myBoard::instance_of<contactor_PD9>();
+    DO::contactor_discharge = &myBoard::instance_of<contactor_PD10>();
+    DO::contactor_precharge = &myBoard::instance_of<contactor_PB14>();
+    DO::sdc_fw_fault = &myBoard::instance_of<sdc_PB4>();
     DO::bms_cs = &myBoard::instance_of<bms_cs_pin>();
-    DO::imd_bypass = &myBoard::instance_of<imd_PF5>();
-    DO::imd_pow = &myBoard::instance_of<imd_pow_PE2>();
+    //DO::imd_bypass = &myBoard::instance_of<imd_PF5>();
+    DO::imd_enable = &myBoard::instance_of<imd_enable_PE11>();
 
-    DI::imd_ok = &myBoard::instance_of<imd_ok_PA12>();
+    DI::imd_ok = &myBoard::instance_of<imd_ok_PE12>();
 
-    ADC::adc_voltage = &myBoard::instance_of<adc_PF13>();
-    ADC::adc_current = &myBoard::instance_of<adc_PA0>();
+    ADC::adc_voltage_ch1 = &myBoard::instance_of<adc_PA3>();
+    ADC::adc_voltage_ch2 = &myBoard::instance_of<adc_PA4>();
+    ADC::adc_current = &myBoard::instance_of<adc_PA5>();
 
     NewSPI::bms_spi_pins = &myBoard::instance_of<bms_spi3>();
     NewSPI::bms_wrapper.emplace(*NewSPI::bms_spi_pins);
@@ -55,8 +56,7 @@ int main(void) {
 
     GlobalTimer::input_timer = get_timer_instance(myBoard, timer_imd);
 
-    SDC::sdc_interrupt =
-        &myBoard::instance_of<sdc_PB12>();  // hay que hacer esto con un bind y tenerlo privado
+    SDC::sdc_interrupt = &myBoard::instance_of<sdc_PB5>();  // hay que hacer esto con un bind y tenerlo privado
 
     Actuators::init();
     Sensors::init();

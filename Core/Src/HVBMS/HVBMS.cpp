@@ -40,8 +40,8 @@ void HVBMS::update() {
         Scheduler::unregister_task(id_check_precharge);
     }
     if (OrderPackets::bypass_imd_flag) {
-        OrderPackets::bypass_imd_flag = false;
-        DO::imd_bypass->toggle();
+        //OrderPackets::bypass_imd_flag = false;
+        //DO::imd_bypass->toggle(); no tengo bypass aqui
     }
     if (OrderPackets::FAULT_flag) {
         ProtectionManager::fault_and_propagate();

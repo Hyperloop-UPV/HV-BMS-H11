@@ -55,7 +55,7 @@ public:
                 []() {
                     Comms::start();
                     Sensors::batteries.start();
-                    DO::sdc_obccu->turn_on();
+                    DO::sdc_fw_fault->turn_on();
                 },
                 connecting_state
             );
@@ -67,7 +67,7 @@ public:
             bms_sm.add_enter_action(
                 []() {
                     Actuators::open_HV();
-                    DO::sdc_obccu->turn_off();
+                    DO::sdc_fw_fault->turn_off();
                     ProtectionManager::propagate_fault();
                     DO::operational_led->turn_off();
                     DO::fault_led->turn_on();
