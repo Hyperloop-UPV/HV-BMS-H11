@@ -46,17 +46,14 @@ inline DigitalInputDomain::Instance* imd_ok;
 using ST_LIB::ADCDomain;
 
 inline constinit float voltage_reading_ch1{0.0f};
-inline constinit float voltage_reading_ch2{0.0f};
 inline constinit float current_reading{0.0f};
 
 // tengo dos canales para el voltaje, preguntar
 constexpr ADCDomain::ADC adc_PA3{ST_LIB::PA3, voltage_reading_ch1};
-constexpr ADCDomain::ADC adc_PA4{ST_LIB::PA4, voltage_reading_ch2};
 constexpr ADCDomain::ADC adc_PA5{ST_LIB::PA5, current_reading};
 
 namespace ADC {
 inline ADCDomain::Instance* adc_voltage_ch1;
-inline ADCDomain::Instance* adc_voltage_ch2;
 inline ADCDomain::Instance* adc_current;
 };  // namespace ADC
 
@@ -94,26 +91,26 @@ using ST_LIB::SPIDomain;
 
 // cambiar todo el spi
 // Configuración SPI para LTC6810
-consteval SPIDomain::SPIConfig get_bms_config() {
-    SPIDomain::SPIConfig c{
-        SPIDomain::ClockPolarity::HIGH, SPIDomain::ClockPhase::SECOND_EDGE,
-        SPIDomain::BitOrder::MSB_FIRST,
-        SPIDomain::NSSMode::SOFTWARE  // Manejamos CS manualmente
-    };
-    c.data_size = ST_LIB::SPIDomain::DataSize::SIZE_8BIT;
-    return c;
-}
+// consteval SPIDomain::SPIConfig get_bms_config() {
+//     SPIDomain::SPIConfig c{
+//         SPIDomain::ClockPolarity::HIGH, SPIDomain::ClockPhase::SECOND_EDGE,
+//         SPIDomain::BitOrder::MSB_FIRST,
+//         SPIDomain::NSSMode::SOFTWARE  // Manejamos CS manualmente
+//     };
+//     c.data_size = ST_LIB::SPIDomain::DataSize::SIZE_8BIT;
+//     return c;
+// }
 
-// Dispositivo SPI3
-inline constexpr auto bms_spi3 =
-    SPIDomain::Device<DMA_Domain::Stream::dma2_stream0, DMA_Domain::Stream::dma2_stream1>(
-        SPIDomain::SPIMode::MASTER, SPIDomain::SPIPeripheral::spi3, 1000000, ST_LIB::PC10,
-        ST_LIB::PC11, ST_LIB::PC12, get_bms_config());
+// // Dispositivo SPI3
+// inline constexpr auto bms_spi3 =
+//     SPIDomain::Device<DMA_Domain::Stream::dma2_stream0, DMA_Domain::Stream::dma2_stream1>(
+//         SPIDomain::SPIMode::MASTER, SPIDomain::SPIPeripheral::spi3, 1000000, ST_LIB::PC10,
+//         ST_LIB::PC11, ST_LIB::PC12, get_bms_config());
 
-namespace NewSPI {
-inline SPIDomain::Instance* bms_spi_pins;
-inline std::optional<SPIDomain::SPIWrapper<bms_spi3>> bms_wrapper;
-}  // namespace NewSPI
+// namespace NewSPI {
+// inline SPIDomain::Instance* bms_spi_pins;
+// inline std::optional<SPIDomain::SPIWrapper<bms_spi3>> bms_wrapper;
+// }  // namespace NewSPI
 
 // Tasks and timeouts id
 inline uint16_t id_timeout_precharge;

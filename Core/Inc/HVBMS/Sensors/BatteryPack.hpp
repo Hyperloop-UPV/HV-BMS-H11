@@ -27,11 +27,11 @@ template <size_t N_BATTERIES> class BatteryPack {
         // NewSPI::bms_wrapper = SPIDomain::SPIWrapper<bms_spi3>(*bms_spi_pins);
         //  Estos métodos se llamarán durante el update(), cuando los punteros ya existan
         static void SPI_transmit(const std::span<uint8_t> data) {
-            NewSPI::bms_wrapper->send(data);
+            //NewSPI::bms_wrapper->send(data);
             // HAL_SPI_Transmit(&NewSPI::bms_spi_pins->hspi, data.data(), data.size(), 10);
         }
         static void SPI_receive(std::span<uint8_t> buffer) {
-            NewSPI::bms_wrapper->receive(buffer);
+            //NewSPI::bms_wrapper->receive(buffer);
             // HAL_SPI_Transmit(&NewSPI::bms_spi_pins->hspi, buffer.data(), buffer.size(), 10);
         }
         static void SPI_CS_turn_on(void) { DO::bms_cs->turn_on(); }
