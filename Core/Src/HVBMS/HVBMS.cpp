@@ -58,17 +58,17 @@ void HVBMS::add_protections() {
 
     ProtectionManager::add_standard_protections();
 
-    // DC bus voltage
-    ProtectionManager::_add_protection(
-        &Sensors::voltage_sensor.reading,
-        Boundary<float, ABOVE>{410}
-    );
+    // // DC bus voltage
+    // ProtectionManager::_add_protection(
+    //     &Sensors::voltage_sensor.reading,
+    //     Boundary<float, ABOVE>{410}
+    // );
 
-    // Batteries current
-    ProtectionManager::_add_protection(
-        &Sensors::current_sensor.reading,
-        Boundary<float, OUT_OF_RANGE>{-15, 70}
-    );
+    // // Batteries current
+    // ProtectionManager::_add_protection(
+    //     &Sensors::current_sensor.reading,
+    //     Boundary<float, OUT_OF_RANGE>{-15, 70}
+    // );
 
     Scheduler::register_task(1000, []() { ProtectionManager::check_protections(); });
 

@@ -14,11 +14,10 @@ inline bool lessError(const A& a, const B& b, const E& error) {
     return std::abs(a - b) < error;
 }
 
-
-
 class IMD {
-    inline static auto ic = GlobalTimer::input_timer
-                      .get_input_capture<GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>();
+    using IC_Type =
+        ST_LIB::InputCapture<timer_imd, GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>;
+    inline static IC_Type* ic{nullptr};
     inline static DigitalOutputDomain::Instance* pow{nullptr};
     inline static DigitalInputDomain::Instance* ok{nullptr};
     inline static float freq{};
@@ -31,13 +30,16 @@ class IMD {
     inline static DataPackets::imd_status status{DataPackets::imd_status::FAST_EVAL};
     inline static float resistance{};
 
-    IMD() {
-        ic.turn_on();
-    }
-
     static void bind(DigitalOutputDomain::Instance* pow_pin, DigitalInputDomain::Instance* ok_pin) {
         pow = pow_pin;
         ok = ok_pin;
+
+        static auto ic_instance =
+            GlobalTimer::input_timer
+                .get_input_capture<GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>();
+
+        ic = &ic_instance;
+        ic->turn_on();
     }
 
     static void power_on() { pow->turn_on(); }
@@ -45,7 +47,7 @@ class IMD {
     static void calculate_resistance() { resistance = ((90 * 1.2e6) / (duty - 5)) - 1.2e6; }
 
     static void read() {
-        if (!ok_status) {
+        if (ok == nullptr || !ic) {
             return;
         }
 
@@ -57,8 +59,8 @@ class IMD {
             is_ok = true;
         }
 
-        freq = ic.get_frequency();
-        duty = ic.get_duty_cycle();
+        freq = ic->get_frequency();
+        duty = ic->get_duty_cycle();
         if (lessError(freq, 0, 0.1)) {
             status = DataPackets::imd_status::SHORTCIRCUIT;
             return;

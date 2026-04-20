@@ -81,9 +81,9 @@ constexpr TimerPin ic_pin = {
 
 
 constexpr TimerDomain::Timer timer_imd{{
-    .request = TimerRequest::GeneralPurpose32bit_23
+    .request = TimerRequest::GeneralPurpose_3
 }, GlobalTimer::ic_pin};
-
+    
 namespace GlobalTimer {
 // inline TimerWrapper<timer_us_tick_def> global_us_timer;
 inline TIM_TypeDef* global_us_timer;
