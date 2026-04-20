@@ -14,11 +14,9 @@ inline bool lessError(const A& a, const B& b, const E& error) {
     return std::abs(a - b) < error;
 }
 
-
-
 class IMD {
-    inline static auto ic = GlobalTimer::input_timer
-                      .get_input_capture<GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>();
+    // inline static auto ic = GlobalTimer::input_timer
+    //                   .get_input_capture<GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>();
     inline static DigitalOutputDomain::Instance* pow{nullptr};
     inline static DigitalInputDomain::Instance* ok{nullptr};
     inline static float freq{};
@@ -32,7 +30,7 @@ class IMD {
     inline static float resistance{};
 
     IMD() {
-        ic.turn_on();
+        // ic.turn_on();
     }
 
     static void bind(DigitalOutputDomain::Instance* pow_pin, DigitalInputDomain::Instance* ok_pin) {
@@ -57,8 +55,8 @@ class IMD {
             is_ok = true;
         }
 
-        freq = ic.get_frequency();
-        duty = ic.get_duty_cycle();
+        // freq = ic.get_frequency();
+        // duty = ic.get_duty_cycle();
         if (lessError(freq, 0, 0.1)) {
             status = DataPackets::imd_status::SHORTCIRCUIT;
             return;

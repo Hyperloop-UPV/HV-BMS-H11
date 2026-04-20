@@ -70,7 +70,7 @@ void HVBMS::add_protections() {
         Boundary<float, OUT_OF_RANGE>{-15, 70}
     );
 
-    Scheduler::register_task(1000, []() { ProtectionManager::check_protections(); });
+    //Scheduler::register_task(1000, []() { ProtectionManager::check_protections(); });
 
     // // SoCs
     // auto id{1};

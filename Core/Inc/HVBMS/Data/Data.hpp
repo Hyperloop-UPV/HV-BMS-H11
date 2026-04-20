@@ -80,14 +80,14 @@ constexpr TimerPin ic_pin = {
 };
 
 
-constexpr TimerDomain::Timer timer_imd{{
-    .request = TimerRequest::GeneralPurpose32bit_23
-}, GlobalTimer::ic_pin};
+// constexpr TimerDomain::Timer timer_imd{{
+//     .request = TimerRequest::GeneralPurpose32bit_24
+// }, GlobalTimer::ic_pin};
 
 namespace GlobalTimer {
 // inline TimerWrapper<timer_us_tick_def> global_us_timer;
 inline TIM_TypeDef* global_us_timer;
-inline TimerWrapper<timer_imd> input_timer;
+//inline TimerWrapper<timer_imd> input_timer;
 };  // namespace GlobalTimer
 
 #define GetMicroseconds() GlobalTimer::global_us_timer->CNT
