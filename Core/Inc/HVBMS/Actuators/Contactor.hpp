@@ -5,15 +5,13 @@
 using ST_LIB::DigitalOutputDomain;
 
 class Contactor {
-    enum class State { OPEN, CLOSED };
-
     DigitalOutputDomain::Instance* output;
+    DigitalInputDomain::Instance* input;
     bool normally_opened;
-    State state;
 
 public:
     Contactor() = default;
-    Contactor(DigitalOutputDomain::Instance* output, bool normally_opened);
+    Contactor(DigitalOutputDomain::Instance* output, DigitalInputDomain::Instance* input, bool normally_opened);
     void open();
     bool is_open();
 

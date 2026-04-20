@@ -19,10 +19,10 @@ constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "00:80
 #error "No PHY selected for Ethernet pinset selection"
 #endif
 
-using myBoard =
-    ST_LIB::Board<eth, led_PG13, led_PG9, contactor_PD8, contactor_PD9, contactor_PD10,
-                  contactor_PB14, sdc_PB4, adc_PA3, adc_PA5, timer_us_tick_def, timer_imd,
-                  sdc_PB5, imd_enable_PE11, imd_ok_PE12>; 
+using myBoard = ST_LIB::Board<eth, led_PG13, led_PG9, contactor_PD8, contactor_PD9, contactor_PD10,
+                              contactor_PB14, aux_contactor_PD12, aux_contactor_PG2,
+                              aux_contactor_PD13, aux_contactor_PD14, sdc_PB4, adc_PA3, adc_PA5,
+                              timer_us_tick_def, timer_imd, sdc_PB5, imd_enable_PE11, imd_ok_PE12>;
 
 int main(void) {
     Hard_fault_check();
@@ -39,6 +39,10 @@ int main(void) {
     DO::imd_enable = &myBoard::instance_of<imd_enable_PE11>();
 
     DI::imd_ok = &myBoard::instance_of<imd_ok_PE12>();
+    DI::aux_contactor_discharge = &myBoard::instance_of<aux_contactor_PD12>();
+    DI::aux_contactor_low = &myBoard::instance_of<aux_contactor_PD13>();
+    DI::aux_contactor_high = &myBoard::instance_of<aux_contactor_PD14>();
+    DI::aux_contactor_precharge = &myBoard::instance_of<aux_contactor_PG2>();
 
     ADC::adc_voltage_ch1 = &myBoard::instance_of<adc_PA3>();
     ADC::adc_current = &myBoard::instance_of<adc_PA5>();

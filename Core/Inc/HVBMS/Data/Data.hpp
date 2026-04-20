@@ -16,7 +16,7 @@ constexpr DigitalOutputDomain::DigitalOutput contactor_PB14{ST_LIB::PB14};
 
 constexpr DigitalOutputDomain::DigitalOutput sdc_PB4{ST_LIB::PB4};
 
-constexpr DigitalOutputDomain::DigitalOutput bms_cs_pin{ST_LIB::PD3}; // dual spi??
+//constexpr DigitalOutputDomain::DigitalOutput bms_cs_pin{ST_LIB::PD3}; // dual spi??
 
 //constexpr DigitalOutputDomain::DigitalOutput imd_PF5{ST_LIB::PF5}; No encuentro bypass
 constexpr DigitalOutputDomain::DigitalOutput imd_enable_PE11{ST_LIB::PE11};
@@ -37,10 +37,17 @@ inline DigitalOutputDomain::Instance* imd_enable;
 using ST_LIB::DigitalInputDomain;
 
 constexpr DigitalInputDomain::DigitalInput imd_ok_PE12{ST_LIB::PE12};
-// me faltan entradas auxiliares de los contactores
+constexpr DigitalInputDomain::DigitalInput aux_contactor_PG2{ST_LIB::PG2};
+constexpr DigitalInputDomain::DigitalInput aux_contactor_PD12{ST_LIB::PD12};
+constexpr DigitalInputDomain::DigitalInput aux_contactor_PD13{ST_LIB::PD13};
+constexpr DigitalInputDomain::DigitalInput aux_contactor_PD14{ST_LIB::PD14};
 
 namespace DI {
 inline DigitalInputDomain::Instance* imd_ok;
+inline DigitalInputDomain::Instance* aux_contactor_low;
+inline DigitalInputDomain::Instance* aux_contactor_high;
+inline DigitalInputDomain::Instance* aux_contactor_precharge;
+inline DigitalInputDomain::Instance* aux_contactor_discharge;
 }
 
 using ST_LIB::ADCDomain;
@@ -48,7 +55,6 @@ using ST_LIB::ADCDomain;
 inline constinit float voltage_reading_ch1{0.0f};
 inline constinit float current_reading{0.0f};
 
-// tengo dos canales para el voltaje, preguntar
 constexpr ADCDomain::ADC adc_PA3{ST_LIB::PA3, voltage_reading_ch1};
 constexpr ADCDomain::ADC adc_PA5{ST_LIB::PA5, current_reading};
 

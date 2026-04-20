@@ -8,10 +8,10 @@ Contactor Actuators::contactor_precharge;
 Contactor Actuators::contactor_discharge;
 
 void Actuators::init() {
-    contactor_discharge = Contactor{DO::contactor_discharge, false};
-    contactor_precharge = Contactor{DO::contactor_precharge, true};
-    contactor_low = Contactor{DO::contactor_low, true};
-    contactor_high = Contactor{DO::contactor_high, true};
+    contactor_discharge = Contactor{DO::contactor_discharge, DI::aux_contactor_discharge, false};
+    contactor_precharge = Contactor{DO::contactor_precharge, DI::aux_contactor_precharge, true};
+    contactor_low = Contactor{DO::contactor_low, DI::aux_contactor_low, true};
+    contactor_high = Contactor{DO::contactor_high, DI::aux_contactor_high, true};
 }
 
 void Actuators::open_HV() {
