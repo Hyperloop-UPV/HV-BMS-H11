@@ -26,4 +26,6 @@ public:
     static bool& get_contactor_high_state();
     static bool& get_contactor_precharge_state();
     static bool& get_contactor_discharge_state();
+
+    static void update_contactors();
 };
