@@ -235,6 +235,10 @@ void Comms::start() {
 
     DataPackets::minimum_soc_init(Sensors::batteries.minimum_soc);
 
+    DataPackets::contactor_status_init(
+        Actuators::get_contactor_discharge_state(), Actuators::get_contactor_precharge_state(),
+        Actuators::get_contactor_low_state(), Actuators::get_contactor_high_state());
+
     DataPackets::batteries_data_init(
         Sensors::batteries.minimum_cell_voltage,
         Sensors::batteries.maximum_cell_voltage,

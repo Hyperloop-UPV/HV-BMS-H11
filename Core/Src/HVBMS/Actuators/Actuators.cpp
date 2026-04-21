@@ -51,3 +51,11 @@ bool Actuators::is_precharging() {
 }
 
 void Actuators::toggle_operational_led() { DO::operational_led->toggle(); }
+
+bool& Actuators::get_contactor_low_state() { return contactor_low.get_state(); }
+
+bool& Actuators::get_contactor_high_state() { return contactor_high.get_state(); }
+
+bool& Actuators::get_contactor_discharge_state() { return contactor_discharge.get_state(); }
+
+bool& Actuators::get_contactor_precharge_state() { return contactor_precharge.get_state(); }

@@ -8,6 +8,7 @@ class Contactor {
     DigitalOutputDomain::Instance* output;
     DigitalInputDomain::Instance* input;
     bool normally_opened;
+    bool state;
 
 public:
     Contactor() = default;
@@ -17,4 +18,6 @@ public:
 
     void close();
     bool is_closed();
+
+    bool& get_state();
 };
