@@ -100,3 +100,6 @@ tools/*.bin
 
 
 Core/Src/Runes/generated_metadata.cpp
+# Generated packet headers
+/Core/Inc/Communications/Packets/DataPackets.hpp
+/Core/Inc/Communications/Packets/OrderPackets.hpp
