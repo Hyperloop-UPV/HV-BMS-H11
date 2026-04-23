@@ -22,7 +22,8 @@ constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "00:80
 using myBoard = ST_LIB::Board<eth, led_PG13, led_PG9, contactor_PD8, contactor_PD9, contactor_PD10,
                               contactor_PB14, aux_contactor_PD12, aux_contactor_PG2,
                               aux_contactor_PD13, aux_contactor_PD14, sdc_PB4, adc_PA4, adc_PA5,
-                              timer_us_tick_def, sdc_PB5, imd_enable_PE11, imd_ok_PE12>;
+                              timer_us_tick_def, sdc_PB5, imd_enable_PE11, imd_ok_PE12, cs_tx_PE4, bms_spi_tx,
+                              bms_spi_rx>;
 
 int main(void) {
     Hard_fault_check();
@@ -34,7 +35,7 @@ int main(void) {
     DO::contactor_discharge = &myBoard::instance_of<contactor_PD10>();
     DO::contactor_precharge = &myBoard::instance_of<contactor_PB14>();
     DO::sdc_fw_fault = &myBoard::instance_of<sdc_PB4>();
-    // DO::bms_cs = &myBoard::instance_of<bms_cs_pin>();
+    DO::cs_tx = &myBoard::instance_of<cs_tx_PE4>();
     // DO::imd_bypass = &myBoard::instance_of<imd_PF5>();
     DO::imd_enable = &myBoard::instance_of<imd_enable_PE11>();
 
@@ -47,8 +48,9 @@ int main(void) {
     ADC::adc_voltage_ch2 = &myBoard::instance_of<adc_PA4>();
     ADC::adc_current = &myBoard::instance_of<adc_PA5>();
 
-    // NewSPI::bms_spi_pins = &myBoard::instance_of<bms_spi3>();
-    // NewSPI::bms_wrapper.emplace(*NewSPI::bms_spi_pins);
+    NewSPI::cs_tx_pin = &myBoard::instance_of<bms_spi_tx>();
+    NewSPI::bms_wrapper_tx.emplace(*NewSPI::cs_tx_pin);
+    NewSPI::bms_wrapper_rx.emplace(myBoard::instance_of<bms_spi_rx>());
 
     auto eth_instance = &myBoard::instance_of<eth>();
 

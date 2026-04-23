@@ -15,8 +15,8 @@ inline bool lessError(const A& a, const B& b, const E& error) {
 }
 
 class IMD {
-    // inline static auto ic = GlobalTimer::input_timer
-    //                   .get_input_capture<GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>();
+    //inline static auto ic = GlobalTimer::input_timer
+    //                  .get_input_capture<GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>();
     inline static DigitalOutputDomain::Instance* pow{nullptr};
     inline static DigitalInputDomain::Instance* ok{nullptr};
     inline static float freq{};
