@@ -57,7 +57,8 @@ int main(void) {
     us_timer.set_prescaler(us_timer.get_clock_frequency() / 1000'000);
     us_timer.counter_enable();
 
-    GlobalTimer::input_timer = &myBoard::instance_of<timer_imd>();
+    TimerWrapper<timer_imd> imd_timer_instance = get_timer_instance(myBoard, timer_imd);
+    GlobalTimer::input_timer = imd_timer_instance;  // value assignment, not pointer
 
     SDC::sdc_interrupt = &myBoard::instance_of<sdc_PB5>();  // hay que hacer esto con un bind y tenerlo privado
 
