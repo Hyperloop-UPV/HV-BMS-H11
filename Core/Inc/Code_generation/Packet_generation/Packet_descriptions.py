@@ -10,18 +10,6 @@ class BoardDescription:
 
         # Load backend IP from general_info.json
         backend_ip = "0.0.0.0"
-<<<<<<< HEAD
-        try:
-            with open(JSONpath + "/general_info.json") as f:
-                general_info = json.load(f)
-                if "addresses" in general_info and "backend" in general_info["addresses"]:
-                    backend_ip = general_info["addresses"]["backend"]
-        except Exception as e:
-            print(f"Warning: Could not load backend IP from general_info.json: {e}")
-
-        #Sockets:
-=======
->>>>>>> f9de5841ebbf4fc3229a6c8c2b8ca99bf6c8b219
         try:
             with open(JSONpath + "/general_info.json") as f:
                 general_info = json.load(f)
@@ -120,9 +108,6 @@ class BoardDescription:
                 self.allSockets.append({"name": name, "type": sock_type})
 
                 if sock_type == "ServerSocket":
-<<<<<<< HEAD
-                    self.ServerSockets.append({"name": name, "type": sock_type, "board_ip": self.board_ip, "port": sock["port"]})
-=======
                     self.ServerSockets.append(
                         {
                             "name": name,
@@ -131,14 +116,10 @@ class BoardDescription:
                             "port": sock["port"],
                         }
                     )
->>>>>>> f9de5841ebbf4fc3229a6c8c2b8ca99bf6c8b219
                 elif sock_type == "Socket":
                     remote_ip = sock["remote_ip"]
                     if remote_ip == "backend":
                         remote_ip = self.backend_ip
-<<<<<<< HEAD
-                    self.Sockets.append({"name": name, "type": sock_type, "board_ip": self.board_ip, "local_port": sock["local_port"], "remote_ip": remote_ip, "remote_port": sock["remote_port"]})
-=======
                     self.Sockets.append(
                         {
                             "name": name,
@@ -149,15 +130,10 @@ class BoardDescription:
                             "remote_port": sock["remote_port"],
                         }
                     )
->>>>>>> f9de5841ebbf4fc3229a6c8c2b8ca99bf6c8b219
                 elif sock_type == "DatagramSocket":
                     remote_ip = sock["remote_ip"]
                     if remote_ip == "backend":
                         remote_ip = self.backend_ip
-<<<<<<< HEAD
-                    self.DatagramSockets.append({"name": name, "type": sock_type, "board_ip": self.board_ip, "port": sock["port"], "remote_ip": remote_ip})
-
-=======
                     self.DatagramSockets.append(
                         {
                             "name": name,
@@ -167,7 +143,6 @@ class BoardDescription:
                             "remote_ip": remote_ip,
                         }
                     )
->>>>>>> f9de5841ebbf4fc3229a6c8c2b8ca99bf6c8b219
 
 
 class PacketDescription:
@@ -189,16 +164,12 @@ class PacketDescription:
     def check_for_sending(packet: dict):
         if "period" in packet and "period_type" in packet and "socket" in packet:
             name = packet["name"].replace(" ", "_").replace("-", "_")
-<<<<<<< HEAD
-            return {"name": name, "period": packet["period"], "period_type": packet["period_type"], "socket": packet["socket"]}
-=======
             return {
                 "name": name,
                 "period": packet["period"],
                 "period_type": packet["period_type"],
                 "socket": packet["socket"],
             }
->>>>>>> f9de5841ebbf4fc3229a6c8c2b8ca99bf6c8b219
 
         else:
             return None
@@ -253,16 +224,10 @@ class MeasurmentsDescription:
         return None
 
     @staticmethod
-<<<<<<< HEAD
-    def _unsigned_int_correction(type:str):
-        aux_type = type[:3]
-        if aux_type == "int":
-=======
     def _numeric_type_correction(type: str):
         if type.startswith("uint") and not type.endswith("_t"):
             type += "_t"
         elif type.startswith("int") and not type.endswith("_t"):
->>>>>>> f9de5841ebbf4fc3229a6c8c2b8ca99bf6c8b219
             type += "_t"
         elif type == "float32":
             type = "float"

@@ -42,10 +42,6 @@ def Get_data_context(board: BoardDescription):
                             Enums.append(measurement.enum)
         return Enums
 
-<<<<<<< HEAD
-
-=======
->>>>>>> f9de5841ebbf4fc3229a6c8c2b8ca99bf6c8b219
     def GenerateDataPackets(board: BoardDescription):
         Packets = []
         totaldata = []
@@ -55,13 +51,8 @@ def Get_data_context(board: BoardDescription):
                     tempdata = ""
                     tempdata_but_pointer = ""
                     for variable in packet_instance.variables:
-<<<<<<< HEAD
-                        tempdata += (str(variable) + ",")
-                        tempdata_but_pointer += ("&" + str(variable) + ",")
-=======
                         tempdata += str(variable) + ","
                         tempdata_but_pointer += "&" + str(variable) + ","
->>>>>>> f9de5841ebbf4fc3229a6c8c2b8ca99bf6c8b219
                     if tempdata.endswith(","):
                         tempdata = tempdata[:-1]
                     if tempdata_but_pointer.endswith(","):
@@ -78,9 +69,6 @@ def Get_data_context(board: BoardDescription):
                             }
                         )
 
-<<<<<<< HEAD
-                    aux_packet = {"name": packet_instance.name, "data": tempdata_but_pointer.replace(" ", "_").replace("-", "_"), "id": packet_instance.id, "variables": packet_variables}
-=======
                     aux_packet = {
                         "name": packet_instance.name,
                         "data": tempdata_but_pointer.replace(" ", "_").replace(
@@ -89,7 +77,6 @@ def Get_data_context(board: BoardDescription):
                         "id": packet_instance.id,
                         "variables": packet_variables,
                     }
->>>>>>> f9de5841ebbf4fc3229a6c8c2b8ca99bf6c8b219
                     Packets.append(aux_packet)
                     for measurement in packet_instance.measurements:
                         aux_data = {
@@ -150,14 +137,10 @@ def Get_data_context(board: BoardDescription):
 def Generate_DataPackets_hpp(board_input: str):
     data_packets_path = "Core/Inc/Communications/Packets/DataPackets.hpp"
     board_instance = globals()[board_input]
-<<<<<<< HEAD
-    if board_instance.data_size == 0 and len(board_instance.sockets.DatagramSockets) == 0:
-=======
     if (
         board_instance.data_size == 0
         and len(board_instance.sockets.DatagramSockets) == 0
     ):
->>>>>>> f9de5841ebbf4fc3229a6c8c2b8ca99bf6c8b219
         if os.path.exists(data_packets_path):
             os.remove(data_packets_path)
         return
@@ -170,12 +153,9 @@ def Generate_DataPackets_hpp(board_input: str):
         Output.write(template.render(context))
 
 
-<<<<<<< HEAD
-=======
 # --------------OrderPackets.hpp generation---------------#
 
 
->>>>>>> f9de5841ebbf4fc3229a6c8c2b8ca99bf6c8b219
 def Get_order_context(board: BoardDescription):
     def GenerateOrderEnum(board: BoardDescription):
         Enums = []
@@ -199,13 +179,8 @@ def Get_order_context(board: BoardDescription):
                     tempdata = ""
                     tempdata_but_pointer = ""
                     for variable in packet_instance.variables:
-<<<<<<< HEAD
-                        tempdata += (str(variable) + ",")
-                        tempdata_but_pointer += ("&" + str(variable) + ",")
-=======
                         tempdata += str(variable) + ","
                         tempdata_but_pointer += "&" + str(variable) + ","
->>>>>>> f9de5841ebbf4fc3229a6c8c2b8ca99bf6c8b219
                     if tempdata.endswith(","):
                         tempdata = tempdata[:-1]
                         tempdata_but_pointer = tempdata_but_pointer[:-1]
@@ -221,16 +196,12 @@ def Get_order_context(board: BoardDescription):
                             }
                         )
 
-<<<<<<< HEAD
-                    aux_packet = {"name": packet_instance.name, "data": tempdata_but_pointer, "id": packet_instance.id, "variables": packet_variables}
-=======
                     aux_packet = {
                         "name": packet_instance.name,
                         "data": tempdata_but_pointer,
                         "id": packet_instance.id,
                         "variables": packet_variables,
                     }
->>>>>>> f9de5841ebbf4fc3229a6c8c2b8ca99bf6c8b219
                     Packets.append(aux_packet)
                     for measurement in packet_instance.measurements:
                         aux_data = {"type": measurement.type, "name": measurement.name}
@@ -255,15 +226,11 @@ def Get_order_context(board: BoardDescription):
 def Generate_OrderPackets_hpp(board_input: str):
     order_packets_path = "Core/Inc/Communications/Packets/OrderPackets.hpp"
     board_instance = globals()[board_input]
-<<<<<<< HEAD
-    if (board_instance.order_size == 0 and len(board_instance.sockets.ServerSockets) == 0 and len(board_instance.sockets.Sockets) == 0):
-=======
     if (
         board_instance.order_size == 0
         and len(board_instance.sockets.ServerSockets) == 0
         and len(board_instance.sockets.Sockets) == 0
     ):
->>>>>>> f9de5841ebbf4fc3229a6c8c2b8ca99bf6c8b219
         if os.path.exists(order_packets_path):
             os.remove(order_packets_path)
         return

@@ -1,7 +1,7 @@
 #include "HVBMS/Sensors/Sensors.hpp"
 
 void Sensors::init() {
-    voltage_sensor.bind(ADC::adc_voltage_ch1);
+    voltage_sensor.bind(ADC::adc_voltage_ch2);
     current_sensor.bind(ADC::adc_current);
     // imd.bind(DO::imd_enable, DI::imd_ok);
 

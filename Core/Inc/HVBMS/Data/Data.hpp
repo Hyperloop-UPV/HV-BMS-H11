@@ -52,14 +52,14 @@ inline DigitalInputDomain::Instance* aux_contactor_discharge;
 
 using ST_LIB::ADCDomain;
 
-inline constinit float voltage_reading_ch1{0.0f};
+inline constinit float voltage_reading_ch2{0.0f};
 inline constinit float current_reading{0.0f};
 
-constexpr ADCDomain::ADC adc_PA3{ST_LIB::PA3, voltage_reading_ch1};
+constexpr ADCDomain::ADC adc_PA4{ST_LIB::PA4, voltage_reading_ch2};
 constexpr ADCDomain::ADC adc_PA5{ST_LIB::PA5, current_reading};
 
 namespace ADC {
-inline ADCDomain::Instance* adc_voltage_ch1;
+inline ADCDomain::Instance* adc_voltage_ch2;
 inline ADCDomain::Instance* adc_current;
 };  // namespace ADC
 
