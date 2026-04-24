@@ -27,11 +27,11 @@ template <size_t N_BATTERIES> class BatteryPack {
         //  Estos métodos se llamarán durante el update(), cuando los punteros ya existan
         static void SPI_transmit(const std::span<uint8_t> data) {
             SPI_CS_turn_on();
-            NewSPI::bms_wrapper_tx->send(data);
+            NewSPI::bms_wrapper_tx->send_DMA(data);
             SPI_CS_turn_off();
         }
         static void SPI_receive(std::span<uint8_t> buffer) {
-            //NewSPI::bms_wrapper_rx->template receive<>(buffer);    hablar con boris para esto
+            NewSPI::bms_wrapper_rx->listen(buffer);    
         }
         // Active low me dice el chat, habra que ver
         static void SPI_CS_turn_on(void) { DO::cs_tx->turn_off(); }
