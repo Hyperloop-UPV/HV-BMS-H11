@@ -29,11 +29,7 @@ class Sensors {
 
     inline static BatteryPack<N_BATTERIES> batteries;
 
-    // inline static IMD imd;
-
-    inline static DataPackets::imd_status imd_hola;
-    inline static float fake_res;
-    inline static bool fake_ok;
+    inline static IMD imd;
 
     static void init();
     static void update_sensors();

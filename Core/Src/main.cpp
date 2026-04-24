@@ -22,7 +22,7 @@ constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "00:80
 using myBoard = ST_LIB::Board<eth, led_PG13, led_PG9, contactor_PD8, contactor_PD9, contactor_PD10,
                               contactor_PB14, aux_contactor_PD12, aux_contactor_PG2,
                               aux_contactor_PD13, aux_contactor_PD14, sdc_PB4, adc_PA4, adc_PA5,
-                              timer_us_tick_def, sdc_PB5, imd_enable_PE11, imd_ok_PE12, cs_tx_PE4, bms_spi_tx,
+                              timer_us_tick_def, timer_imd, sdc_PB5, imd_enable_PE11, imd_ok_PE12, cs_tx_PE4, bms_spi_tx,
                               bms_spi_rx>;
 
 int main(void) {
@@ -56,10 +56,10 @@ int main(void) {
 
     TimerWrapper<timer_us_tick_def> us_timer = get_timer_instance(myBoard, timer_us_tick_def);
     GlobalTimer::global_us_timer = us_timer.instance->tim;
-    us_timer.set_prescaler(us_timer.get_clock_frequency() / 1000'000);
+    us_timer.set_prescaler((uint16_t)(us_timer.get_clock_frequency() / 1000'000) - 1);
     us_timer.counter_enable();
 
-    // GlobalTimer::input_timer = get_timer_instance(myBoard, timer_imd);
+    GlobalTimer::input_timer = get_timer_instance(myBoard, timer_imd);
 
     SDC::sdc_interrupt =
         &myBoard::instance_of<sdc_PB5>();  // hay que hacer esto con un bind y tenerlo privado
