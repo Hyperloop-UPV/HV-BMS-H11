@@ -11,7 +11,7 @@ constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "00:80
                                               "192.168.1.7", "255.255.0.0");
 #elif defined(USE_PHY_LAN8700)
 constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "50:50:71:40:01:67",
-                                              "192.168.1.7", "255.255.255.0");
+                                              "192.168.1.7", "255.255.0.0");
 #elif defined(USE_PHY_KSZ8041)
 constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "00:80:e1:00:01:07",
                                               "192.168.1.7", "255.255.0.0");
@@ -57,9 +57,9 @@ int main(void) {
     us_timer.set_prescaler(us_timer.get_clock_frequency() / 1000'000);
     us_timer.counter_enable();
 
-    TimerWrapper<timer_imd> imd_timer_instance = get_timer_instance(myBoard, timer_imd);
-    GlobalTimer::input_timer = imd_timer_instance;  // value assignment, not pointer
-
+    GlobalTimer::input_timer = get_timer_instance(myBoard, timer_imd);
+    //GlobalTimer::input_timer
+     //   .get_input_capture<GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>();
     SDC::sdc_interrupt = &myBoard::instance_of<sdc_PB5>();  // hay que hacer esto con un bind y tenerlo privado
 
     Actuators::init();

@@ -18,6 +18,7 @@ class IMD {
     using IC_Type =
         ST_LIB::InputCapture<timer_imd, GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>;
     inline static IC_Type* ic{nullptr};
+    inline static std::optional<IC_Type> ic_instance{std::nullopt};
     inline static DigitalOutputDomain::Instance* pow{nullptr};
     inline static DigitalInputDomain::Instance* ok{nullptr};
     inline static float freq{};
@@ -33,12 +34,9 @@ class IMD {
     static void bind(DigitalOutputDomain::Instance* pow_pin, DigitalInputDomain::Instance* ok_pin) {
         pow = pow_pin;
         ok = ok_pin;
-
-        static auto ic_instance =
-            GlobalTimer::input_timer
-                .get_input_capture<GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>();
-
-        ic = &ic_instance;
+        GlobalTimer::input_timer
+            .get_input_capture<GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>();
+        ic = &ic_instance.value();
         ic->turn_on();
     }
 
@@ -47,7 +45,7 @@ class IMD {
     static void calculate_resistance() { resistance = ((90 * 1.2e6) / (duty - 5)) - 1.2e6; }
 
     static void read() {
-        if (ok == nullptr || !ic) {
+        if (ok == nullptr || ic == nullptr) {
             return;
         }
 
