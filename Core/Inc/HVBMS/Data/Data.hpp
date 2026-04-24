@@ -80,7 +80,7 @@ constexpr TimerPin ic_pin = {
 };
 
 
-constexpr TimerDomain::Timer timer_imd{{
+inline constexpr TimerDomain::Timer timer_imd{{
     .request = TimerRequest::GeneralPurpose_3
 }, GlobalTimer::ic_pin};
     

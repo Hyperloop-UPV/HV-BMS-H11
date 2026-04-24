@@ -34,9 +34,10 @@ class IMD {
     static void bind(DigitalOutputDomain::Instance* pow_pin, DigitalInputDomain::Instance* ok_pin) {
         pow = pow_pin;
         ok = ok_pin;
-        GlobalTimer::input_timer
-            .get_input_capture<GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>();
-        ic = &ic_instance.value();
+        static auto ic_instance =
+            GlobalTimer::input_timer
+                .get_input_capture<GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>();
+        ic = &ic_instance;
         ic->turn_on();
     }
 

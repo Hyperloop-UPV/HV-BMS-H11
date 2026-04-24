@@ -54,7 +54,7 @@ int main(void) {
 
     TimerWrapper<timer_us_tick_def> us_timer = get_timer_instance(myBoard, timer_us_tick_def);
     GlobalTimer::global_us_timer = us_timer.instance->tim;
-    us_timer.set_prescaler(us_timer.get_clock_frequency() / 1000'000);
+    us_timer.set_prescaler((uint16_t)(us_timer.get_clock_frequency() / 1000'000) -1);
     us_timer.counter_enable();
 
     GlobalTimer::input_timer = get_timer_instance(myBoard, timer_imd);

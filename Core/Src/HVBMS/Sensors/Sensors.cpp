@@ -7,7 +7,7 @@ void Sensors::init() {
 
     sdc.enable();
 
-    Scheduler::register_task(10000, []() { Sensors::update_batteries(); });
+    //Scheduler::register_task(10000, []() { Sensors::update_batteries(); });
 }
 
 void Sensors::update_batteries() {
