@@ -3,7 +3,7 @@
 #include "HVBMS/Data/Data.hpp"
 
 #define set_protection_name(protection, name)                                                      \
-    {                                                                                              \
+    {                                                                                              \x
         protection->set_name((char*)malloc(name.size() + 1));                                      \
         sprintf(protection->get_name(), "%s", name.c_str());                                       \
     }
