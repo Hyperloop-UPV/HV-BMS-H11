@@ -24,18 +24,18 @@ template <size_t N_BATTERIES> class BatteryPack {
     using Battery = LTC6810Driver::LTC6810<6, READING_PERIOD_US, CONV_RATE_TIME_MS>;
     struct BMSConfig {
         static constexpr size_t n_LTC6810{N_BATTERIES};
-        // NewSPI::bms_wrapper = SPIDomain::SPIWrapper<bms_spi3>(*bms_spi_pins);
         //  Estos métodos se llamarán durante el update(), cuando los punteros ya existan
         static void SPI_transmit(const std::span<uint8_t> data) {
-            //NewSPI::bms_wrapper->send(data);
-            // HAL_SPI_Transmit(&NewSPI::bms_spi_pins->hspi, data.data(), data.size(), 10);
+            SPI_CS_turn_on();
+            NewSPI::bms_wrapper_tx->send_DMA(data);
+            SPI_CS_turn_off();
         }
         static void SPI_receive(std::span<uint8_t> buffer) {
-            //NewSPI::bms_wrapper->receive(buffer);
-            // HAL_SPI_Transmit(&NewSPI::bms_spi_pins->hspi, buffer.data(), buffer.size(), 10);
+            NewSPI::bms_wrapper_rx->listen(buffer);    
         }
-        static void SPI_CS_turn_on(void) { DO::bms_cs->turn_on(); }
-        static void SPI_CS_turn_off(void) { DO::bms_cs->turn_off(); }
+        // Active low me dice el chat, habra que ver
+        static void SPI_CS_turn_on(void) { DO::cs_tx->turn_off(); }
+        static void SPI_CS_turn_off(void) { DO::cs_tx->turn_on(); }
         static int32_t get_tick(void) { return GetMicroseconds(); }
         static constexpr int32_t tick_resolution_us{500};
         static constexpr int32_t period_us{READING_PERIOD_US};

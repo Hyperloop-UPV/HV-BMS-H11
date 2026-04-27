@@ -18,7 +18,6 @@ class IMD {
     using IC_Type =
         ST_LIB::InputCapture<timer_imd, GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>;
     inline static IC_Type* ic{nullptr};
-    inline static std::optional<IC_Type> ic_instance{std::nullopt};
     inline static DigitalOutputDomain::Instance* pow{nullptr};
     inline static DigitalInputDomain::Instance* ok{nullptr};
     inline static float freq{};

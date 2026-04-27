@@ -7,24 +7,16 @@
 - `nucleo-*`
 - `board-*`
 
-List all presets:
-
-```sh
-cmake --list-presets
-```
-
 ## 2. Build for Simulator
 
 ```sh
-cmake --preset simulator
-cmake --build --preset simulator
+./hyper build main --preset simulator
 ```
 
 With sanitizers:
 
 ```sh
-cmake --preset simulator-asan
-cmake --build --preset simulator-asan
+./hyper build main --preset simulator-asan
 ```
 
 ## 3. Build for MCU
@@ -32,13 +24,19 @@ cmake --build --preset simulator-asan
 Example:
 
 ```sh
-cmake --preset board-debug-eth-ksz8041 -DBOARD_NAME=TEST
-cmake --build --preset board-debug-eth-ksz8041
+./hyper build main --preset board-debug-eth-ksz8041 --board-name TEST
 ```
 
 The build output is copied to:
 
 - `out/build/latest.elf`
+
+If the selected `BOARD_NAME` enables packet code generation, the build also regenerates:
+
+- `Core/Inc/Communications/Packets/DataPackets.hpp`
+- `Core/Inc/Communications/Packets/OrderPackets.hpp`
+
+These headers are generated artifacts, not hand-maintained source files. They are gitignored and should not be edited or committed.
 
 ## 4. Debug from VSCode
 
@@ -57,3 +55,9 @@ Useful tasks in `.vscode/tasks.json`:
 - `MCU | OpenOCD | Start Server`
 - `MCU | OpenOCD | RTT Console`
 - `MCU | ST-LINK | Start GDB Server`
+
+## 5. Example Guides
+
+Per-example build and validation guides live in:
+
+- [`docs/examples/README.md`](../examples/README.md)

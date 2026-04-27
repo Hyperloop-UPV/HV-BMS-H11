@@ -1,10 +1,10 @@
 #pragma once
 
-#include "ADCLinearSensor.hpp"
 #include "../../../deps/LTC6810-Driver/Inc/BMS.hpp"
+#include "ADCLinearSensor.hpp"
 #include "BatteryPack.hpp"
-#include "SDC.hpp"
 #include "IMD.hpp"
+#include "SDC.hpp"
 
 #define BATTERIES_CONNECTED 1
 #define N_BATTERIES 16
@@ -20,7 +20,7 @@ class Sensors {
     static constexpr float CURRENT_SLOPE{89.94180359377545};
     static constexpr float CURRENT_OFFSET{-151.40450651439056};
 
-public:
+   public:
     inline static ADCLinearSensor voltage_sensor{VOLTAGE_SLOPE, VOLTAGE_OFFSET};
 
     inline static ADCLinearSensor current_sensor{CURRENT_SLOPE, CURRENT_OFFSET};

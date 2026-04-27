@@ -13,7 +13,7 @@
 #include "ST-LIB.hpp"
 
 class HVBMS {
-public:
+   public:
     inline static DataPackets::gsm_status current_gsm_state{DataPackets::gsm_status::CONNECTING};
 
     static void update();
@@ -21,33 +21,26 @@ public:
     inline static bool prueba{false};
 
     // Crear estados
-    static constexpr auto connecting_state = make_state(
-        DataPackets::gsm_status::CONNECTING,
-        Transition<DataPackets::gsm_status>{
-            DataPackets::gsm_status::OPERATIONAL,
-            []() { return OrderPackets::control_station_tcp->is_connected(); }
-        }
-    );
+    static constexpr auto connecting_state =
+        make_state(DataPackets::gsm_status::CONNECTING,
+                   Transition<DataPackets::gsm_status>{
+                       DataPackets::gsm_status::OPERATIONAL,
+                       []() { return OrderPackets::control_station_tcp->is_connected(); }});
 
-    static constexpr auto operational_state = make_state(
-        DataPackets::gsm_status::OPERATIONAL,
-        Transition<DataPackets::gsm_status>{
-            DataPackets::gsm_status::FAULT,
-            []() { return !OrderPackets::control_station_tcp->is_connected(); }
-        }
-    );
+    static constexpr auto operational_state =
+        make_state(DataPackets::gsm_status::OPERATIONAL,
+                   Transition<DataPackets::gsm_status>{
+                       DataPackets::gsm_status::FAULT,
+                       []() { return !OrderPackets::control_station_tcp->is_connected(); }});
 
     static constexpr auto fault_state = make_state(DataPackets::gsm_status::FAULT);
 
     // Crear maquina de estados
     static inline constinit StateMachine<DataPackets::gsm_status, 3U, 2U> state_machine =
         []() consteval {
-            StateMachine<DataPackets::gsm_status, 3U, 2U> bms_sm = make_state_machine(
-                DataPackets::gsm_status::CONNECTING,
-                connecting_state,
-                operational_state,
-                fault_state
-            );
+            StateMachine<DataPackets::gsm_status, 3U, 2U> bms_sm =
+                make_state_machine(DataPackets::gsm_status::CONNECTING, connecting_state,
+                                   operational_state, fault_state);
 
             // Acciones ON ENTRY
             // CONNECTING
@@ -57,8 +50,7 @@ public:
                     Sensors::batteries.start();
                     DO::sdc_fw_fault->turn_on();
                 },
-                connecting_state
-            );
+                connecting_state);
 
             // OPERATIONAL
             bms_sm.add_enter_action([]() { DO::operational_led->turn_on(); }, operational_state);
@@ -72,17 +64,13 @@ public:
                     DO::operational_led->turn_off();
                     DO::fault_led->turn_on();
                 },
-                fault_state
-            );
+                fault_state);
 
             // Acciones CÍCLICAS
             using namespace std::chrono_literals;
             // CONNECTING
-            bms_sm.add_cyclic_action(
-                []() { Actuators::toggle_operational_led(); },
-                300ms,
-                connecting_state
-            );
+            bms_sm.add_cyclic_action([]() { Actuators::toggle_operational_led(); }, 300ms,
+                                     connecting_state);
             bms_sm.add_cyclic_action([]() { Sensors::update_sensors(); }, 10ms, connecting_state);
 
             // OPERATIONAL

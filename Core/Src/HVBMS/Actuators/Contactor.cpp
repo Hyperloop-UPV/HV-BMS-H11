@@ -15,11 +15,11 @@ void Contactor::open() {
 
 // hay que mirar si es reset o set
 bool Contactor::is_open() {
-    if (input->read() == GPIO_PinState::GPIO_PIN_SET) {
-        return true;
-    } else {
-        return false;
-    }
+    if (input->read() == GPIO_PinState::GPIO_PIN_SET)
+        state = true;
+    else 
+        state = false;
+    return state;
  }
 
 void Contactor::close() {
@@ -31,7 +31,10 @@ void Contactor::close() {
 
 bool Contactor::is_closed() {
     if (input->read() == GPIO_PinState::GPIO_PIN_RESET)
-        return true;
+        state = true;
     else
-        return false;
+        state = false;
+    return state;
 }
+
+bool& Contactor::get_state() { return state; }

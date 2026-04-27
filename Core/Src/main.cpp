@@ -21,8 +21,9 @@ constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "00:80
 
 using myBoard = ST_LIB::Board<eth, led_PG13, led_PG9, contactor_PD8, contactor_PD9, contactor_PD10,
                               contactor_PB14, aux_contactor_PD12, aux_contactor_PG2,
-                              aux_contactor_PD13, aux_contactor_PD14, sdc_PB4, adc_PA3, adc_PA5,
-                              timer_us_tick_def, timer_imd, sdc_PB5, imd_enable_PE11, imd_ok_PE12>;
+                              aux_contactor_PD13, aux_contactor_PD14, sdc_PB4, adc_PA4, adc_PA5,
+                              timer_us_tick_def, timer_imd, sdc_PB5, imd_enable_PE11, imd_ok_PE12, cs_tx_PE4, bms_spi_tx,
+                              bms_spi_rx, spi_enable_PE3>;
 
 int main(void) {
     Hard_fault_check();
@@ -34,8 +35,9 @@ int main(void) {
     DO::contactor_discharge = &myBoard::instance_of<contactor_PD10>();
     DO::contactor_precharge = &myBoard::instance_of<contactor_PB14>();
     DO::sdc_fw_fault = &myBoard::instance_of<sdc_PB4>();
-    //DO::bms_cs = &myBoard::instance_of<bms_cs_pin>();
-    //DO::imd_bypass = &myBoard::instance_of<imd_PF5>();
+    DO::cs_tx = &myBoard::instance_of<cs_tx_PE4>();
+    DO::spi_enable = &myBoard::instance_of<spi_enable_PE3>();
+    // DO::imd_bypass = &myBoard::instance_of<imd_PF5>();
     DO::imd_enable = &myBoard::instance_of<imd_enable_PE11>();
 
     DI::imd_ok = &myBoard::instance_of<imd_ok_PE12>();
@@ -44,23 +46,24 @@ int main(void) {
     DI::aux_contactor_high = &myBoard::instance_of<aux_contactor_PD14>();
     DI::aux_contactor_precharge = &myBoard::instance_of<aux_contactor_PG2>();
 
-    ADC::adc_voltage_ch1 = &myBoard::instance_of<adc_PA3>();
+    ADC::adc_voltage_ch2 = &myBoard::instance_of<adc_PA4>();
     ADC::adc_current = &myBoard::instance_of<adc_PA5>();
 
-    //NewSPI::bms_spi_pins = &myBoard::instance_of<bms_spi3>();
-    //NewSPI::bms_wrapper.emplace(*NewSPI::bms_spi_pins);
+    NewSPI::cs_tx_pin = &myBoard::instance_of<bms_spi_tx>();
+    NewSPI::bms_wrapper_tx.emplace(*NewSPI::cs_tx_pin);
+    NewSPI::bms_wrapper_rx.emplace(myBoard::instance_of<bms_spi_rx>());
 
     auto eth_instance = &myBoard::instance_of<eth>();
 
     TimerWrapper<timer_us_tick_def> us_timer = get_timer_instance(myBoard, timer_us_tick_def);
     GlobalTimer::global_us_timer = us_timer.instance->tim;
-    us_timer.set_prescaler((uint16_t)(us_timer.get_clock_frequency() / 1000'000) -1);
+    us_timer.set_prescaler((uint16_t)(us_timer.get_clock_frequency() / 1000'000) - 1);
     us_timer.counter_enable();
 
     GlobalTimer::input_timer = get_timer_instance(myBoard, timer_imd);
-    //GlobalTimer::input_timer
-     //   .get_input_capture<GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>();
-    SDC::sdc_interrupt = &myBoard::instance_of<sdc_PB5>();  // hay que hacer esto con un bind y tenerlo privado
+
+    SDC::sdc_interrupt =
+        &myBoard::instance_of<sdc_PB5>();  // hay que hacer esto con un bind y tenerlo privado
 
     Actuators::init();
     Sensors::init();

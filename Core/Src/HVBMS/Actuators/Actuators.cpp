@@ -12,6 +12,8 @@ void Actuators::init() {
     contactor_precharge = Contactor{DO::contactor_precharge, DI::aux_contactor_precharge, true};
     contactor_low = Contactor{DO::contactor_low, DI::aux_contactor_low, true};
     contactor_high = Contactor{DO::contactor_high, DI::aux_contactor_high, true};
+
+    Scheduler::register_task(50000, Actuators::update_contactors);
 }
 
 void Actuators::open_HV() {
@@ -51,3 +53,19 @@ bool Actuators::is_precharging() {
 }
 
 void Actuators::toggle_operational_led() { DO::operational_led->toggle(); }
+
+bool& Actuators::get_contactor_low_state() { return contactor_low.get_state(); }
+
+bool& Actuators::get_contactor_high_state() { return contactor_high.get_state(); }
+
+bool& Actuators::get_contactor_discharge_state() { return contactor_discharge.get_state(); }
+
+bool& Actuators::get_contactor_precharge_state() { return contactor_precharge.get_state(); }
+
+
+void Actuators::update_contactors(){
+    contactor_discharge.is_open();
+    contactor_precharge.is_open();
+    contactor_low.is_open();
+    contactor_high.is_open();
+}

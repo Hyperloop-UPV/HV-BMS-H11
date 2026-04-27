@@ -36,6 +36,10 @@ void HVBMS::update() {
     if (OrderPackets::open_contactors_flag) {
         OrderPackets::open_contactors_flag = false;
         Actuators::open_HV();
+        if (OrderPackets::bypass_imd_flag) {
+            // OrderPackets::bypass_imd_flag = false;
+            // DO::imd_bypass->toggle(); no tengo bypass aqui
+        }
         Scheduler::cancel_timeout(id_timeout_precharge);
         Scheduler::unregister_task(id_check_precharge);
     }
