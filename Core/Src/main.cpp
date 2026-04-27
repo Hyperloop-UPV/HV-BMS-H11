@@ -23,7 +23,7 @@ using myBoard = ST_LIB::Board<eth, led_PG13, led_PG9, contactor_PD8, contactor_P
                               contactor_PB14, aux_contactor_PD12, aux_contactor_PG2,
                               aux_contactor_PD13, aux_contactor_PD14, sdc_PB4, adc_PA4, adc_PA5,
                               timer_us_tick_def, timer_imd, sdc_PB5, imd_enable_PE11, imd_ok_PE12, cs_tx_PE4, bms_spi_tx,
-                              bms_spi_rx>;
+                              bms_spi_rx, spi_enable_PE3>;
 
 int main(void) {
     Hard_fault_check();
@@ -36,6 +36,7 @@ int main(void) {
     DO::contactor_precharge = &myBoard::instance_of<contactor_PB14>();
     DO::sdc_fw_fault = &myBoard::instance_of<sdc_PB4>();
     DO::cs_tx = &myBoard::instance_of<cs_tx_PE4>();
+    DO::spi_enable = &myBoard::instance_of<spi_enable_PE3>();
     // DO::imd_bypass = &myBoard::instance_of<imd_PF5>();
     DO::imd_enable = &myBoard::instance_of<imd_enable_PE11>();
 

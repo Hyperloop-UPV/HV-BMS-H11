@@ -16,9 +16,11 @@ constexpr DigitalOutputDomain::DigitalOutput contactor_PB14{ST_LIB::PB14};
 constexpr DigitalOutputDomain::DigitalOutput sdc_PB4{ST_LIB::PB4};
 
 constexpr DigitalOutputDomain::DigitalOutput cs_tx_PE4{ST_LIB::PE4}; 
+constexpr DigitalOutputDomain::DigitalOutput spi_enable_PE3{ST_LIB::PE3};
 
 // constexpr DigitalOutputDomain::DigitalOutput imd_PF5{ST_LIB::PF5}; No encuentro bypass
 constexpr DigitalOutputDomain::DigitalOutput imd_enable_PE11{ST_LIB::PE11};
+
 
 namespace DO {
 inline DigitalOutputDomain::Instance* operational_led;
@@ -31,6 +33,7 @@ inline DigitalOutputDomain::Instance* sdc_fw_fault;
 inline DigitalOutputDomain::Instance* cs_tx;
 // inline DigitalOutputDomain::Instance* imd_bypass;
 inline DigitalOutputDomain::Instance* imd_enable;
+inline DigitalOutputDomain::Instance* spi_enable;
 };  // namespace DO
 
 using ST_LIB::DigitalInputDomain;

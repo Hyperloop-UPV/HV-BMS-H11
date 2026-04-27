@@ -6,6 +6,7 @@ void Sensors::init() {
     imd.bind(DO::imd_enable, DI::imd_ok);
 
     NewSPI::bms_wrapper_tx.emplace(*NewSPI::cs_tx_pin);
+    DO::spi_enable->turn_on();
     sdc.enable();
 
     Scheduler::register_task(10000, []() { Sensors::update_batteries(); });
