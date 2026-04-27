@@ -4,6 +4,7 @@ void Sensors::init() {
     voltage_sensor.bind(ADC::adc_voltage_ch2);
     current_sensor.bind(ADC::adc_current);
     imd.bind(DO::imd_enable, DI::imd_ok);
+    imd.power_on();
 
     NewSPI::bms_wrapper_tx.emplace(*NewSPI::cs_tx_pin);
     DO::spi_enable->turn_on();
@@ -22,4 +23,5 @@ void Sensors::update_batteries() {
 void Sensors::update_sensors() {
     voltage_sensor.read();
     current_sensor.read();
+    imd.read();
 }
