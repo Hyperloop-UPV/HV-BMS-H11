@@ -61,12 +61,12 @@ constexpr TimerDomain::Timer timer_us_tick_def{{
 }};
 
 namespace GlobalTimer{
-constexpr TimerPin ic_pin = {
-    .af = TimerAF::InputCapture, .pin = ST_LIB::PF7, .channel = TimerChannel::CHANNEL_1};
+inline constexpr TimerPin ic_pin = {
+    .af = TimerAF::InputCapture, .pin = ST_LIB::PF7, .channel = TimerChannel::CHANNEL_2};
 };
 
 
-constexpr TimerDomain::Timer timer_imd{{
+inline constexpr TimerDomain::Timer timer_imd{{
     .request = TimerRequest::GeneralPurpose32bit_23
 }, GlobalTimer::ic_pin};
 
