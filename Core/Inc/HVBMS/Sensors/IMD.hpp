@@ -21,17 +21,17 @@ class IMD {
     inline static IC_Type* ic{nullptr};
     inline static DigitalInputDomain::Instance* ok{nullptr};
     inline static DigitalOutputDomain::Instance* pow{nullptr};
-    inline static float freq{};
-    inline static float duty{};
     inline static uint16_t debouncing_timeout{Scheduler::INVALID_ID};
     inline static bool enabled{false};
-
-   public:
+    
+    public:
     inline static GPIO_PinState ok_status{GPIO_PIN_SET};
-
+    
     inline static bool is_ok{true};
     inline static DataPackets::imd_status status{DataPackets::imd_status::FAST_EVAL};
     inline static float resistance{};
+    inline static float freq{};
+    inline static float duty{};
 
     static void bind(DigitalOutputDomain::Instance* pow_pin,
                      DigitalInputDomain::Instance* ok_pin) {
