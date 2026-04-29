@@ -19,32 +19,36 @@ class IMD {
     using IC_Type =
         ST_LIB::InputCapture<timer_imd, GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_1>;
     inline static IC_Type* ic{nullptr};
+    inline static DigitalInputDomain::Instance* ok{nullptr};
     inline static DigitalOutputDomain::Instance* pow{nullptr};
     inline static float freq{};
     inline static float duty{};
-    
-    public:
-     inline static EXTIDomain::Instance* ok{nullptr};
-     inline static GPIO_PinState ok_status{GPIO_PIN_SET};
+    inline static uint16_t debouncing_timeout{Scheduler::INVALID_ID};
+    inline static bool enabled{false};
 
-     inline static bool is_ok{true};
-     inline static DataPackets::imd_status status{DataPackets::imd_status::FAST_EVAL};
-     inline static float resistance{};
+   public:
+    inline static GPIO_PinState ok_status{GPIO_PIN_SET};
 
-     static void bind(DigitalOutputDomain::Instance* pow_pin) {
-         pow = pow_pin;
-         static auto ic_instance =
-             GlobalTimer::input_timer
-                 .get_input_capture<GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_1>();
-         ic = &ic_instance;
-         ic->turn_on();
-     }
+    inline static bool is_ok{true};
+    inline static DataPackets::imd_status status{DataPackets::imd_status::FAST_EVAL};
+    inline static float resistance{};
+
+    static void bind(DigitalOutputDomain::Instance* pow_pin,
+                     DigitalInputDomain::Instance* ok_pin) {
+        ok = ok_pin;
+        pow = pow_pin;
+        static auto ic_instance =
+            GlobalTimer::input_timer
+                .get_input_capture<GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_1>();
+        ic = &ic_instance;
+        ic->turn_on();
+    }
 
     static void power_on() { pow->turn_on(); }
 
     static void calculate_resistance() { resistance = ((90 * 1.2e6) / (duty - 5)) - 1.2e6; }
 
-    static void imd_callback();
+    static void imd_fault();
 
     static void read() {
         if (ok == nullptr || ic == nullptr) {
@@ -55,6 +59,16 @@ class IMD {
 
         if (ok_status == GPIO_PinState::GPIO_PIN_RESET) {
             is_ok = false;
+            if (!enabled) {
+                if (debouncing_timeout == Scheduler::INVALID_ID) {
+                    debouncing_timeout = Scheduler::set_timeout(10000, []() {
+                        enabled = true;
+                        debouncing_timeout = Scheduler::INVALID_ID;
+                    });
+                }
+                return;
+            }
+            imd_fault();
         } else {
             is_ok = true;
         }
@@ -65,31 +79,27 @@ class IMD {
             status = DataPackets::imd_status::SHORTCIRCUIT;
             return;
         }
-        if (lessError(freq, 10, 5)) {
+        else if (lessError(freq, 10, 5)) {
             status = DataPackets::imd_status::NORMAL;
             calculate_resistance();
             return;
         }
-        if (lessError(freq, 20, 5)) {
+        else if (lessError(freq, 20, 5)) {
             status = DataPackets::imd_status::UNDERVOLTAGE;
             calculate_resistance();
             return;
         }
-        if (lessError(freq, 30, 5)) {
+        else if (lessError(freq, 30, 5)) {
             status = DataPackets::imd_status::FAST_EVAL;
             return;
         }
-        if (lessError(freq, 40, 5)) {
+        else if (lessError(freq, 40, 5)) {
             status = DataPackets::imd_status::EQUIPMENT_FAULT;
             return;
         }
-        if (lessError(freq, 50, 5)) {
+        else if (lessError(freq, 50, 5)) {
             status = DataPackets::imd_status::GROUNDING_FAULT;
             return;
         }
     }
-};
-
-constexpr EXTIDomain::Device imd_ok_PA12 {
-    ST_LIB::PA12, EXTIDomain::Trigger::BOTH_EDGES, IMD::imd_callback
 };

@@ -3,7 +3,7 @@
 void Sensors::init() {
     voltage_sensor.bind(ADC::adc_voltage);
     current_sensor.bind(ADC::adc_current);
-    imd.bind(DO::imd_pow);
+    imd.bind(DO::imd_pow, DI::imd_ok);
     imd.power_on();
 
     sdc.enable();

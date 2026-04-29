@@ -38,6 +38,8 @@ int main(void) {
     DO::imd_bypass = &myBoard::instance_of<imd_PF5>();
     DO::imd_pow = &myBoard::instance_of<imd_pow_PE2>();
 
+    DI::imd_ok = &myBoard::instance_of<imd_ok_PA12>();
+
     ADC::adc_voltage = &myBoard::instance_of<adc_PF13>();
     ADC::adc_current = &myBoard::instance_of<adc_PA0>();
 
@@ -57,8 +59,6 @@ int main(void) {
 
     SDC::sdc_interrupt =
         &myBoard::instance_of<sdc_PB12>();  // Por culpa de C++ tengo que tener esto fuera
-
-    IMD::ok = &myBoard::instance_of<imd_ok_PA12>();  // Y esto más de lo mismo
 
     Actuators::init();
     Sensors::init();

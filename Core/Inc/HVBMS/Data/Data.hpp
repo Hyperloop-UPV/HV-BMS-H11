@@ -28,6 +28,13 @@ inline DigitalOutputDomain::Instance* imd_bypass;
 inline DigitalOutputDomain::Instance* imd_pow;
 };  // namespace DO
 
+using ST_LIB::DigitalInputDomain;
+
+constexpr DigitalInputDomain::DigitalInput imd_ok_PA12{ST_LIB::PA12};
+
+namespace DI {
+inline DigitalInputDomain::Instance* imd_ok;
+}
 
 using ST_LIB::ADCDomain;
 

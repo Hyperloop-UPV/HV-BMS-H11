@@ -5,11 +5,13 @@
 using ST_LIB::EXTIDomain;
 
 class SDC {
+    private:
+        inline static bool enabled{false};
+        inline static uint16_t debouncing_timeout{Scheduler::INVALID_ID};
     public:
-    inline static EXTIDomain::Instance* sdc_interrupt{nullptr};
-    inline static DataPackets::sdc_status status{DataPackets::sdc_status::DISENGAGED};
-    inline static bool enabled{false};
-    inline static uint16_t debouncing_timeout{Scheduler::INVALID_ID};
+        inline static EXTIDomain::Instance* sdc_interrupt{nullptr};
+        inline static DataPackets::sdc_status status{DataPackets::sdc_status::DISENGAGED};
+
 
     static void enable() {
         if (!sdc_interrupt)
