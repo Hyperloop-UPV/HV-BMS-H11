@@ -20,17 +20,17 @@ class IMD {
         ST_LIB::InputCapture<timer_imd, GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>;
     inline static IC_Type* ic{nullptr};
     inline static DigitalOutputDomain::Instance* pow{nullptr};
-    inline static float freq{};
-    inline static float duty{};
     inline static bool enabled{false};
     inline static uint16_t debouncing_timeout{Scheduler::INVALID_ID};
-
-   public:
+    
+    public:
     inline static EXTIDomain::Instance* ok{nullptr};
-
+    
     inline static bool is_ok{true};
     inline static DataPackets::imd_status status{DataPackets::imd_status::FAST_EVAL};
     inline static float resistance{};
+    inline static float duty{};
+    inline static float freq{};
 
     static void bind(DigitalOutputDomain::Instance* pow_pin) {
         pow = pow_pin;

@@ -147,9 +147,9 @@ public:
         driver_diagnosis_packet = new HeapPacket(static_cast<uint16_t>(942), &driver_reading_period);
     }
 
-    static void imd_init(imd_status &imd_status, float &imd_resistance, bool &imd_is_ok)
+    static void imd_init(imd_status &imd_status, float &imd_resistance, bool &imd_is_ok, float &imd_duty, float &imd_freq)
     {
-        imd_packet = new HeapPacket(static_cast<uint16_t>(943), &imd_status, &imd_resistance, &imd_is_ok);
+        imd_packet = new HeapPacket(static_cast<uint16_t>(943), &imd_status, &imd_resistance, &imd_is_ok, &imd_duty, &imd_freq);
     }
 
     static void minimum_soc_init(float &minimum_soc)

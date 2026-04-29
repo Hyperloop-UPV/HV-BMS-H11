@@ -231,7 +231,7 @@ void Comms::start() {
 
     DataPackets::sdc_init(Sensors::sdc.status);
 
-    DataPackets::imd_init(Sensors::imd.status, Sensors::imd.resistance, Sensors::imd.is_ok);
+    DataPackets::imd_init(Sensors::imd.status, Sensors::imd.resistance, Sensors::imd.is_ok, Sensors::imd.duty, Sensors::imd.freq);
 
     DataPackets::minimum_soc_init(Sensors::batteries.minimum_soc);
 
