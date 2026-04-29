@@ -318,7 +318,7 @@ public:
             DataPackets::control_station_udp->send_packet(*DataPackets::imd_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::minimum_soc_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::batteries_data_packet);
-            //DataPackets::control_station_udp->send_packet(*DataPackets::contactor_status_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::contactor_status_packet);
             });
     }
 
