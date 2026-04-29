@@ -1,5 +1,4 @@
 #pragma once
-
 #include "HVBMS/Data/Data.hpp"
 #include "ST-LIB_LOW.hpp"
 
@@ -44,6 +43,8 @@ class IMD {
 
     static void calculate_resistance() { resistance = ((90 * 1.2e6) / (duty - 5)) - 1.2e6; }
 
+    static void imd_fault();
+
     static void read() {
         if (ok == nullptr || ic == nullptr) {
             return;
@@ -53,35 +54,36 @@ class IMD {
 
         if (ok_status == GPIO_PinState::GPIO_PIN_RESET) {
             is_ok = false;
+            imd_fault();
         } else {
             is_ok = true;
         }
 
         freq = ic->get_frequency();
         duty = ic->get_duty_cycle();
-        if (lessError(freq, 0, 0.1)) {
+        if (lessError(freq, 0, 5)) {
             status = DataPackets::imd_status::SHORTCIRCUIT;
             return;
         }
-        if (lessError(freq, 10, 0.1)) {
+        if (lessError(freq, 10, 5)) {
             status = DataPackets::imd_status::NORMAL;
             calculate_resistance();
             return;
         }
-        if (lessError(freq, 20, 0.1)) {
+        if (lessError(freq, 20, 5)) {
             status = DataPackets::imd_status::UNDERVOLTAGE;
             calculate_resistance();
             return;
         }
-        if (lessError(freq, 30, 0.1)) {
+        if (lessError(freq, 30, 5)) {
             status = DataPackets::imd_status::FAST_EVAL;
             return;
         }
-        if (lessError(freq, 40, 0.1)) {
+        if (lessError(freq, 40, 5)) {
             status = DataPackets::imd_status::EQUIPMENT_FAULT;
             return;
         }
-        if (lessError(freq, 50, 0.1)) {
+        if (lessError(freq, 50, 5)) {
             status = DataPackets::imd_status::GROUNDING_FAULT;
             return;
         }

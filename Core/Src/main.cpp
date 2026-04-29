@@ -19,7 +19,6 @@ constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "00:80
 #error "No PHY selected for Ethernet pinset selection"
 #endif
 
-
 using myBoard =
     ST_LIB::Board<eth, led_PG7, led_PG8, contactor_PG14, contactor_PG12, contactor_PD4,
                   contactor_PF4, sdc_PA11, adc_PF13, adc_PA0, timer_us_tick_def, timer_imd,
@@ -55,7 +54,7 @@ int main(void) {
     us_timer.counter_enable();
 
     GlobalTimer::input_timer = get_timer_instance(myBoard, timer_imd);
-    
+
     GlobalTimer::input_timer.instance->tim->PSC = 600;
 
     SDC::sdc_interrupt =
@@ -63,7 +62,6 @@ int main(void) {
 
     Actuators::init();
     Sensors::init();
-
 
     HVBMS::add_protections();
 

@@ -86,7 +86,7 @@ public:
             bms_sm.add_cyclic_action([]() { Sensors::update_sensors(); }, 10ms, connecting_state);
 
             // OPERATIONAL
-            bms_sm.add_cyclic_action([]() { Sensors::update_sensors(); }, 1ms, operational_state);
+            bms_sm.add_cyclic_action([]() { Sensors::update_sensors(); }, 10ms, operational_state);
             // FAULT
             bms_sm.add_cyclic_action([]() { Sensors::update_sensors(); }, 10ms, fault_state);
 

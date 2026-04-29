@@ -1,5 +1,4 @@
 #include "HVBMS/Sensors/SDC.hpp"
-
 #include "HVBMS/HVBMS.hpp"
 
 void SDC::sdc_callback() {
