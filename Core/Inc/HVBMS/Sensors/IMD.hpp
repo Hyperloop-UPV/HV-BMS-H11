@@ -22,10 +22,11 @@ class IMD {
     inline static DigitalOutputDomain::Instance* pow{nullptr};
     inline static float freq{};
     inline static float duty{};
+    inline static bool enabled{false};
+    inline static uint16_t debouncing_timeout{Scheduler::INVALID_ID};
 
    public:
     inline static EXTIDomain::Instance* ok{nullptr};
-    inline static GPIO_PinState ok_status{GPIO_PIN_SET};
 
     inline static bool is_ok{true};
     inline static DataPackets::imd_status status{DataPackets::imd_status::FAST_EVAL};
@@ -51,39 +52,31 @@ class IMD {
             return;
         }
 
-        ok_status = ok->read();
-
-        if (ok_status == GPIO_PinState::GPIO_PIN_RESET) {
-            is_ok = false;
-        } else {
-            is_ok = true;
-        }
-
         freq = ic->get_frequency();
         duty = ic->get_duty_cycle();
         if (lessError(freq, 0, 5)) {
             status = DataPackets::imd_status::SHORTCIRCUIT;
             return;
         }
-        if (lessError(freq, 10, 5)) {
+        else if (lessError(freq, 10, 5)) {
             status = DataPackets::imd_status::NORMAL;
             calculate_resistance();
             return;
         }
-        if (lessError(freq, 20, 5)) {
+        else if (lessError(freq, 20, 5)) {
             status = DataPackets::imd_status::UNDERVOLTAGE;
             calculate_resistance();
             return;
         }
-        if (lessError(freq, 30, 5)) {
+        else if (lessError(freq, 30, 5)) {
             status = DataPackets::imd_status::FAST_EVAL;
             return;
         }
-        if (lessError(freq, 40, 5)) {
+        else if (lessError(freq, 40, 5)) {
             status = DataPackets::imd_status::EQUIPMENT_FAULT;
             return;
         }
-        if (lessError(freq, 50, 5)) {
+        else if (lessError(freq, 50, 5)) {
             status = DataPackets::imd_status::GROUNDING_FAULT;
             return;
         }

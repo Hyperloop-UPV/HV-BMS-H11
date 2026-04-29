@@ -5,15 +5,16 @@
 using ST_LIB::EXTIDomain;
 
 class SDC {
-public:
-    inline static EXTIDomain::Instance* sdc_interrupt{nullptr};
-    inline static DataPackets::sdc_status status{DataPackets::sdc_status::DISENGAGED};
+   private:
     inline static bool enabled{false};
     inline static uint16_t debouncing_timeout{Scheduler::INVALID_ID};
 
+   public:
+    inline static EXTIDomain::Instance* sdc_interrupt{nullptr};
+    inline static DataPackets::sdc_status status{DataPackets::sdc_status::DISENGAGED};
+
     static void enable() {
-        if (!sdc_interrupt)
-            return;
+        if (!sdc_interrupt) return;
 
         if (sdc_interrupt->read() == GPIO_PinState::GPIO_PIN_SET) {
             status = DataPackets::sdc_status::ENGAGED;
@@ -24,8 +25,5 @@ public:
     static void sdc_callback();
 };
 
-constexpr EXTIDomain::Device sdc_PB5{
-    ST_LIB::PB5,
-    EXTIDomain::Trigger::BOTH_EDGES,
-    SDC::sdc_callback
-};
+constexpr EXTIDomain::Device sdc_PB5{ST_LIB::PB5, EXTIDomain::Trigger::BOTH_EDGES,
+                                     SDC::sdc_callback};
