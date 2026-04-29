@@ -1,78 +1,155 @@
 #include "main.h"
 
-#include "HVBMS/HVBMS.hpp"
-#include "HVBMS/Sensors/Sensors.hpp"
 #include "ST-LIB.hpp"
 
-using ST_LIB::EthernetDomain;
+using namespace ST_LIB;
 
-#if defined(USE_PHY_LAN8742)
-constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "00:80:e1:00:01:07",
-                                              "192.168.1.7", "255.255.0.0");
-#elif defined(USE_PHY_LAN8700)
-constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "50:50:71:40:01:67",
-                                              "192.168.1.7", "255.255.255.0");
-#elif defined(USE_PHY_KSZ8041)
-constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "00:80:e1:00:01:07",
-                                              "192.168.1.7", "255.255.0.0");
+constexpr auto led = ST_LIB::DigitalOutputDomain::DigitalOutput(ST_LIB::PF13);
+
+#if 0
+// TODO: This pin doesn't output a pwm???
+constexpr ST_LIB::TimerPin pwm_out_pin{
+    .af = ST_LIB::TimerAF::PWM,
+    .pin = ST_LIB::PC12,
+    .channel = ST_LIB::TimerChannel::CHANNEL_1,
+};
+constexpr ST_LIB::TimerDomain::Timer timer_pwm_out_def{{
+    .request = ST_LIB::TimerRequest::GeneralPurpose_15,
+}, pwm_out_pin};
 #else
-#error "No PHY selected for Ethernet pinset selection"
+constexpr ST_LIB::TimerPin pwm_out_pin{
+    .af = ST_LIB::TimerAF::PWM,
+    .pin = ST_LIB::PF6,
+    .channel = ST_LIB::TimerChannel::CHANNEL_1,
+};
+constexpr ST_LIB::TimerDomain::Timer timer_pwm_out_def{
+    {
+        .request = ST_LIB::TimerRequest::GeneralPurpose_16,
+    },
+    pwm_out_pin};
+
 #endif
 
-using myBoard =
-    ST_LIB::Board<eth, led_PG7, led_PG8, contactor_PG14, contactor_PG12, contactor_PD4,
-                  contactor_PF4, sdc_PA11, adc_PF13, adc_PA0, timer_us_tick_def, timer_imd,
-                  bms_spi3, bms_cs_pin, sdc_PB12, imd_PF5, imd_pow_PE2, imd_ok_PA12>;
+#if 0
+constexpr ST_LIB::TimerPin pwm_in_pin{
+    .af = ST_LIB::TimerAF::PWM,
+    .pin = ST_LIB::PG12,
+    .channel = ST_LIB::TimerChannel::CHANNEL_1,
+};
+constexpr ST_LIB::TimerDomain::Timer timer_pwm_in_def{{
+    .request = ST_LIB::TimerRequest::GeneralPurpose32bit_23,
+}, pwm_in_pin};
 
+constexpr ST_LIB::TimerPin ic_pin{
+    .af = ST_LIB::TimerAF::InputCapture,
+    .pin = ST_LIB::PC9,
+    .channel = ST_LIB::TimerChannel::CHANNEL_4,
+};
+constexpr ST_LIB::TimerDomain::Timer timer_ic_def{{
+    .request = ST_LIB::TimerRequest::GeneralPurpose_3,
+}, ic_pin};
+#else
+constexpr ST_LIB::TimerPin pwm_in_pin{
+    .af = ST_LIB::TimerAF::PWM,
+    .pin = ST_LIB::PF11,
+    .channel = ST_LIB::TimerChannel::CHANNEL_1,
+};
+constexpr ST_LIB::TimerDomain::Timer timer_pwm_in_def{
+    {
+        .request = ST_LIB::TimerRequest::GeneralPurpose32bit_24,
+    },
+    pwm_in_pin};
+
+constexpr ST_LIB::TimerPin ic_pin{
+    .af = ST_LIB::TimerAF::InputCapture,
+    .pin = ST_LIB::PF7,
+    .channel = ST_LIB::TimerChannel::CHANNEL_2,
+};
+constexpr ST_LIB::TimerDomain::Timer timer_ic_def{
+    {
+        .request = ST_LIB::TimerRequest::GeneralPurpose32bit_23,
+    },
+    ic_pin};
+#endif
+
+using MainBoard = ST_LIB::Board<timer_pwm_out_def, timer_pwm_in_def, timer_ic_def>;
+
+TIM_TypeDef* tim3 = TIM3;
+#if !defined(EXAMPLE_ADC) && !defined(EXAMPLE_ETHERNET) && !defined(EXAMPLE_MPU) && \
+    !defined(EXAMPLE_HARDFAULT) && !defined(EXAMPLE_EXTI)
 int main(void) {
-    Hard_fault_check();
-    myBoard::init();
-    DO::operational_led = &myBoard::instance_of<led_PG8>();
-    DO::fault_led = &myBoard::instance_of<led_PG7>();
-    DO::contactor_high = &myBoard::instance_of<contactor_PG12>();
-    DO::contactor_low = &myBoard::instance_of<contactor_PG14>();
-    DO::contactor_precharge = &myBoard::instance_of<contactor_PD4>();
-    DO::contactor_discharge = &myBoard::instance_of<contactor_PF4>();
-    DO::sdc_obccu = &myBoard::instance_of<sdc_PA11>();
-    DO::bms_cs = &myBoard::instance_of<bms_cs_pin>();
-    DO::imd_bypass = &myBoard::instance_of<imd_PF5>();
-    DO::imd_pow = &myBoard::instance_of<imd_pow_PE2>();
+    MainBoard::init();
 
-    DI::imd_ok = &myBoard::instance_of<imd_ok_PA12>();
-
-    ADC::adc_voltage = &myBoard::instance_of<adc_PF13>();
-    ADC::adc_current = &myBoard::instance_of<adc_PA0>();
-
-    NewSPI::bms_spi_pins = &myBoard::instance_of<bms_spi3>();
-    NewSPI::bms_wrapper.emplace(*NewSPI::bms_spi_pins);
-
-    auto eth_instance = &myBoard::instance_of<eth>();
-
-    TimerWrapper<timer_us_tick_def> us_timer = get_timer_instance(myBoard, timer_us_tick_def);
-    GlobalTimer::global_us_timer = us_timer.instance->tim;
-    us_timer.set_prescaler(us_timer.get_clock_frequency() / 1000'000);
-    us_timer.counter_enable();
-
-    GlobalTimer::input_timer = get_timer_instance(myBoard, timer_imd);
-
-    SDC::sdc_interrupt =
-        &myBoard::instance_of<sdc_PB12>();  // hay que hacer esto con un bind y tenerlo privado
-
-    Actuators::init();
-    Sensors::init();
-
-    HVBMS::add_protections();
-
-    HVBMS::state_machine.start();
-
-    while (1) {
-        eth_instance->update();
-        HVBMS::update();
-        Scheduler::update();
+    if (!tim3) {
+        ErrorHandler("asodnoadn");
     }
-}
 
-void Error_Handler(void) {
+    auto pwm_out_tim = get_timer_instance(MainBoard, timer_pwm_out_def);
+    auto pwm_in_tim = get_timer_instance(MainBoard, timer_pwm_in_def);
+    auto ic_tim = get_timer_instance(MainBoard, timer_ic_def);
+
+    auto pwm_out = pwm_out_tim.template get_pwm<pwm_out_pin>();
+    auto pwm_in = pwm_in_tim.template get_pwm<pwm_in_pin>();
+    auto ic = ic_tim.template get_input_capture<ic_pin, ST_LIB::TimerChannel::CHANNEL_1>();
+
+    // pwm_out.configure(100*1000, 20.0f);
+    // pwm_out.turn_on();
+    // for(;;);
+
+#define PWM_FREQ 10
+    // #define PWM_FREQ 280
+    ic_tim.instance->tim->PSC = 2000;
+#define PWM_DUTY 20.0f  // 3.5f
+                        // #define PWM_DUTY 3.5f
+    pwm_in.configure(PWM_FREQ, PWM_DUTY);
+    pwm_in.turn_on();
+
+    HAL_Delay(10);
+
+    ic.turn_on();
+
+    HAL_Delay(4000);
+
+    uint32_t freq = ic.get_frequency();
+    float duty = ic.get_duty_cycle();
+    pwm_out.configure(freq, duty);
+    pwm_out.turn_on();
+
+    float inc_dec = 1.0f;
+    duty = 11.0f;
+    while (1) {
+#define PARTY_MODE 0
+#if PARTY_MODE != 0
+        HAL_Delay(200);
+        duty += inc_dec;
+        if ((duty > 90.0f) || (duty < 10.0f)) inc_dec = -inc_dec;
+
+        pwm_in.set_duty_cycle(duty);
+        pwm_out.set_duty_cycle(ic.get_duty_cycle());
+        pwm_out.set_timer_frequency(ic.get_frequency());
+#elif 0
+        pwm_in.set_duty_cycle(duty);
+        HAL_Delay(10);
+        float duty_recieved = ic.get_duty_cycle();
+        pwm_out.set_duty_cycle(duty_recieved);
+        duty -= inc_dec;
+        inc_dec *= 0.75f;
+        if (duty == 0.0f) break;
+#else
+        (void)inc_dec;
+        float duty_tmp = ic.get_duty_cycle();
+        float freq_tmp = ic.get_frequency();
+        pwm_out.set_duty_cycle(duty_tmp);
+
+        pwm_out.set_timer_frequency(freq_tmp);
+#endif
+    }
+
+    for (;;);
+}
+#endif
+
+extern "C" void Error_Handler(void) {
     ErrorHandler("HAL error handler triggered");
     while (1) {
     }

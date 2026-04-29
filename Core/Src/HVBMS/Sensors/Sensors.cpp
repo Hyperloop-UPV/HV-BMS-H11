@@ -4,7 +4,8 @@ void Sensors::init() {
     voltage_sensor.bind(ADC::adc_voltage);
     current_sensor.bind(ADC::adc_current);
     imd.bind(DO::imd_pow, DI::imd_ok);
-
+    imd.power_on();
+    
     sdc.enable();
 
     Scheduler::register_task(10000, []() { Sensors::update_batteries(); });
@@ -20,4 +21,5 @@ void Sensors::update_batteries() {
 void Sensors::update_sensors() {
     voltage_sensor.read();
     current_sensor.read();
+    imd.read();
 }
