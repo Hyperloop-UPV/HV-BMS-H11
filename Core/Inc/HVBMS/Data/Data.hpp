@@ -18,7 +18,6 @@ constexpr DigitalOutputDomain::DigitalOutput sdc_PB4{ST_LIB::PB4};
 constexpr DigitalOutputDomain::DigitalOutput cs_tx_PE4{ST_LIB::PE4}; 
 constexpr DigitalOutputDomain::DigitalOutput spi_enable_PE3{ST_LIB::PE3};
 
-// constexpr DigitalOutputDomain::DigitalOutput imd_PF5{ST_LIB::PF5}; No encuentro bypass
 constexpr DigitalOutputDomain::DigitalOutput imd_enable_PE11{ST_LIB::PE11};
 
 
@@ -31,21 +30,18 @@ inline DigitalOutputDomain::Instance* contactor_precharge;
 inline DigitalOutputDomain::Instance* contactor_discharge;
 inline DigitalOutputDomain::Instance* sdc_fw_fault;
 inline DigitalOutputDomain::Instance* cs_tx;
-// inline DigitalOutputDomain::Instance* imd_bypass;
 inline DigitalOutputDomain::Instance* imd_enable;
 inline DigitalOutputDomain::Instance* spi_enable;
 };  // namespace DO
 
 using ST_LIB::DigitalInputDomain;
 
-constexpr DigitalInputDomain::DigitalInput imd_ok_PE12{ST_LIB::PE12};
 constexpr DigitalInputDomain::DigitalInput aux_contactor_PG2{ST_LIB::PG2};
 constexpr DigitalInputDomain::DigitalInput aux_contactor_PD12{ST_LIB::PD12};
 constexpr DigitalInputDomain::DigitalInput aux_contactor_PD13{ST_LIB::PD13};
 constexpr DigitalInputDomain::DigitalInput aux_contactor_PD14{ST_LIB::PD14};
 
 namespace DI {
-inline DigitalInputDomain::Instance* imd_ok;
 inline DigitalInputDomain::Instance* aux_contactor_low;
 inline DigitalInputDomain::Instance* aux_contactor_high;
 inline DigitalInputDomain::Instance* aux_contactor_precharge;

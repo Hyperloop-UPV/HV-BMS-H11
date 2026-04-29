@@ -3,14 +3,14 @@
 void Sensors::init() {
     voltage_sensor.bind(ADC::adc_voltage_ch2);
     current_sensor.bind(ADC::adc_current);
-    imd.bind(DO::imd_enable, DI::imd_ok);
+    imd.bind(DO::imd_enable);
     imd.power_on();
 
     NewSPI::bms_wrapper_tx.emplace(*NewSPI::cs_tx_pin);
     DO::spi_enable->turn_on();
     sdc.enable();
 
-    //Scheduler::register_task(10000, []() { Sensors::update_batteries(); });
+    Scheduler::register_task(10000, []() { Sensors::update_batteries(); });
 }
 
 void Sensors::update_batteries() {

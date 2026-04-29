@@ -37,10 +37,8 @@ int main(void) {
     DO::sdc_fw_fault = &myBoard::instance_of<sdc_PB4>();
     DO::cs_tx = &myBoard::instance_of<cs_tx_PE4>();
     DO::spi_enable = &myBoard::instance_of<spi_enable_PE3>();
-    // DO::imd_bypass = &myBoard::instance_of<imd_PF5>();
     DO::imd_enable = &myBoard::instance_of<imd_enable_PE11>();
 
-    DI::imd_ok = &myBoard::instance_of<imd_ok_PE12>();
     DI::aux_contactor_discharge = &myBoard::instance_of<aux_contactor_PD12>();
     DI::aux_contactor_low = &myBoard::instance_of<aux_contactor_PD13>();
     DI::aux_contactor_high = &myBoard::instance_of<aux_contactor_PD14>();
@@ -62,8 +60,12 @@ int main(void) {
 
     GlobalTimer::input_timer = get_timer_instance(myBoard, timer_imd);
 
+    GlobalTimer::input_timer.instance->tim->PSC = 600;
+
     SDC::sdc_interrupt =
-        &myBoard::instance_of<sdc_PB5>();  // hay que hacer esto con un bind y tenerlo privado
+        &myBoard::instance_of<sdc_PB5>();  // Por culpa de C++ tengo que tener esto fuera
+
+    IMD::ok = &myBoard::instance_of<imd_ok_PE12>();  // Y esto más de lo mismo
 
     Actuators::init();
     Sensors::init();
