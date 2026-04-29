@@ -11,7 +11,7 @@ constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "00:80
                                               "192.168.1.7", "255.255.0.0");
 #elif defined(USE_PHY_LAN8700)
 constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "50:50:71:40:01:67",
-                                              "192.168.1.7", "255.255.255.0");
+                                              "192.168.1.7", "255.255.0.0");
 #elif defined(USE_PHY_KSZ8041)
 constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "00:80:e1:00:01:07",
                                               "192.168.1.7", "255.255.0.0");
@@ -19,20 +19,11 @@ constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "00:80
 #error "No PHY selected for Ethernet pinset selection"
 #endif
 
-constexpr ST_LIB::TimerPin pwm_in_pin{
-    .af = ST_LIB::TimerAF::PWM,
-    .pin = ST_LIB::PF11,
-    .channel = ST_LIB::TimerChannel::CHANNEL_1,
-};
-constexpr ST_LIB::TimerDomain::Timer timer_pwm_in_def{{
-    .request = ST_LIB::TimerRequest::GeneralPurpose32bit_24,
-                                                      },
-                                                      pwm_in_pin};
 
 using myBoard =
     ST_LIB::Board<eth, led_PG7, led_PG8, contactor_PG14, contactor_PG12, contactor_PD4,
                   contactor_PF4, sdc_PA11, adc_PF13, adc_PA0, timer_us_tick_def, timer_imd,
-                  bms_spi3, bms_cs_pin, sdc_PB12, imd_PF5, imd_pow_PE2, imd_ok_PA12, timer_pwm_in_def>;
+                  bms_spi3, bms_cs_pin, sdc_PB12, imd_PF5, imd_pow_PE2, imd_ok_PA12>;
 
 int main(void) {
     Hard_fault_check();
@@ -65,23 +56,14 @@ int main(void) {
 
     GlobalTimer::input_timer = get_timer_instance(myBoard, timer_imd);
     
-    [[maybe_unused]]uint32_t clock = GlobalTimer::input_timer.get_clock_frequency();
-    GlobalTimer::input_timer.instance->tim->PSC = 100;
+    GlobalTimer::input_timer.instance->tim->PSC = 600;
+
     SDC::sdc_interrupt =
         &myBoard::instance_of<sdc_PB12>();  // hay que hacer esto con un bind y tenerlo privado
 
     Actuators::init();
     Sensors::init();
 
-
-    auto pwm_in_tim = get_timer_instance(myBoard, timer_pwm_in_def);
-
-    auto pwm_in = pwm_in_tim.template get_pwm<pwm_in_pin>();
-
-    
-
-    pwm_in.configure(10, 20.0f);
-    pwm_in.turn_on();
 
     HVBMS::add_protections();
 
