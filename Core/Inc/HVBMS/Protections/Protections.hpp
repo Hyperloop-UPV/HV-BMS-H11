@@ -3,13 +3,13 @@
 #include "HVBMS/Sensors/Sensors.hpp"
 
 
-
 inline constexpr auto dc_voltage_protection =
-    ST_LIB::Protections::protection<"dc_bus_voltage", Sensors::voltage_sensor.reading>(
+    Protections::protection<"dc_bus_voltage", Sensors::voltage_sensor.reading>(
         Protections::Rules::above(410.0f)
     );
 
 inline constexpr auto dc_current_protection =
-    ST_LIB::Protections::protection<"dc_bus_current", Sensors::current_sensor.reading>(
-        Protections::Rules::above(120.0f)
-    );
+    Protections::protection<"dc_bus_current", Sensors::current_sensor.reading>(
+        Protections::Rules::above(120.0f));
+
+

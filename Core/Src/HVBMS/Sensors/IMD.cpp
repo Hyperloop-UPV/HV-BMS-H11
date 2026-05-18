@@ -17,5 +17,5 @@ void IMD::imd_callback() {
         }
         return;
     }
-    HVBMS::state_machine.force_change_state((std::size_t)DataPackets::gsm_status::FAULT);
+    FAULT("IMD fault");
 }

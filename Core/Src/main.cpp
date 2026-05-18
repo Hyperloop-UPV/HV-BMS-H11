@@ -22,7 +22,8 @@ constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "67:67
 #error "No PHY selected for Ethernet pinset selection"
 #endif
 
-using myBoard = ST_LIB::Board<DefaultFaultPolicy, eth, dc_voltage_protection, dc_current_protection, led_PG13, led_PG9, contactor_PD8, contactor_PD9, contactor_PD10,
+
+using myBoard = ST_LIB::Board<ST_LIB::FaultPolicy<HVBMS::state_machine, &HVBMS::on_fault_enter>, eth, dc_current_protection, dc_voltage_protection, led_PG13, led_PG9, contactor_PD8, contactor_PD9, contactor_PD10,
                               contactor_PB14, aux_contactor_PD12, aux_contactor_PG2,
                               aux_contactor_PD13, aux_contactor_PD14, sdc_PB4, adc_PA4, adc_PA5,
                               timer_us_tick_def, timer_imd, sdc_PB5, imd_enable_PE11, imd_ok_PE12, cs_tx_PE4, bms_spi_tx,
@@ -87,7 +88,7 @@ int main(void) {
 }
 
 void Error_Handler(void) {
-    ErrorHandler("HAL error handler triggered");
+    FAULT("HAL error handler triggered");
     while (1) {
     }
 }

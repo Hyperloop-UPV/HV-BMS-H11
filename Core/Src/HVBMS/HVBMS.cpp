@@ -16,7 +16,7 @@ void HVBMS::update() {
             id_timeout_precharge = Scheduler::set_timeout(4000000, []() {
                 Scheduler::unregister_task(id_check_precharge);
                 Actuators::open_HV();
-                ErrorHandler("Precharge failed");
+                FAULT("Precharge failed");
             });
 
             id_check_precharge = Scheduler::register_task(100, []() {
@@ -49,49 +49,10 @@ void HVBMS::update() {
     current_gsm_state = state_machine.get_current_state();
 }
 
-void HVBMS::add_protections() {
-    // ProtectionManager::link_state_machine(
-    //     HVBMS::state_machine,
-    //     static_cast<uint8_t>(DataPackets::gsm_status::FAULT)
-    // );
 
-    // ProtectionManager::add_standard_protections();
-
-    // // DC bus voltage
-    // ProtectionManager::_add_protection(
-    //     &Sensors::voltage_sensor.reading,
-    //     Boundary<float, ABOVE>{410}
-    // );
-
-    // // Batteries current
-    // ProtectionManager::_add_protection(
-    //     &Sensors::current_sensor.reading,
-    //     Boundary<float, OUT_OF_RANGE>{-15, 70}
-    // );
-
-    //Scheduler::register_task(1000, []() { ProtectionManager::check_protections(); });
-
-    // // SoCs
-    // auto id{1};
-    // for (auto& [_, soc] : Sensors::batteries.SoCs) {
-    //     ProtectionManager::_add_protection(&soc, Boundary<float, BELOW>(0.24));
-    //     ++id;
-    // }
-
-    // // Batteries conversion rate
-    // id = 1;
-    // for (auto& battery : Sensors::batteries.batteries) {
-    //     ProtectionManager::_add_protection(&battery.conv_rate, Boundary<float, BELOW>(0.5));
-
-    //     ++id;
-    // }
-
-    // // Batteries temperature
-    // id = 1;
-    // for (auto& temp : Sensors::batteries.batteries_temp) {
-    //     ProtectionManager::_add_protection(&temp[0], Boundary<float, ABOVE>(60.0));
-    //     ProtectionManager::_add_protection(&temp[1], Boundary<float, ABOVE>(60.0));
-    //     ++id;
-    // }
-    //ProtectionManager::initialize();
+void HVBMS::on_fault_enter(){
+    Actuators::open_HV();
+    DO::sdc_fw_fault->turn_off();
+    DO::operational_led->turn_off();
+    DO::fault_led->turn_on();
 }

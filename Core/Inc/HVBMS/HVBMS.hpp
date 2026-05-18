@@ -16,7 +16,7 @@ class HVBMS {
     inline static DataPackets::gsm_status current_gsm_state{DataPackets::gsm_status::CONNECTING};
 
     static void update();
-    static void add_protections();
+    static void on_fault_enter();
     inline static bool prueba{false};
 
     // Crear estados
@@ -27,19 +27,15 @@ class HVBMS {
                        []() { return OrderPackets::control_station_tcp->is_connected(); }});
 
     static constexpr auto operational_state =
-        make_state(DataPackets::gsm_status::OPERATIONAL,
-                   Transition<DataPackets::gsm_status>{
-                       DataPackets::gsm_status::FAULT,
-                       []() { return !OrderPackets::control_station_tcp->is_connected(); }});
+        make_state(DataPackets::gsm_status::OPERATIONAL);
 
-    static constexpr auto fault_state = make_state(DataPackets::gsm_status::FAULT);
 
     // Crear maquina de estados
-    static inline constinit StateMachine<DataPackets::gsm_status, 3U, 2U> state_machine =
+    static inline constinit StateMachine<DataPackets::gsm_status, 2U, 1U> state_machine =
         []() consteval {
-            StateMachine<DataPackets::gsm_status, 3U, 2U> bms_sm =
+            StateMachine<DataPackets::gsm_status, 2U, 1U> bms_sm =
                 make_state_machine(DataPackets::gsm_status::CONNECTING, connecting_state,
-                                   operational_state, fault_state);
+                                   operational_state);
 
             // Acciones ON ENTRY
             // CONNECTING
@@ -54,17 +50,6 @@ class HVBMS {
             // OPERATIONAL
             bms_sm.add_enter_action([]() { DO::operational_led->turn_on(); }, operational_state);
 
-            // FAULT
-            bms_sm.add_enter_action(
-                []() {
-                    Actuators::open_HV();
-                    DO::sdc_fw_fault->turn_off();
-                    //ProtectionManager::propagate_fault();
-                    DO::operational_led->turn_off();
-                    DO::fault_led->turn_on();
-                },
-                fault_state);
-
             // Acciones CÍCLICAS
             using namespace std::chrono_literals;
             // CONNECTING
@@ -74,8 +59,6 @@ class HVBMS {
 
             // OPERATIONAL
             bms_sm.add_cyclic_action([]() { Sensors::update_sensors(); }, 1ms, operational_state);
-            // FAULT
-            bms_sm.add_cyclic_action([]() { Sensors::update_sensors(); }, 10ms, fault_state);
 
             return bms_sm;
         }();

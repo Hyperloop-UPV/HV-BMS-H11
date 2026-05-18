@@ -18,5 +18,5 @@ void SDC::sdc_callback() {
         return;
     }
 
-    HVBMS::state_machine.force_change_state((std::size_t)DataPackets::gsm_status::FAULT);
+    FAULT("SDC fault");
 }

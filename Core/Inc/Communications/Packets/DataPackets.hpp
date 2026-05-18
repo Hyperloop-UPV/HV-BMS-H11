@@ -14,7 +14,6 @@ public:
     {
         CONNECTING = 0,
         OPERATIONAL = 1,
-        FAULT = 2,
     };
     enum class imd_status : uint8_t
     {
@@ -203,88 +202,88 @@ public:
     static void start()
     {
         if (batteries_voltage_packet == nullptr) {
-            ErrorHandler("Packet batteries_voltage not initialized");
+            PANIC("Packet batteries_voltage not initialized");
         }
         if (voltage_sensor_packet == nullptr) {
-            ErrorHandler("Packet voltage_sensor not initialized");
+            PANIC("Packet voltage_sensor not initialized");
         }
         if (current_sensor_packet == nullptr) {
-            ErrorHandler("Packet current_sensor not initialized");
+            PANIC("Packet current_sensor not initialized");
         }
         if (sdc_packet == nullptr) {
-            ErrorHandler("Packet sdc not initialized");
+            PANIC("Packet sdc not initialized");
         }
         if (battery_1_packet == nullptr) {
-            ErrorHandler("Packet battery_1 not initialized");
+            PANIC("Packet battery_1 not initialized");
         }
         if (battery_2_packet == nullptr) {
-            ErrorHandler("Packet battery_2 not initialized");
+            PANIC("Packet battery_2 not initialized");
         }
         if (battery_3_packet == nullptr) {
-            ErrorHandler("Packet battery_3 not initialized");
+            PANIC("Packet battery_3 not initialized");
         }
         if (battery_4_packet == nullptr) {
-            ErrorHandler("Packet battery_4 not initialized");
+            PANIC("Packet battery_4 not initialized");
         }
         if (battery_5_packet == nullptr) {
-            ErrorHandler("Packet battery_5 not initialized");
+            PANIC("Packet battery_5 not initialized");
         }
         if (battery_6_packet == nullptr) {
-            ErrorHandler("Packet battery_6 not initialized");
+            PANIC("Packet battery_6 not initialized");
         }
         if (battery_7_packet == nullptr) {
-            ErrorHandler("Packet battery_7 not initialized");
+            PANIC("Packet battery_7 not initialized");
         }
         if (battery_8_packet == nullptr) {
-            ErrorHandler("Packet battery_8 not initialized");
+            PANIC("Packet battery_8 not initialized");
         }
         if (battery_9_packet == nullptr) {
-            ErrorHandler("Packet battery_9 not initialized");
+            PANIC("Packet battery_9 not initialized");
         }
         if (battery_10_packet == nullptr) {
-            ErrorHandler("Packet battery_10 not initialized");
+            PANIC("Packet battery_10 not initialized");
         }
         if (battery_11_packet == nullptr) {
-            ErrorHandler("Packet battery_11 not initialized");
+            PANIC("Packet battery_11 not initialized");
         }
         if (battery_12_packet == nullptr) {
-            ErrorHandler("Packet battery_12 not initialized");
+            PANIC("Packet battery_12 not initialized");
         }
         if (battery_13_packet == nullptr) {
-            ErrorHandler("Packet battery_13 not initialized");
+            PANIC("Packet battery_13 not initialized");
         }
         if (battery_14_packet == nullptr) {
-            ErrorHandler("Packet battery_14 not initialized");
+            PANIC("Packet battery_14 not initialized");
         }
         if (battery_15_packet == nullptr) {
-            ErrorHandler("Packet battery_15 not initialized");
+            PANIC("Packet battery_15 not initialized");
         }
         if (battery_16_packet == nullptr) {
-            ErrorHandler("Packet battery_16 not initialized");
+            PANIC("Packet battery_16 not initialized");
         }
         if (battery_17_packet == nullptr) {
-            ErrorHandler("Packet battery_17 not initialized");
+            PANIC("Packet battery_17 not initialized");
         }
         if (battery_18_packet == nullptr) {
-            ErrorHandler("Packet battery_18 not initialized");
+            PANIC("Packet battery_18 not initialized");
         }
         if (general_state_machine_packet == nullptr) {
-            ErrorHandler("Packet general_state_machine not initialized");
+            PANIC("Packet general_state_machine not initialized");
         }
         if (driver_diagnosis_packet == nullptr) {
-            ErrorHandler("Packet driver_diagnosis not initialized");
+            PANIC("Packet driver_diagnosis not initialized");
         }
         if (imd_packet == nullptr) {
-            ErrorHandler("Packet imd not initialized");
+            PANIC("Packet imd not initialized");
         }
         if (minimum_soc_packet == nullptr) {
-            ErrorHandler("Packet minimum_soc not initialized");
+            PANIC("Packet minimum_soc not initialized");
         }
         if (batteries_data_packet == nullptr) {
-            ErrorHandler("Packet batteries_data not initialized");
+            PANIC("Packet batteries_data not initialized");
         }
         if (contactor_status_packet == nullptr) {
-            ErrorHandler("Packet contactor_status not initialized");
+            PANIC("Packet contactor_status not initialized");
         }
         
 
