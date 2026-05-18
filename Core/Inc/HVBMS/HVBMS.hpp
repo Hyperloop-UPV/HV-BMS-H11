@@ -9,7 +9,6 @@
 #include "HVBMS/Sensors/SDC.hpp"
 #include "HVBMS/Sensors/Sensors.hpp"
 #include "Protections/Protection.hpp"
-#include "Protections/ProtectionManager.hpp"
 #include "ST-LIB.hpp"
 
 class HVBMS {
@@ -60,7 +59,7 @@ class HVBMS {
                 []() {
                     Actuators::open_HV();
                     DO::sdc_fw_fault->turn_off();
-                    ProtectionManager::propagate_fault();
+                    //ProtectionManager::propagate_fault();
                     DO::operational_led->turn_off();
                     DO::fault_led->turn_on();
                 },

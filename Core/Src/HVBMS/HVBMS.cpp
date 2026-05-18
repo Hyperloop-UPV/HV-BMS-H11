@@ -43,19 +43,19 @@ void HVBMS::update() {
         //DO::imd_bypass->toggle(); no tengo bypass aqui
     }
     if (OrderPackets::FAULT_flag) {
-        ProtectionManager::fault_and_propagate();
+        //ProtectionManager::fault_and_propagate();
     }
 
     current_gsm_state = state_machine.get_current_state();
 }
 
 void HVBMS::add_protections() {
-    ProtectionManager::link_state_machine(
-        HVBMS::state_machine,
-        static_cast<uint8_t>(DataPackets::gsm_status::FAULT)
-    );
+    // ProtectionManager::link_state_machine(
+    //     HVBMS::state_machine,
+    //     static_cast<uint8_t>(DataPackets::gsm_status::FAULT)
+    // );
 
-    ProtectionManager::add_standard_protections();
+    // ProtectionManager::add_standard_protections();
 
     // // DC bus voltage
     // ProtectionManager::_add_protection(
@@ -93,5 +93,5 @@ void HVBMS::add_protections() {
     //     ProtectionManager::_add_protection(&temp[1], Boundary<float, ABOVE>(60.0));
     //     ++id;
     // }
-    ProtectionManager::initialize();
+    //ProtectionManager::initialize();
 }
