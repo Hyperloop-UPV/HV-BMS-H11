@@ -10,7 +10,7 @@ void IMD::imd_callback() {
     }
     if (!enabled) {
         if (debouncing_timeout == Scheduler::INVALID_ID) {
-            debouncing_timeout = Scheduler::set_timeout(200000, []() {
+            debouncing_timeout = Scheduler::set_timeout(2000000, []() {
                 enabled = true;
                 debouncing_timeout = Scheduler::INVALID_ID;
             });
