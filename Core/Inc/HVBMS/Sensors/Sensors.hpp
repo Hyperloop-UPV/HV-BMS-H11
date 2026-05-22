@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../../deps/LTC6810-Driver/Inc/BMS.hpp"
-#include "ADCLinearSensor.hpp"
+#include "HVBMS/Data/Data.hpp"
 #include "BatteryPack.hpp"
 #include "IMD.hpp"
 #include "SDC.hpp"
@@ -21,9 +21,10 @@ class Sensors {
     static constexpr float CURRENT_OFFSET{-151.40450651439056};
 
    public:
-    inline static ADCLinearSensor voltage_sensor{VOLTAGE_SLOPE, VOLTAGE_OFFSET};
 
-    inline static ADCLinearSensor current_sensor{CURRENT_SLOPE, CURRENT_OFFSET};
+    inline static LinearSensor<float> voltage_sensor { *ADC::adc_voltage_ch2, VOLTAGE_SLOPE, VOLTAGE_OFFSET, ADC_reading::voltage_reading};
+
+    inline static LinearSensor<float> current_sensor { *ADC::adc_current, CURRENT_SLOPE, CURRENT_OFFSET, ADC_reading::current_reading};
 
     inline static SDC sdc;
 

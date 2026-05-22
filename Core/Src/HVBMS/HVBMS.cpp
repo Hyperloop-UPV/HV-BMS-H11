@@ -20,7 +20,7 @@ void HVBMS::update() {
             });
 
             id_check_precharge = Scheduler::register_task(100, []() {
-                if (Sensors::voltage_sensor.reading / Sensors::batteries.total_voltage >= 0.95) {
+                if (ADC_reading::voltage_reading / Sensors::batteries.total_voltage >= 0.95) {
                     Scheduler::cancel_timeout(id_timeout_precharge);
                     Actuators::close_HV();
                     Scheduler::unregister_task(id_check_precharge);
@@ -43,7 +43,7 @@ void HVBMS::update() {
         //DO::imd_bypass->toggle(); no tengo bypass aqui
     }
     if (OrderPackets::FAULT_flag) {
-        //ProtectionManager::fault_and_propagate();
+        FAULT("FAULT order triggered");
     }
 
     current_gsm_state = state_machine.get_current_state();

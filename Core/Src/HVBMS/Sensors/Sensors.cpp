@@ -1,13 +1,14 @@
 #include "HVBMS/Sensors/Sensors.hpp"
 
 void Sensors::init() {
-    voltage_sensor.bind(ADC::adc_voltage_ch2);
-    current_sensor.bind(ADC::adc_current);
     imd.bind(DO::imd_enable);
     imd.power_on();
 
     NewSPI::bms_wrapper_tx.emplace(*NewSPI::cs_tx_pin);
+    
     DO::spi_enable->turn_on();
+    
+    DO::sdc_fw_fault->turn_on();
     sdc.enable();
 
     Scheduler::register_task(10000, []() { Sensors::update_batteries(); });
@@ -16,7 +17,7 @@ void Sensors::init() {
 void Sensors::update_batteries() {
     if constexpr (BATTERIES_CONNECTED) {
         batteries.update();
-        batteries.read(current_sensor.reading);
+        batteries.read(ADC_reading::current_reading);
     }
 }
 

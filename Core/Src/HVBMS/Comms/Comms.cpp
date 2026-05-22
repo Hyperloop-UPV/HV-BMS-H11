@@ -221,9 +221,9 @@ void Comms::start() {
 
     DataPackets::batteries_voltage_init(Sensors::batteries.total_voltage);
 
-    DataPackets::voltage_sensor_init(Sensors::voltage_sensor.reading);
+    DataPackets::voltage_sensor_init(ADC_reading::voltage_reading);
 
-    DataPackets::current_sensor_init(Sensors::current_sensor.reading);
+    DataPackets::current_sensor_init(ADC_reading::current_reading);
 
     DataPackets::general_state_machine_init(HVBMS::current_gsm_state);
 

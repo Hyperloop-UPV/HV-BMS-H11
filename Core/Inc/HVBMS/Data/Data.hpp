@@ -50,11 +50,26 @@ inline DigitalInputDomain::Instance* aux_contactor_discharge;
 
 using ST_LIB::ADCDomain;
 
-inline constinit float voltage_reading_ch2{0.0f};
-inline constinit float current_reading{0.0f};
+static float voltage_reading_ch2_raw;
+static float current_reading_raw;
 
-constexpr ADCDomain::ADC adc_PA4{ST_LIB::PA4, voltage_reading_ch2};
-constexpr ADCDomain::ADC adc_PA5{ST_LIB::PA5, current_reading};
+
+
+inline constexpr ADCDomain::ADC adc_PA4{ST_LIB::PA4, voltage_reading_ch2_raw};
+inline constexpr ADCDomain::ADC adc_PA5{ST_LIB::PA5, current_reading_raw};
+
+namespace ADC_reading{
+inline float voltage_reading{0.0f};
+inline float current_reading{0.0f};
+}
+
+inline constexpr auto dc_voltage_protection =
+    Protections::protection<"dc_bus_voltage", ADC_reading::voltage_reading>(
+        Protections::Rules::above(410.0f));
+
+inline constexpr auto dc_current_protection =
+    Protections::protection<"dc_bus_current", ADC_reading::current_reading>(
+        Protections::Rules::above(120.0f));
 
 namespace ADC {
 inline ADCDomain::Instance* adc_voltage_ch2;

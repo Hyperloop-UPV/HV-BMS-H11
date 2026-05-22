@@ -4,7 +4,6 @@
 #include "HVBMS/Actuators/Contactor.hpp"
 #include "HVBMS/Comms/Comms.hpp"
 #include "HVBMS/Data/Data.hpp"
-#include "HVBMS/Sensors/ADCLinearSensor.hpp"
 #include "HVBMS/Sensors/BatteryPack.hpp"
 #include "HVBMS/Sensors/SDC.hpp"
 #include "HVBMS/Sensors/Sensors.hpp"
@@ -43,7 +42,7 @@ class HVBMS {
                 []() {
                     Comms::start();
                     Sensors::batteries.start();
-                    DO::sdc_fw_fault->turn_on();
+                    //DO::sdc_fw_fault->turn_on();
                 },
                 connecting_state);
 

@@ -1,7 +1,6 @@
 #include "main.h"
 
 #include "HVBMS/HVBMS.hpp"
-#include "HVBMS/Protections/Protections.hpp"
 #include "HVBMS/Sensors/Sensors.hpp"
 #include "ST-LIB.hpp"
 
@@ -75,7 +74,7 @@ int main(void) {
     Actuators::init();
     Sensors::init();
 
-    HVBMS::state_machine.start();
+    //HVBMS::state_machine.start();
 
     while (1) {
         FaultController::check_transitions();
