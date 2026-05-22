@@ -1,0 +1,777 @@
+#ifndef BCC_STLIB_H
+#define BCC_STLIB_H
+
+#include "HVBMS/Data/Data.hpp"
+#include "ST-LIB.hpp"
+
+// NOTE: LV-BMS H11 uses 'MC33772C'
+//       HV-BMS H11 uses 'MC33771C'
+// #include "../../../../deps/BCC_SW_Driver/bcc/MC33772C.h"
+
+//#define USE_MC33771C
+#define USE_MC33772C
+
+extern TIM_TypeDef* global_tick_timer;
+extern TIM_TypeDef* timeout_timer;  // This one must be 32 bits
+extern ST_LIB::DigitalOutputDomain::Instance* spi_cs;
+extern ST_LIB::DigitalOutputDomain::Instance* bms_rst;
+extern ST_LIB::SPIDomain::SPIWrapper<spi_def>* spi_wrapper;
+
+inline bool bcc_exceeded_timeout = false;
+
+typedef struct {
+    const uint8_t address;
+    const uint16_t defaultVal;
+    const uint16_t value;
+} bcc_init_reg_t;
+
+#if defined(USE_MC33771C)
+#define MC33771C_INIT_CONF_REG_CNT 59U
+extern bcc_init_reg_t bcc_init_regs[MC33771C_INIT_CONF_REG_CNT];
+#elif defined(USE_MC33772C)
+#define MC33772C_INIT_CONF_REG_CNT 45U
+extern bcc_init_reg_t bcc_init_regs[MC33772C_INIT_CONF_REG_CNT];
+#else
+#error Must define either 'USE_MC33771C' or 'USE_MC33771C'
+#endif
+
+const char* get_bcc_error_string(bcc_status_t status);
+
+void timeout_timer_callback(void* rawinfo);
+
+/*!
+ * @brief Returns SCG system clock frequency.
+ *
+ * @return SCG system clock frequency.
+ */
+uint32_t BCC_MCU_GetSystemClockFreq(void);
+
+/*!
+ * @brief Waits for specified amount of seconds.
+ *
+ * @param delay Number of seconds to wait.
+ */
+void BCC_MCU_WaitSec(uint16_t delay);
+
+/*!
+ * @brief Waits for specified amount of milliseconds.
+ *
+ * @param delay Number of milliseconds to wait.
+ */
+void BCC_MCU_WaitMs(uint16_t delay);
+
+/*!
+ * @brief Waits for specified amount of microseconds.
+ *
+ * @param delay Number of microseconds to wait.
+ */
+void BCC_MCU_WaitUs(uint32_t delay);
+
+/*!
+ * @brief Starts a non-blocking timeout mechanism. After expiration of the time
+ * passed as a parameter, function BCC_MCU_TimeoutExpired should signalize an
+ * expired timeout.
+ *
+ * @param timeoutUs Length of the timeout in microseconds.
+ *
+ * @return Returns BCC_STATUS_TIMEOUT_START in case of error, BCC_STATUS_SUCCESS
+ *         otherwise.
+ */
+bcc_status_t BCC_MCU_StartTimeout(uint32_t timeoutUs);
+
+/*!
+ * @brief Returns state of the timeout mechanism started by the function
+ * BCC_MCU_StartTimeout.
+ *
+ * @return True if timeout expired, false otherwise.
+ */
+bool BCC_MCU_TimeoutExpired(void);
+
+/*!
+ * @brief This function performs one 48b transfer via SPI bus. Intended for SPI
+ * mode only.
+ *
+ * The byte order of buffers is given by BCC_MSG_* macros (in bcc.h).
+ *
+ * @param drvInstance Instance of BCC driver.
+ * @param txBuf       Pointer to TX data buffer (of BCC_MSG_SIZE size).
+ * @param rxBuf       Pointer to RX data buffer (of BCC_MSG_SIZE size).
+ *
+ * @return bcc_status_t Error code.
+ */
+bcc_status_t BCC_MCU_TransferSpi(const uint8_t drvInstance, volatile uint8_t txBuf[],
+                                 volatile uint8_t rxBuf[]);
+
+// NOTE: Unused since we don't use Tpl
+bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance, uint8_t txBuf[], uint8_t rxBuf[],
+                                 const uint16_t rxTrCnt);
+
+#define BCC_MCU_Assert(expr)                            \
+    do {                                                \
+        if (!(expr)) {                                  \
+            FAULT("BCC assert fail: " stringify(expr)); \
+        }                                               \
+    } while (0)
+
+/*!
+ * @brief Writes logic 0 or 1 to the CSB (SPI mode) or CSB_TX pin (TPL mode).
+ *
+ * @param drvInstance Instance of BCC driver.
+ * @param value       Zero or one to be set to CSB (CSB_TX) pin.
+ */
+void BCC_MCU_WriteCsbPin(const uint8_t drvInstance, const uint8_t value);
+
+/*!
+ * @brief Writes logic 0 or 1 to the RST pin.
+ *
+ * @param drvInstance Instance of BCC driver.
+ * @param value       Zero or one to be set to RST pin.
+ */
+void BCC_MCU_WriteRstPin(const uint8_t drvInstance, const uint8_t value);
+
+// NOTE: Unused since we don't use Tpl
+void BCC_MCU_WriteEnPin(const uint8_t drvInstance, const uint8_t value);
+// NOTE: Unused since we don't use Tpl
+uint32_t BCC_MCU_ReadIntbPin(const uint8_t drvInstance);
+
+#ifdef BCC_STLIB_IMPLEMENTATION
+
+const char* get_bcc_error_str(bcc_status_t status) {
+    switch (status) {
+        case BCC_STATUS_SUCCESS:
+            return "BCC Success";
+        case BCC_STATUS_PARAM_RANGE:
+            return "BCC Error: Param out of Range";
+        case BCC_STATUS_SPI_FAIL:
+            return "BCC Error: SPI Fail";
+        case BCC_STATUS_COM_TIMEOUT:
+            return "BCC Error: Communication Timeout";
+        case BCC_STATUS_COM_ECHO:
+            return "BCC Error: Received \"echo\" frame does not correspond to the sent frame";
+        case BCC_STATUS_COM_CRC:
+            return "BCC Error: Wrong CRC in the received SPI frame";
+        case BCC_STATUS_COM_MSG_CNT:
+            return "BCC Error: Received frame has a valid CRC but the message counter value does "
+                   "not match to the expected one";
+        case BCC_STATUS_COM_NULL:
+            return "BCC Error: Invalid request from MCU or else check bcc.h BCC_STATUS_COM_NULL";
+        case BCC_STATUS_DIAG_FAIL:
+            return "BCC Error: You're not allowed to enter diagnostic mode";
+        case BCC_STATUS_EEPROM_ERROR:
+            return "BCC Error: An error occurred during communication to EEPROM";
+        case BCC_STATUS_EEPROM_PRESENT:
+            return "BCC Error: No EEPROM detected";
+        case BCC_STATUS_DATA_RDY:
+            return "BCC Error: A new sequence of conversions is currently running";
+        case BCC_STATUS_TIMEOUT_START:
+            return "BCC Error: Error reported in BCC_MCU_StartTimeout function";
+    }
+    return "BCC Error: Unknown";
+}
+
+void timeout_timer_callback(void* rawinfo) {
+    (void)rawinfo;
+    bcc_exceeded_timeout = true;
+}
+
+uint32_t BCC_MCU_GetSystemClockFreq(void) { return SystemCoreClock; }
+
+void BCC_MCU_WaitSec(uint16_t delay) {
+    uint32_t total = delay * 1000;
+    uint32_t i = 0;
+    for (; i < total; i += UINT16_MAX) {
+        BCC_MCU_WaitMs(i);
+    }
+    BCC_MCU_WaitMs(i - total);
+}
+
+void BCC_MCU_WaitMs(uint16_t delay) {
+    // NOTE: Assume the counter for the timer has started
+    // NOTE: This also assumes the timer is counting in microseconds per CNT step
+    BCC_MCU_Assert((global_tick_timer->CR1 & TIM_CR1_CEN) != 0);
+    BCC_MCU_WaitUs((uint32_t)delay * 1000UL);
+}
+
+void BCC_MCU_WaitUs(uint32_t delay) {
+    // NOTE: Assume the counter for the timer has started
+    // NOTE: This also assumes the timer is counting in microseconds per CNT step
+    // BCC_MCU_Assert((global_tick_timer->CR1 & TIM_CR1_CEN) != 0);
+    uint32_t start = global_tick_timer->CNT;
+    uint32_t end = start + delay;
+    if (start > end) [[unlikely]] {
+        while (global_tick_timer->CNT > end) /* wait */
+            ;
+    }
+    while (global_tick_timer->CNT < end) /* wait */
+        ;
+}
+
+bcc_status_t BCC_MCU_StartTimeout(uint32_t timeoutUs) {
+    bcc_exceeded_timeout = false;
+    timeout_timer->CNT = 0;
+    timeout_timer->ARR = timeoutUs;
+    SET_BIT(timeout_timer->CR1, TIM_CR1_CEN);
+    return BCC_STATUS_SUCCESS;
+}
+
+bool BCC_MCU_TimeoutExpired(void) { return bcc_exceeded_timeout; }
+
+bcc_status_t BCC_MCU_TransferSpi(const uint8_t drvInstance, volatile uint8_t txBuf[],
+                                 volatile uint8_t rxBuf[]) {
+    BCC_MCU_Assert(txBuf != NULL);
+    BCC_MCU_Assert(rxBuf != NULL);
+
+    spi_cs->turn_off();
+    bool ok = spi_wrapper->template transceive(txBuf, rxBuf, BCC_MSG_SIZE);
+    spi_cs->turn_on();
+    return ok ? BCC_STATUS_SUCCESS : BCC_STATUS_SPI_FAIL;
+}
+
+bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance, volatile uint8_t txBuf[],
+                                 volatile uint8_t rxBuf[], const uint16_t rxTrCnt) {
+    return BCC_STATUS_SPI_FAIL;
+}
+
+void BCC_MCU_WriteCsbPin(const uint8_t drvInstance, const uint8_t value) {
+    if (value) {
+        spi_cs->turn_on();
+    } else {
+        spi_cs->turn_off();
+    }
+}
+
+void BCC_MCU_WriteRstPin(const uint8_t drvInstance, const uint8_t value) {
+    // NOTE: this should actually be handled in hv bms (@Jorge_Canut)
+    if (value == 0) {
+        bms_rst->turn_off();
+        HAL_Delay(10);
+    } else {
+        bms_rst->turn_on();
+        HAL_Delay(10);
+    }
+}
+
+void BCC_MCU_WriteEnPin(const uint8_t drvInstance, const uint8_t value) {
+    BCC_MCU_Assert(false && !"Used tpl function when using spi");
+}
+
+uint32_t BCC_MCU_ReadIntbPin(const uint8_t drvInstance) {
+    // BCC_MCU_Assert(false && !"Used tpl function when using spi");
+    return 0;
+}
+
+#ifdef USE_MC33771C
+// TODO (@Jorge_Canut): check these init registers (taken from an example)
+/* address, defaultVal, value */
+bcc_init_reg_t bcc_init_regs[MC33771C_INIT_CONF_REG_CNT] = {
+    {MC33771C_GPIO_CFG1_OFFSET, MC33771C_GPIO_CFG1_POR_VAL, MC33771C_GPIO_CFG1_INIT_VALUE},
+    {MC33771C_GPIO_CFG2_OFFSET, MC33771C_GPIO_CFG2_POR_VAL, MC33771C_GPIO_CFG2_INIT_VALUE},
+    {MC33771C_TH_ALL_CT_OFFSET, MC33771C_TH_ALL_CT_POR_VAL, MC33771C_TH_ALL_CT_INIT_VALUE},
+    {MC33771C_TH_CT14_OFFSET, MC33771C_TH_CT14_POR_VAL, MC33771C_TH_CTX_INIT_VALUE},
+    {MC33771C_TH_CT13_OFFSET, MC33771C_TH_CT13_POR_VAL, MC33771C_TH_CTX_INIT_VALUE},
+    {MC33771C_TH_CT12_OFFSET, MC33771C_TH_CT12_POR_VAL, MC33771C_TH_CTX_INIT_VALUE},
+    {MC33771C_TH_CT11_OFFSET, MC33771C_TH_CT11_POR_VAL, MC33771C_TH_CTX_INIT_VALUE},
+    {MC33771C_TH_CT10_OFFSET, MC33771C_TH_CT10_POR_VAL, MC33771C_TH_CTX_INIT_VALUE},
+    {MC33771C_TH_CT9_OFFSET, MC33771C_TH_CT9_POR_VAL, MC33771C_TH_CTX_INIT_VALUE},
+    {MC33771C_TH_CT8_OFFSET, MC33771C_TH_CT8_POR_VAL, MC33771C_TH_CTX_INIT_VALUE},
+    {MC33771C_TH_CT7_OFFSET, MC33771C_TH_CT7_POR_VAL, MC33771C_TH_CTX_INIT_VALUE},
+    {MC33771C_TH_CT6_OFFSET, MC33771C_TH_CT6_POR_VAL, MC33771C_TH_CTX_INIT_VALUE},
+    {MC33771C_TH_CT5_OFFSET, MC33771C_TH_CT5_POR_VAL, MC33771C_TH_CTX_INIT_VALUE},
+    {MC33771C_TH_CT4_OFFSET, MC33771C_TH_CT4_POR_VAL, MC33771C_TH_CTX_INIT_VALUE},
+    {MC33771C_TH_CT3_OFFSET, MC33771C_TH_CT3_POR_VAL, MC33771C_TH_CTX_INIT_VALUE},
+    {MC33771C_TH_CT2_OFFSET, MC33771C_TH_CT2_POR_VAL, MC33771C_TH_CTX_INIT_VALUE},
+    {MC33771C_TH_CT1_OFFSET, MC33771C_TH_CT1_POR_VAL, MC33771C_TH_CTX_INIT_VALUE},
+    {MC33771C_TH_AN6_OT_OFFSET, MC33771C_TH_AN6_OT_POR_VAL, MC33771C_TH_ANX_OT_INIT_VALUE},
+    {MC33771C_TH_AN5_OT_OFFSET, MC33771C_TH_AN5_OT_POR_VAL, MC33771C_TH_ANX_OT_INIT_VALUE},
+    {MC33771C_TH_AN4_OT_OFFSET, MC33771C_TH_AN4_OT_POR_VAL, MC33771C_TH_ANX_OT_INIT_VALUE},
+    {MC33771C_TH_AN3_OT_OFFSET, MC33771C_TH_AN3_OT_POR_VAL, MC33771C_TH_ANX_OT_INIT_VALUE},
+    {MC33771C_TH_AN2_OT_OFFSET, MC33771C_TH_AN2_OT_POR_VAL, MC33771C_TH_ANX_OT_INIT_VALUE},
+    {MC33771C_TH_AN1_OT_OFFSET, MC33771C_TH_AN1_OT_POR_VAL, MC33771C_TH_ANX_OT_INIT_VALUE},
+    {MC33771C_TH_AN0_OT_OFFSET, MC33771C_TH_AN0_OT_POR_VAL, MC33771C_TH_ANX_OT_INIT_VALUE},
+    {MC33771C_TH_AN6_UT_OFFSET, MC33771C_TH_AN6_UT_POR_VAL, MC33771C_TH_ANX_UT_INIT_VALUE},
+    {MC33771C_TH_AN5_UT_OFFSET, MC33771C_TH_AN5_UT_POR_VAL, MC33771C_TH_ANX_UT_INIT_VALUE},
+    {MC33771C_TH_AN4_UT_OFFSET, MC33771C_TH_AN4_UT_POR_VAL, MC33771C_TH_ANX_UT_INIT_VALUE},
+    {MC33771C_TH_AN3_UT_OFFSET, MC33771C_TH_AN3_UT_POR_VAL, MC33771C_TH_ANX_UT_INIT_VALUE},
+    {MC33771C_TH_AN2_UT_OFFSET, MC33771C_TH_AN2_UT_POR_VAL, MC33771C_TH_ANX_UT_INIT_VALUE},
+    {MC33771C_TH_AN1_UT_OFFSET, MC33771C_TH_AN1_UT_POR_VAL, MC33771C_TH_ANX_UT_INIT_VALUE},
+    {MC33771C_TH_AN0_UT_OFFSET, MC33771C_TH_AN0_UT_POR_VAL, MC33771C_TH_ANX_UT_INIT_VALUE},
+    {MC33771C_TH_ISENSE_OC_OFFSET, MC33771C_TH_ISENSE_OC_POR_VAL, MC33771C_TH_ISENSE_OC_INIT_VALUE},
+    {MC33771C_TH_COULOMB_CNT_MSB_OFFSET, MC33771C_TH_COULOMB_CNT_MSB_POR_VAL,
+     MC33771C_TH_COULOMB_CNT_MSB_INIT_VALUE},
+    {MC33771C_TH_COULOMB_CNT_LSB_OFFSET, MC33771C_TH_COULOMB_CNT_LSB_POR_VAL,
+     MC33771C_TH_COULOMB_CNT_LSB_INIT_VALUE},
+    {MC33771C_CB1_CFG_OFFSET, MC33771C_CB1_CFG_POR_VAL, MC33771C_CBX_CFG_INIT_VALUE},
+    {MC33771C_CB2_CFG_OFFSET, MC33771C_CB2_CFG_POR_VAL, MC33771C_CBX_CFG_INIT_VALUE},
+    {MC33771C_CB3_CFG_OFFSET, MC33771C_CB3_CFG_POR_VAL, MC33771C_CBX_CFG_INIT_VALUE},
+    {MC33771C_CB4_CFG_OFFSET, MC33771C_CB4_CFG_POR_VAL, MC33771C_CBX_CFG_INIT_VALUE},
+    {MC33771C_CB5_CFG_OFFSET, MC33771C_CB5_CFG_POR_VAL, MC33771C_CBX_CFG_INIT_VALUE},
+    {MC33771C_CB6_CFG_OFFSET, MC33771C_CB6_CFG_POR_VAL, MC33771C_CBX_CFG_INIT_VALUE},
+    {MC33771C_CB7_CFG_OFFSET, MC33771C_CB7_CFG_POR_VAL, MC33771C_CBX_CFG_INIT_VALUE},
+    {MC33771C_CB8_CFG_OFFSET, MC33771C_CB8_CFG_POR_VAL, MC33771C_CBX_CFG_INIT_VALUE},
+    {MC33771C_CB9_CFG_OFFSET, MC33771C_CB9_CFG_POR_VAL, MC33771C_CBX_CFG_INIT_VALUE},
+    {MC33771C_CB10_CFG_OFFSET, MC33771C_CB10_CFG_POR_VAL, MC33771C_CBX_CFG_INIT_VALUE},
+    {MC33771C_CB11_CFG_OFFSET, MC33771C_CB11_CFG_POR_VAL, MC33771C_CBX_CFG_INIT_VALUE},
+    {MC33771C_CB12_CFG_OFFSET, MC33771C_CB12_CFG_POR_VAL, MC33771C_CBX_CFG_INIT_VALUE},
+    {MC33771C_CB13_CFG_OFFSET, MC33771C_CB13_CFG_POR_VAL, MC33771C_CBX_CFG_INIT_VALUE},
+    {MC33771C_CB14_CFG_OFFSET, MC33771C_CB14_CFG_POR_VAL, MC33771C_CBX_CFG_INIT_VALUE},
+    {MC33771C_OV_UV_EN_OFFSET, MC33771C_OV_UV_EN_POR_VAL, MC33771C_OV_UV_EN_INIT_VALUE},
+    {MC33771C_SYS_CFG1_OFFSET, MC33771C_SYS_CFG1_POR_VAL, MC33771C_SYS_CFG1_INIT_VALUE},
+    {MC33771C_SYS_CFG2_OFFSET, MC33771C_SYS_CFG2_POR_VAL, MC33771C_SYS_CFG2_INIT_VALUE},
+    {MC33771C_ADC_CFG_OFFSET, MC33771C_ADC_CFG_POR_VAL, MC33771C_ADC_CFG_INIT_VALUE},
+    {MC33771C_ADC2_OFFSET_COMP_OFFSET, MC33771C_ADC2_OFFSET_COMP_POR_VAL,
+     MC33771C_ADC2_OFFSET_COMP_INIT_VALUE},
+    {MC33771C_FAULT_MASK1_OFFSET, MC33771C_FAULT_MASK1_POR_VAL, MC33771C_FAULT_MASK1_INIT_VALUE},
+    {MC33771C_FAULT_MASK2_OFFSET, MC33771C_FAULT_MASK2_POR_VAL, MC33771C_FAULT_MASK2_INIT_VALUE},
+    {MC33771C_FAULT_MASK3_OFFSET, MC33771C_FAULT_MASK3_POR_VAL, MC33771C_FAULT_MASK3_INIT_VALUE},
+    {MC33771C_WAKEUP_MASK1_OFFSET, MC33771C_WAKEUP_MASK1_POR_VAL, MC33771C_WAKEUP_MASK1_INIT_VALUE},
+    {MC33771C_WAKEUP_MASK2_OFFSET, MC33771C_WAKEUP_MASK2_POR_VAL, MC33771C_WAKEUP_MASK2_INIT_VALUE},
+    {MC33771C_WAKEUP_MASK3_OFFSET, MC33771C_WAKEUP_MASK3_POR_VAL, MC33771C_WAKEUP_MASK3_INIT_VALUE},
+};
+
+// Victor doesnt change INIT, I do not change INIT  
+
+#define MC33771C_SYS_CFG1_INIT_VALUE                                                               \
+    (MC33771C_SYS_CFG1_CYCLIC_TIMER(MC33771C_SYS_CFG1_CYCLIC_TIMER_CONTINUOUS_ENUM_VAL) |          \
+     MC33771C_SYS_CFG1_DIAG_TIMEOUT(MC33771C_SYS_CFG1_DIAG_TIMEOUT_1S_ENUM_VAL) |                  \
+     MC33771C_SYS_CFG1_I_MEAS_EN(                                                                  \
+         MC33771C_SYS_CFG1_I_MEAS_EN_ENABLED_ENUM_VAL) | /* if enabled each cell balance driver    \
+                                                            can be individually switched on or off \
+                                                           revisar esto porque no me entero mucho*/                                       \
+     MC33771C_SYS_CFG1_CB_DRVEN(MC33771C_SYS_CFG1_CB_DRVEN_DISABLED_ENUM_VAL) | /* voy a equilibrar baterias?*/                   \
+     MC33771C_SYS_CFG1_GO2DIAG(MC33771C_SYS_CFG1_GO2DIAG_EXIT_ENUM_VAL) |                          \
+     MC33771C_SYS_CFG1_CB_MANUAL_PAUSE(                                                            \
+         MC33771C_SYS_CFG1_CB_MANUAL_PAUSE_DISABLED_ENUM_VAL) | /* enable this bit for a soft      \
+                                                                   reset */                        \
+     MC33771C_SYS_CFG1_SOFT_RST(MC33771C_SYS_CFG1_SOFT_RST_DISABLED_ENUM_VAL) |                    \
+     MC33771C_SYS_CFG1_FAULT_WAVE(MC33771C_SYS_CFG1_FAULT_WAVE_DISABLED_ENUM_VAL) |                \
+     MC33771C_SYS_CFG1_WAVE_DC_BITX(MC33771C_SYS_CFG1_WAVE_DC_BITX_500US_ENUM_VAL))
+
+#define MC337721C_SYS_CFG2_INIT_VALUE                                                    \
+    (MC33771C_SYS_CFG2_PREVIOUS_STATE(MC33771C_SYS_CFG2_PREVIOUS_STATE_INIT_ENUM_VAL) | \
+     MC33771C_SYS_CFG2_FLT_RST_CFG(MC33771C_SYS_CFG2_FLT_RST_CFG_OSC_MON_ENUM_VAL) |    \
+     MC33771C_SYS_CFG2_TIMEOUT_COMM(MC33771C_SYS_CFG2_TIMEOUT_COMM_32MS_ENUM_VAL) |     \
+     MC33771C_SYS_CFG2_NUMB_ODD(MC33771C_SYS_CFG2_NUMB_ODD_EVEN_ENUM_VAL) |             \
+     MC33771C_SYS_CFG2_HAMM_ENCOD(MC33771C_SYS_CFG2_HAMM_ENCOD_DECODE_ENUM_VAL))
+
+/* SYS_DIAG can stay at default for init */ /* Jorge no entiende absolutamente nada asi que lo mismo*/
+
+#define MC33771C_ADC_CFG_INIT_VALUE                                             \
+    (MC33771C_ADC_CFG_AVG(MC33771C_ADC_CFG_AVG_NO_AVERAGING_ENUM_VAL) | /*Esto no se yo*/         \
+     MC33771C_ADC_CFG_SOC(MC33771C_ADC_CFG_SOC_DISABLED_ENUM_VAL) |             \
+     MC33771C_ADC_CFG_PGA_GAIN_S(MC33771C_ADC_CFG_PGA_GAIN_S_AUTO_ENUM_VAL)     \ 
+     /* Faltaria >PGA_GAIN_AMP_S*/
+     MC33771C_ADC_CFG_PGA_GAIN(MC33771C_ADC_CFG_PGA_GAIN_AUTO_ENUM_VAL) |       \
+     MC33771C_ADC_CFG_ADC1_A_DEF(MC33771C_ADC_CFG_ADC1_A_DEF_16_BIT_ENUM_VAL) | \
+     MC33771C_ADC_CFG_ADC1_B_DEF(MC33771C_ADC_CFG_ADC1_B_DEF_16_BIT_ENUM_VAL) | \
+     MC33771C_ADC_CFG_ADC2_DEF(MC33771C_ADC_CFG_ADC2_DEF_16_BIT_ENUM_VAL))
+
+#define MC33771C_ADC2_OFFSET_COMP_INIT_VALUE                                                 \
+    (/* if set, reset the coulomb counters when reading from any CC register */              \
+    MC33772C_ADC2_OFFSET_COMP_CC_RST_CFG(                                                   \
+        MC33772C_ADC2_OFFSET_COMP_CC_RST_CFG_NO_ACTION_ENUM_VAL) |                          \
+    MC33772C_ADC2_OFFSET_COMP_FREE_CNT(MC33772C_ADC2_OFFSET_COMP_FREE_CNT_CLAMP_ENUM_VAL) | \
+    MC33772C_ADC2_OFFSET_COMP_ALLCBOFFONSHORT(                                              \
+        MC33772C_ADC2_OFFSET_COMP_ALLCBOFFONSHORT_SHORTED_ENUM_VAL) |                       \
+    MC33772C_ADC2_OFFSET_COMP_ADC2_OFFSET_COMP(BCC_GET_ADC2_OFFSET(0)))
+
+#elif defined(USE_MC33772C)
+/* INIT doesn't seem to be something I want to change */
+
+// NOTE(vic): DIAG mode is diagnostic mode
+// MC33772C_SYS_CFG1_CYCLIC_TIMER_0_1S_ENUM_VAL for 0.1s cyclic timer
+#define MC33772C_SYS_CFG1_INIT_VALUE                                                          \
+         (MC33772C_SYS_CFG1_CYCLIC_TIMER(MC33772C_SYS_CFG1_CYCLIC_TIMER_CONTINUOUS_ENUM_VAL) |     \
+          MC33772C_SYS_CFG1_DIAG_TIMEOUT(MC33772C_SYS_CFG1_DIAG_TIMEOUT_1S_ENUM_VAL) |             \
+          MC33772C_SYS_CFG1_I_MEAS_EN(                                                             \
+              MC33772C_SYS_CFG1_I_MEAS_EN_ENABLED_ENUM_VAL) | /* if enabled each cell balance      \
+                                                                 driver can be individually                                                                               \
+                                                                 switched on or off                \
+                                                               */                                  \
+          MC33772C_SYS_CFG1_CB_DRVEN(MC33772C_SYS_CFG1_CB_DRVEN_DISABLED_ENUM_VAL) |               \
+          MC33772C_SYS_CFG1_GO2DIAG(MC33772C_SYS_CFG1_GO2DIAG_EXIT_ENUM_VAL) |                     \
+          MC33772C_SYS_CFG1_CB_MANUAL_PAUSE(                                                       \
+              MC33772C_SYS_CFG1_CB_MANUAL_PAUSE_DISABLED_ENUM_VAL) | /* enable this bit for a soft \
+                                                                        reset */                   \
+          MC33772C_SYS_CFG1_SOFT_RST(MC33772C_SYS_CFG1_SOFT_RST_DISABLED_ENUM_VAL) |               \
+          MC33772C_SYS_CFG1_FAULT_WAVE(MC33772C_SYS_CFG1_FAULT_WAVE_DISABLED_ENUM_VAL) |           \
+          MC33772C_SYS_CFG1_WAVE_DC_BITX(MC33772C_SYS_CFG1_WAVE_DC_BITX_1MS_ENUM_VAL))
+
+#define MC33772C_SYS_CFG2_INIT_VALUE                                                    \
+         (/* get the previous state of the chip */                                           \
+          MC33772C_SYS_CFG2_PREVIOUS_STATE(MC33772C_SYS_CFG2_PREVIOUS_STATE_INIT_ENUM_VAL) | \
+          MC33772C_SYS_CFG2_FLT_RST_CFG(MC33772C_SYS_CFG2_FLT_RST_CFG_OSC_MON_ENUM_VAL) |    \
+          MC33772C_SYS_CFG2_TIMEOUT_COMM(MC33772C_SYS_CFG2_TIMEOUT_COMM_32MS_ENUM_VAL) |     \
+          MC33772C_SYS_CFG2_NUMB_ODD(MC33772C_SYS_CFG2_NUMB_ODD_EVEN_ENUM_VAL) |             \
+          MC33772C_SYS_CFG2_HAMM_ENCOD(MC33772C_SYS_CFG2_HAMM_ENCOD_DECODE_ENUM_VAL))
+
+/* SYS_DIAG can stay at default for init */
+
+#define MC33772C_ADC_CFG_INIT_VALUE                                             \
+         (MC33772C_ADC_CFG_AVG(MC33772C_ADC_CFG_AVG_NO_AVERAGING_ENUM_VAL) |         \
+          MC33772C_ADC_CFG_SOC(MC33772C_ADC_CFG_SOC_DISABLED_ENUM_VAL) |             \
+          MC33772C_ADC_CFG_PGA_GAIN(MC33772C_ADC_CFG_PGA_GAIN_AUTO_ENUM_VAL) |       \
+          MC33772C_ADC_CFG_ADC1_A_DEF(MC33772C_ADC_CFG_ADC1_A_DEF_16_BIT_ENUM_VAL) | \
+          MC33772C_ADC_CFG_ADC1_B_DEF(MC33772C_ADC_CFG_ADC1_B_DEF_16_BIT_ENUM_VAL) | \
+          MC33772C_ADC_CFG_ADC2_DEF(MC33772C_ADC_CFG_ADC2_DEF_16_BIT_ENUM_VAL))
+
+#define MC33772C_ADC2_OFFSET_COMP_INIT_VALUE                                                 \
+         (/* if set, reset the coulomb counters when reading from any CC register */              \
+          MC33772C_ADC2_OFFSET_COMP_CC_RST_CFG(                                                   \
+              MC33772C_ADC2_OFFSET_COMP_CC_RST_CFG_NO_ACTION_ENUM_VAL) |                          \
+          MC33772C_ADC2_OFFSET_COMP_FREE_CNT(MC33772C_ADC2_OFFSET_COMP_FREE_CNT_CLAMP_ENUM_VAL) | \
+          MC33772C_ADC2_OFFSET_COMP_ALLCBOFFONSHORT(                                              \
+              MC33772C_ADC2_OFFSET_COMP_ALLCBOFFONSHORT_SHORTED_ENUM_VAL) |                       \
+          MC33772C_ADC2_OFFSET_COMP_ADC2_OFFSET_COMP(BCC_GET_ADC2_OFFSET(0)))
+
+#define MC33772C_OV_UV_EN_INIT_VALUE                                                      \
+         (/* use a common register for overvoltage/undervoltage or individual for each cell */ \
+          MC33772C_OV_UV_EN_COMMON_OV_TH(MC33772C_OV_UV_EN_COMMON_OV_TH_COMMON_ENUM_VAL) |     \
+          MC33772C_OV_UV_EN_COMMON_UV_TH(MC33772C_OV_UV_EN_COMMON_UV_TH_COMMON_ENUM_VAL) |     \
+          MC33772C_OV_UV_EN_CT6_OVUV_EN(MC33772C_OV_UV_EN_CT6_OVUV_EN_ENABLED_ENUM_VAL) |      \
+          MC33772C_OV_UV_EN_CT5_OVUV_EN(MC33772C_OV_UV_EN_CT5_OVUV_EN_ENABLED_ENUM_VAL) |      \
+          MC33772C_OV_UV_EN_CT3_OVUV_EN(MC33772C_OV_UV_EN_CT3_OVUV_EN_ENABLED_ENUM_VAL) |      \
+          MC33772C_OV_UV_EN_CT2_OVUV_EN(MC33772C_OV_UV_EN_CT2_OVUV_EN_ENABLED_ENUM_VAL) |      \
+          MC33772C_OV_UV_EN_CT4_OVUV_EN(MC33772C_OV_UV_EN_CT4_OVUV_EN_ENABLED_ENUM_VAL) |      \
+          MC33772C_OV_UV_EN_CT1_OVUV_EN(MC33772C_OV_UV_EN_CT1_OVUV_EN_ENABLED_ENUM_VAL))
+
+#define MC33772C_CBX_CFG_INIT_VALUE                                     \
+         (MC33772C_CB1_CFG_CB_EN(MC33772C_CB1_CFG_CB_EN_DISABLED_ENUM_VAL) | \
+          MC33772C_CB1_CFG_CB_TIMER(0U))
+
+#define MC33772C_CB_OPEN_FLT_INIT_VALUE                                                       \
+         (MC33772C_CB_OPEN_FLT_CB6_OPEN_FLT(MC33772C_CB_OPEN_FLT_CB6_OPEN_FLT_NO_FAULT_ENUM_VAL) | \
+          MC33772C_CB_OPEN_FLT_CB5_OPEN_FLT(MC33772C_CB_OPEN_FLT_CB5_OPEN_FLT_NO_FAULT_ENUM_VAL) | \
+          MC33772C_CB_OPEN_FLT_CB4_OPEN_FLT(MC33772C_CB_OPEN_FLT_CB4_OPEN_FLT_NO_FAULT_ENUM_VAL) | \
+          MC33772C_CB_OPEN_FLT_CB3_OPEN_FLT(MC33772C_CB_OPEN_FLT_CB3_OPEN_FLT_NO_FAULT_ENUM_VAL) | \
+          MC33772C_CB_OPEN_FLT_CB2_OPEN_FLT(MC33772C_CB_OPEN_FLT_CB2_OPEN_FLT_NO_FAULT_ENUM_VAL) | \
+          MC33772C_CB_OPEN_FLT_CB1_OPEN_FLT(MC33772C_CB_OPEN_FLT_CB1_OPEN_FLT_NO_FAULT_ENUM_VAL))
+
+#define MC33772C_CB_SHORT_FLT_INIT_VALUE                          \
+         (MC33772C_CB_SHORT_FLT_CB6_SHORT_FLT(                         \
+              MC33772C_CB_SHORT_FLT_CB6_SHORT_FLT_NO_FAULT_ENUM_VAL) | \
+          MC33772C_CB_SHORT_FLT_CB5_SHORT_FLT(                         \
+              MC33772C_CB_SHORT_FLT_CB5_SHORT_FLT_NO_FAULT_ENUM_VAL) | \
+          MC33772C_CB_SHORT_FLT_CB4_SHORT_FLT(                         \
+              MC33772C_CB_SHORT_FLT_CB4_SHORT_FLT_NO_FAULT_ENUM_VAL) | \
+          MC33772C_CB_SHORT_FLT_CB3_SHORT_FLT(                         \
+              MC33772C_CB_SHORT_FLT_CB3_SHORT_FLT_NO_FAULT_ENUM_VAL) | \
+          MC33772C_CB_SHORT_FLT_CB2_SHORT_FLT(                         \
+              MC33772C_CB_SHORT_FLT_CB2_SHORT_FLT_NO_FAULT_ENUM_VAL) | \
+          MC33772C_CB_SHORT_FLT_CB1_SHORT_FLT(                         \
+              MC33772C_CB_SHORT_FLT_CB1_SHORT_FLT_NO_FAULT_ENUM_VAL))
+
+/* CB_DRV_STS is read only */
+
+#define MC33772C_GPIO_CFG1_INIT_VALUE                                                   \
+         (MC33772C_GPIO_CFG1_GPIO6_CFG(MC33772C_GPIO_CFG1_GPIO6_CFG_ANALOG_RATIO_ENUM_VAL) | \
+          MC33772C_GPIO_CFG1_GPIO5_CFG(MC33772C_GPIO_CFG1_GPIO5_CFG_ANALOG_RATIO_ENUM_VAL) | \
+          MC33772C_GPIO_CFG1_GPIO4_CFG(MC33772C_GPIO_CFG1_GPIO4_CFG_ANALOG_RATIO_ENUM_VAL) | \
+          MC33772C_GPIO_CFG1_GPIO3_CFG(MC33772C_GPIO_CFG1_GPIO3_CFG_ANALOG_RATIO_ENUM_VAL) | \
+          MC33772C_GPIO_CFG1_GPIO2_CFG(MC33772C_GPIO_CFG1_GPIO2_CFG_ANALOG_RATIO_ENUM_VAL) | \
+          MC33772C_GPIO_CFG1_GPIO1_CFG(MC33772C_GPIO_CFG1_GPIO1_CFG_ANALOG_RATIO_ENUM_VAL) | \
+          MC33772C_GPIO_CFG1_GPIO0_CFG(MC33772C_GPIO_CFG1_GPIO0_CFG_ANALOG_RATIO_ENUM_VAL))
+
+#define MC33772C_GPIO_CFG2_INIT_VALUE                                                         \
+         (MC33772C_GPIO_CFG2_GPIO2_SOC(MC33772C_GPIO_CFG2_GPIO2_SOC_ADC_TRG_DISABLED_ENUM_VAL) |   \
+          MC33772C_GPIO_CFG2_GPIO0_WU(MC33772C_GPIO_CFG2_GPIO0_WU_NO_WAKEUP_ENUM_VAL) |            \
+          MC33772C_GPIO_CFG2_GPIO0_FLT_ACT(                                                        \
+              MC33772C_GPIO_CFG2_GPIO0_FLT_ACT_DISABLED_ENUM_VAL) | /* GPIOx_DR are initialized to \
+                                                                     * zero                        \
+                                                                     */                            \
+          MC33772C_GPIO_CFG2_GPIO6_DR(MC33772C_GPIO_CFG2_GPIO6_DR_LOW_ENUM_VAL) |                  \
+          MC33772C_GPIO_CFG2_GPIO5_DR(MC33772C_GPIO_CFG2_GPIO5_DR_LOW_ENUM_VAL) |                  \
+          MC33772C_GPIO_CFG2_GPIO4_DR(MC33772C_GPIO_CFG2_GPIO4_DR_LOW_ENUM_VAL) |                  \
+          MC33772C_GPIO_CFG2_GPIO3_DR(MC33772C_GPIO_CFG2_GPIO3_DR_LOW_ENUM_VAL) |                  \
+          MC33772C_GPIO_CFG2_GPIO2_DR(MC33772C_GPIO_CFG2_GPIO2_DR_LOW_ENUM_VAL) |                  \
+          MC33772C_GPIO_CFG2_GPIO1_DR(MC33772C_GPIO_CFG2_GPIO1_DR_LOW_ENUM_VAL) |                  \
+          MC33772C_GPIO_CFG2_GPIO0_DR(MC33772C_GPIO_CFG2_GPIO0_DR_LOW_ENUM_VAL))
+
+/* GPIO_STS is not useful for init */
+/* AN_OT_UT_FLT is for overtemp and undertemp faults, not useful for init */
+/* GPIO_SHORT_ANx_OPEN_STS is for short and open load, not useful for init */
+/* I_STATUS is read only */
+/* COM_STATUS holds the number of communication errors, not useful for init
+ *            (255 max then FAULT1_STATUS[COMM_ERR_OVR_FLT] gets set
+ *             and the nº doesn't change until reset) */
+/* FAULT1_STATUS is not useful for init */
+/* FAULT2_STATUS is not useful for init */
+/* FAULT3_STATUS is not useful for init */
+
+/* FAULT_MASKx disable faults */
+#define MC33772C_FAULT_MASK1_INIT_VALUE                                     \
+         (MC33772C_FAULT_MASK1_VPWR_OV_FLT_MASK_12_F(                            \
+              MC33772C_FAULT_MASK1_VPWR_OV_FLT_MASK_12_F_NOT_MASKED_ENUM_VAL) |  \
+          MC33772C_FAULT_MASK1_VPWR_LV_FLT_MASK_11_F(                            \
+              MC33772C_FAULT_MASK1_VPWR_LV_FLT_MASK_11_F_NOT_MASKED_ENUM_VAL) |  \
+          MC33772C_FAULT_MASK1_COM_LOSS_FLT_MASK_10_F(                           \
+              MC33772C_FAULT_MASK1_COM_LOSS_FLT_MASK_10_F_NOT_MASKED_ENUM_VAL) | \
+          MC33772C_FAULT_MASK1_COM_ERR_FLT_MASK_9_F(                             \
+              MC33772C_FAULT_MASK1_COM_ERR_FLT_MASK_9_F_NOT_MASKED_ENUM_VAL) |   \
+          MC33772C_FAULT_MASK1_CSB_WUP_FLT_MASK_8_F(                             \
+              MC33772C_FAULT_MASK1_CSB_WUP_FLT_MASK_8_F_NOT_MASKED_ENUM_VAL) |   \
+          MC33772C_FAULT_MASK1_GPIO0_WUP_FLT_MASK_7_F(                           \
+              MC33772C_FAULT_MASK1_GPIO0_WUP_FLT_MASK_7_F_NOT_MASKED_ENUM_VAL) | \
+          MC33772C_FAULT_MASK1_I2C_ERR_FLT_MASK_6_F(                             \
+              MC33772C_FAULT_MASK1_I2C_ERR_FLT_MASK_6_F_NOT_MASKED_ENUM_VAL) |   \
+          MC33772C_FAULT_MASK1_IS_OL_FLT_MASK_5_F(                               \
+              MC33772C_FAULT_MASK1_IS_OL_FLT_MASK_5_F_NOT_MASKED_ENUM_VAL) |     \
+          MC33772C_FAULT_MASK1_IS_OC_FLT_MASK_4_F(                               \
+              MC33772C_FAULT_MASK1_IS_OC_FLT_MASK_4_F_NOT_MASKED_ENUM_VAL) |     \
+          MC33772C_FAULT_MASK1_AN_OT_FLT_MASK_3_F(                               \
+              MC33772C_FAULT_MASK1_AN_OT_FLT_MASK_3_F_NOT_MASKED_ENUM_VAL) |     \
+          MC33772C_FAULT_MASK1_AN_UT_FLT_MASK_2_F(                               \
+              MC33772C_FAULT_MASK1_AN_UT_FLT_MASK_2_F_NOT_MASKED_ENUM_VAL) |     \
+          MC33772C_FAULT_MASK1_CT_OV_FLT_MASK_1_F(                               \
+              MC33772C_FAULT_MASK1_CT_OV_FLT_MASK_1_F_NOT_MASKED_ENUM_VAL) |     \
+          MC33772C_FAULT_MASK1_CT_UV_FLT_MASK_0_F(                               \
+              MC33772C_FAULT_MASK1_CT_UV_FLT_MASK_0_F_NOT_MASKED_ENUM_VAL))
+
+#define MC33772C_FAULT_MASK2_INIT_VALUE                                      \
+         (MC33772C_FAULT_MASK2_VCOM_OV_FLT_MASK_15_F(                             \
+              MC33772C_FAULT_MASK2_VCOM_OV_FLT_MASK_15_F_NOT_MASKED_ENUM_VAL) |   \
+          MC33772C_FAULT_MASK2_VCOM_UV_FLT_MASK_14_F(                             \
+              MC33772C_FAULT_MASK2_VCOM_UV_FLT_MASK_14_F_NOT_MASKED_ENUM_VAL) |   \
+          MC33772C_FAULT_MASK2_VANA_OV_FLT_MASK_13_F(                             \
+              MC33772C_FAULT_MASK2_VANA_OV_FLT_MASK_13_F_NOT_MASKED_ENUM_VAL) |   \
+          MC33772C_FAULT_MASK2_VANA_UV_FLT_MASK_12_F(                             \
+              MC33772C_FAULT_MASK2_VANA_UV_FLT_MASK_12_F_NOT_MASKED_ENUM_VAL) |   \
+          MC33772C_FAULT_MASK2_ADC1_B_FLT_MASK_11_F(                              \
+              MC33772C_FAULT_MASK2_ADC1_B_FLT_MASK_11_F_NOT_MASKED_ENUM_VAL) |    \
+          MC33772C_FAULT_MASK2_ADC1_A_FLT_MASK_10_F(                              \
+              MC33772C_FAULT_MASK2_ADC1_A_FLT_MASK_10_F_NOT_MASKED_ENUM_VAL) |    \
+          MC33772C_FAULT_MASK2_GND_LOSS_FLT_MASK_9_F(                             \
+              MC33772C_FAULT_MASK2_GND_LOSS_FLT_MASK_9_F_NOT_MASKED_ENUM_VAL) |   \
+          MC33772C_FAULT_MASK2_AN_OPEN_FLT_MASK_6_F(                              \
+              MC33772C_FAULT_MASK2_AN_OPEN_FLT_MASK_6_F_NOT_MASKED_ENUM_VAL) |    \
+          MC33772C_FAULT_MASK2_GPIO_SHORT_FLT_MASK_5_F(                           \
+              MC33772C_FAULT_MASK2_GPIO_SHORT_FLT_MASK_5_F_NOT_MASKED_ENUM_VAL) | \
+          MC33772C_FAULT_MASK2_CB_SHORT_FLT_MASK_4_F(                             \
+              MC33772C_FAULT_MASK2_CB_SHORT_FLT_MASK_4_F_NOT_MASKED_ENUM_VAL) |   \
+          MC33772C_FAULT_MASK2_CB_OPEN_FLT_MASK_3_F(                              \
+              MC33772C_FAULT_MASK2_CB_OPEN_FLT_MASK_3_F_NOT_MASKED_ENUM_VAL) |    \
+          MC33772C_FAULT_MASK2_OSC_ERR_FLT_MASK_2_F(                              \
+              MC33772C_FAULT_MASK2_OSC_ERR_FLT_MASK_2_F_NOT_MASKED_ENUM_VAL) |    \
+          MC33772C_FAULT_MASK2_DED_ERR_FLT_MASK_1_F(                              \
+              MC33772C_FAULT_MASK2_DED_ERR_FLT_MASK_1_F_NOT_MASKED_ENUM_VAL) |    \
+          MC33772C_FAULT_MASK2_FUSE_ERR_FLT_MASK_0_F(                             \
+              MC33772C_FAULT_MASK2_FUSE_ERR_FLT_MASK_0_F_NOT_MASKED_ENUM_VAL))
+
+#define MC33772C_FAULT_MASK3_INIT_VALUE                                    \
+         (MC33772C_FAULT_MASK3_CC_OVR_FLT_MASK_15_F(                            \
+              MC33772C_FAULT_MASK3_CC_OVR_FLT_MASK_15_F_NOT_MASKED_ENUM_VAL) |  \
+          MC33772C_FAULT_MASK3_DIAG_TO_FLT_MASK_14_F(                           \
+              MC33772C_FAULT_MASK3_DIAG_TO_FLT_MASK_14_F_NOT_MASKED_ENUM_VAL) | \
+          MC33772C_FAULT_MASK3_VCP_UV_MASK_13_F(                                \
+              MC33772C_FAULT_MASK3_VCP_UV_MASK_13_F_NOT_MASKED_ENUM_VAL) |      \
+          MC33772C_FAULT_MASK3_EOT_CB6_MASK_5_F(                                \
+              MC33772C_FAULT_MASK3_EOT_CB6_MASK_5_F_MASKED_ENUM_VAL) |          \
+          MC33772C_FAULT_MASK3_EOT_CB5_MASK_4_F(                                \
+              MC33772C_FAULT_MASK3_EOT_CB5_MASK_4_F_MASKED_ENUM_VAL) |          \
+          MC33772C_FAULT_MASK3_EOT_CB4_MASK_3_F(                                \
+              MC33772C_FAULT_MASK3_EOT_CB4_MASK_3_F_MASKED_ENUM_VAL) |          \
+          MC33772C_FAULT_MASK3_EOT_CB3_MASK_2_F(                                \
+              MC33772C_FAULT_MASK3_EOT_CB3_MASK_2_F_MASKED_ENUM_VAL) |          \
+          MC33772C_FAULT_MASK3_EOT_CB2_MASK_1_F(                                \
+              MC33772C_FAULT_MASK3_EOT_CB2_MASK_1_F_MASKED_ENUM_VAL) |          \
+          MC33772C_FAULT_MASK3_EOT_CB1_MASK_0_F(                                \
+              MC33772C_FAULT_MASK3_EOT_CB1_MASK_0_F_MASKED_ENUM_VAL))
+
+/* prevent the masked bits from waking up the device from FAULTx_STATUS */
+#define MC33772C_WAKEUP_MASK1_INIT_VALUE                                     \
+         (MC33772C_WAKEUP_MASK1_VPWR_OV_FLT_MASK_12_F(                            \
+              MC33772C_WAKEUP_MASK1_VPWR_OV_FLT_MASK_12_F_NOT_MASKED_ENUM_VAL) |  \
+          MC33772C_WAKEUP_MASK1_VPWR_LV_FLT_MASK_11_F(                            \
+              MC33772C_WAKEUP_MASK1_VPWR_LV_FLT_MASK_11_F_NOT_MASKED_ENUM_VAL) |  \
+          MC33772C_WAKEUP_MASK1_GPIO0_WUP_FLT_MASK_7_F(                           \
+              MC33772C_WAKEUP_MASK1_GPIO0_WUP_FLT_MASK_7_F_NOT_MASKED_ENUM_VAL) | \
+          MC33772C_WAKEUP_MASK1_IS_OC_FLT_MASK_4_F(                               \
+              MC33772C_WAKEUP_MASK1_IS_OC_FLT_MASK_4_F_NOT_MASKED_ENUM_VAL) |     \
+          MC33772C_WAKEUP_MASK1_AN_OT_FLT_MASK_3_F(                               \
+              MC33772C_WAKEUP_MASK1_AN_OT_FLT_MASK_3_F_NOT_MASKED_ENUM_VAL) |     \
+          MC33772C_WAKEUP_MASK1_AN_UT_FLT_MASK_2_F(                               \
+              MC33772C_WAKEUP_MASK1_AN_UT_FLT_MASK_2_F_NOT_MASKED_ENUM_VAL) |     \
+          MC33772C_WAKEUP_MASK1_CT_OV_FLT_MASK_1_F(                               \
+              MC33772C_WAKEUP_MASK1_CT_OV_FLT_MASK_1_F_NOT_MASKED_ENUM_VAL) |     \
+          MC33772C_WAKEUP_MASK1_CT_UV_FLT_MASK_0_F(                               \
+              MC33772C_WAKEUP_MASK1_CT_UV_FLT_MASK_0_F_NOT_MASKED_ENUM_VAL))
+
+#define MC33772C_WAKEUP_MASK2_INIT_VALUE                                      \
+         (MC33772C_WAKEUP_MASK2_VCOM_OV_FLT_MASK_15_F(                             \
+              MC33772C_WAKEUP_MASK2_VCOM_OV_FLT_MASK_15_F_NOT_MASKED_ENUM_VAL) |   \
+          MC33772C_WAKEUP_MASK2_VCOM_UV_FLT_MASK_14_F(                             \
+              MC33772C_WAKEUP_MASK2_VCOM_UV_FLT_MASK_14_F_NOT_MASKED_ENUM_VAL) |   \
+          MC33772C_WAKEUP_MASK2_VANA_OV_FLT_MASK_13_F(                             \
+              MC33772C_WAKEUP_MASK2_VANA_OV_FLT_MASK_13_F_NOT_MASKED_ENUM_VAL) |   \
+          MC33772C_WAKEUP_MASK2_VANA_UV_FLT_MASK_12_F(                             \
+              MC33772C_WAKEUP_MASK2_VANA_UV_FLT_MASK_12_F_NOT_MASKED_ENUM_VAL) |   \
+          MC33772C_WAKEUP_MASK2_ADC1_B_FLT_MASK_11_F(                              \
+              MC33772C_WAKEUP_MASK2_ADC1_B_FLT_MASK_11_F_NOT_MASKED_ENUM_VAL) |    \
+          MC33772C_WAKEUP_MASK2_ADC1_A_FLT_MASK_10_F(                              \
+              MC33772C_WAKEUP_MASK2_ADC1_A_FLT_MASK_10_F_NOT_MASKED_ENUM_VAL) |    \
+          MC33772C_WAKEUP_MASK2_GND_LOSS_FLT_MASK_9_F(                             \
+              MC33772C_WAKEUP_MASK2_GND_LOSS_FLT_MASK_9_F_NOT_MASKED_ENUM_VAL) |   \
+          MC33772C_WAKEUP_MASK2_IC_TSD_FLT_MASK_8_F(                               \
+              MC33772C_WAKEUP_MASK2_IC_TSD_FLT_MASK_8_F_NOT_MASKED_ENUM_VAL) |     \
+          MC33772C_WAKEUP_MASK2_GPIO_SHORT_FLT_MASK_5_F(                           \
+              MC33772C_WAKEUP_MASK2_GPIO_SHORT_FLT_MASK_5_F_NOT_MASKED_ENUM_VAL) | \
+          MC33772C_WAKEUP_MASK2_CB_SHORT_FLT_MASK_4_F(                             \
+              MC33772C_WAKEUP_MASK2_CB_SHORT_FLT_MASK_4_F_NOT_MASKED_ENUM_VAL) |   \
+          MC33772C_WAKEUP_MASK2_OSC_ERR_FLT_MASK_2_F(                              \
+              MC33772C_WAKEUP_MASK2_OSC_ERR_FLT_MASK_2_F_NOT_MASKED_ENUM_VAL) |    \
+          MC33772C_WAKEUP_MASK2_DED_ERR_FLT_MASK_1_F(                              \
+              MC33772C_WAKEUP_MASK2_DED_ERR_FLT_MASK_1_F_NOT_MASKED_ENUM_VAL))
+
+#define MC33772C_WAKEUP_MASK3_INIT_VALUE                                   \
+         (MC33772C_WAKEUP_MASK3_CC_OVR_FLT_MASK_15_F(                           \
+              MC33772C_WAKEUP_MASK3_CC_OVR_FLT_MASK_15_F_NOT_MASKED_ENUM_VAL) | \
+          MC33772C_WAKEUP_MASK3_VCP_UV_MASK_13_F(                               \
+              MC33772C_WAKEUP_MASK3_VCP_UV_MASK_13_F_NOT_MASKED_ENUM_VAL) |     \
+          MC33772C_WAKEUP_MASK3_EOT_CB6_MASK_5_F(                               \
+              MC33772C_WAKEUP_MASK3_EOT_CB6_MASK_5_F_NOT_MASKED_ENUM_VAL) |     \
+          MC33772C_WAKEUP_MASK3_EOT_CB5_MASK_4_F(                               \
+              MC33772C_WAKEUP_MASK3_EOT_CB5_MASK_4_F_NOT_MASKED_ENUM_VAL) |     \
+          MC33772C_WAKEUP_MASK3_EOT_CB4_MASK_3_F(                               \
+              MC33772C_WAKEUP_MASK3_EOT_CB4_MASK_3_F_NOT_MASKED_ENUM_VAL) |     \
+          MC33772C_WAKEUP_MASK3_EOT_CB3_MASK_2_F(                               \
+              MC33772C_WAKEUP_MASK3_EOT_CB3_MASK_2_F_NOT_MASKED_ENUM_VAL) |     \
+          MC33772C_WAKEUP_MASK3_EOT_CB2_MASK_1_F(                               \
+              MC33772C_WAKEUP_MASK3_EOT_CB2_MASK_1_F_NOT_MASKED_ENUM_VAL) |     \
+          MC33772C_WAKEUP_MASK3_EOT_CB1_MASK_0_F(                               \
+              MC33772C_WAKEUP_MASK3_EOT_CB1_MASK_0_F_NOT_MASKED_ENUM_VAL))
+
+/* CC_NB_SAMPLES is read only */
+/* COULOMB_CNT1 is read only */
+/* COULOMB_CNT2 is read only */
+/* MEAS_ISENSE1 is read only */
+/* MEAS_ISENSE2 is not useful for init */
+/* MEAS_xxxx are read only */
+
+// 19V minimum
+// 4.2V per cell max
+
+static constexpr double UV_OV_THRESHOLD_PRECISION = 19.53125;
+static constexpr double MIN_VOLTAGE_TOTAL = 19.0;
+static constexpr double UNDERVOLTAGE_THRESHOLD_ONE_F64 = (MIN_VOLTAGE_TOTAL / 6.0);
+static constexpr double UNDERVOLTAGE_THRESHOLD_ONE_CONVERTED_F64 =
+    (1000.0 * UNDERVOLTAGE_THRESHOLD_ONE_F64 / 19.53125);
+// NOTE: round up
+static constexpr uint8_t UNDERVOLTAGE_THRESHOLD_ONE_CONVERTED =
+    (uint8_t)(UNDERVOLTAGE_THRESHOLD_ONE_CONVERTED_F64 + 0.5);
+
+static constexpr double OVERVOLTAGE_THRESHOLD_ONE_F64 = 4.2;
+static constexpr double OVERVOLTAGE_THRESHOLD_ONE_CONVERTED_F64 =
+    (1000.0 * OVERVOLTAGE_THRESHOLD_ONE_F64 / 19.53125);
+// NOTE: round down
+static constexpr double OVERVOLTAGE_THRESHOLD_ONE_CONVERTED =
+    ((uint8_t)(OVERVOLTAGE_THRESHOLD_ONE_CONVERTED_F64 - 0.5));
+
+void bcc_dummy_check() {
+    FAULT("This function should not be called");
+
+    if constexpr ((UNDERVOLTAGE_THRESHOLD_ONE_F64 < 0.0) ||
+                  (UNDERVOLTAGE_THRESHOLD_ONE_F64 > 5.0)) {
+        ST_LIB::compile_error("Undervoltage threshold out of range [0V, 5V]");
+    }
+
+    if constexpr ((OVERVOLTAGE_THRESHOLD_ONE_F64 < 0.0) || (OVERVOLTAGE_THRESHOLD_ONE_F64 > 5.0)) {
+        ST_LIB::compile_error("Overvoltage threshold out of range [0V, 5V]");
+    }
+}
+
+// NOTE: Undervoltage and overvoltage thresholds are in resolution 19.53125mV/LSB
+#define MC33772C_TH_ALL_CT_INIT_VALUE                                       \
+         (MC33772C_TH_ALL_CT_ALL_CT_OV_TH(OVERVOLTAGE_THRESHOLD_ONE_CONVERTED) | \
+          MC33772C_TH_ALL_CT_ALL_CT_UV_TH(UNDERVOLTAGE_THRESHOLD_ONE_CONVERTED))
+
+// NOTE: Undervoltage and overvoltage thresholds are in resolution 19.53125mV/LSB
+#define MC33772C_TH_CTx_INIT_VALUE                                          \
+         (MC33772C_TH_ALL_CT_ALL_CT_OV_TH(OVERVOLTAGE_THRESHOLD_ONE_CONVERTED) | \
+          MC33772C_TH_ALL_CT_ALL_CT_UV_TH(UNDERVOLTAGE_THRESHOLD_ONE_CONVERTED))
+
+// over/undertemperature resolution: 4.8828125 mV/LSB
+#define MC33772C_TH_ANx_OT_INIT_VALUE      \
+         (/* TODO: overtemperature threshold */ \
+          MC33772C_TH_AN1_OT_POR_VAL)
+
+#define MC33772C_TH_ANx_UT_INIT_VALUE       \
+         (/* TODO: undertemperature threshold */ \
+          MC33772C_TH_AN1_UT_POR_VAL)
+
+#define MC33772C_TH_ISENSE_OC_INIT_VALUE                                               \
+         (/* TODO: sleep mode ISENSE overcurrent threshold. Resolution is 1.2 microV/LSB */ \
+          MC33772C_TH_ISENSE_OC_POR_VAL)
+
+#define MC33772C_TH_COULOMB_CNT_MSB_INIT_VALUE              \
+         (/* TODO: Overcoulomb counting accumulator threshold */ \
+          MC33772C_TH_COULOMB_CNT_MSB_POR_VAL)
+#define MC33772C_TH_COULOMB_CNT_LSB_INIT_VALUE              \
+         (/* TODO: Overcoulomb counting accumulator threshold */ \
+          MC33772C_TH_COULOMB_CNT_LSB_POR_VAL)
+
+/* SILICON_REV silicon revision (version), is read only */
+/* EEPROM_CTRL is not useful for init */
+/* DED_ENCODE1 is read only */
+/* DED_ENCODE2 is read only */
+/* FUSE_MIRROR_DATA not sure what this is, doesn't seem useful for init */
+/* FUSE_MIRROR_CNTL is not useful for init */
+/* RESERVED well, is reserved */
+/* FUSE_BANK, no idea, probably not useful for init */
+
+/* address, default value, init value */
+#define BCC_INIT_REG(x) \
+         {MC33772C_##x##_OFFSET, MC33772C_##x##_POR_VAL, MC33772C_##x##_INIT_VALUE}
+
+bcc_init_reg_t bcc_init_regs[MC33772C_INIT_CONF_REG_CNT] = {
+    BCC_INIT_REG(SYS_CFG1),
+    BCC_INIT_REG(SYS_CFG2),
+    BCC_INIT_REG(ADC_CFG),
+    BCC_INIT_REG(ADC2_OFFSET_COMP),
+    BCC_INIT_REG(OV_UV_EN),
+    {MC33772C_CB6_CFG_OFFSET, MC33772C_CB6_CFG_POR_VAL, MC33772C_CBX_CFG_INIT_VALUE},
+    {MC33772C_CB5_CFG_OFFSET, MC33772C_CB5_CFG_POR_VAL, MC33772C_CBX_CFG_INIT_VALUE},
+    {MC33772C_CB4_CFG_OFFSET, MC33772C_CB4_CFG_POR_VAL, MC33772C_CBX_CFG_INIT_VALUE},
+    {MC33772C_CB3_CFG_OFFSET, MC33772C_CB3_CFG_POR_VAL, MC33772C_CBX_CFG_INIT_VALUE},
+    {MC33772C_CB2_CFG_OFFSET, MC33772C_CB2_CFG_POR_VAL, MC33772C_CBX_CFG_INIT_VALUE},
+    {MC33772C_CB1_CFG_OFFSET, MC33772C_CB1_CFG_POR_VAL, MC33772C_CBX_CFG_INIT_VALUE},
+    BCC_INIT_REG(CB_OPEN_FLT),
+    BCC_INIT_REG(CB_SHORT_FLT),
+    BCC_INIT_REG(GPIO_CFG1),
+    BCC_INIT_REG(GPIO_CFG2),
+    BCC_INIT_REG(FAULT_MASK1),
+    BCC_INIT_REG(FAULT_MASK2),
+    BCC_INIT_REG(FAULT_MASK3),
+    BCC_INIT_REG(WAKEUP_MASK1),
+    BCC_INIT_REG(WAKEUP_MASK2),
+    BCC_INIT_REG(WAKEUP_MASK3),
+    BCC_INIT_REG(TH_ALL_CT),
+    {MC33772C_TH_CT6_OFFSET, MC33772C_TH_CT6_POR_VAL, MC33772C_TH_CTx_INIT_VALUE},
+    {MC33772C_TH_CT5_OFFSET, MC33772C_TH_CT5_POR_VAL, MC33772C_TH_CTx_INIT_VALUE},
+    {MC33772C_TH_CT4_OFFSET, MC33772C_TH_CT4_POR_VAL, MC33772C_TH_CTx_INIT_VALUE},
+    {MC33772C_TH_CT3_OFFSET, MC33772C_TH_CT3_POR_VAL, MC33772C_TH_CTx_INIT_VALUE},
+    {MC33772C_TH_CT2_OFFSET, MC33772C_TH_CT2_POR_VAL, MC33772C_TH_CTx_INIT_VALUE},
+    {MC33772C_TH_CT1_OFFSET, MC33772C_TH_CT1_POR_VAL, MC33772C_TH_CTx_INIT_VALUE},
+
+    {MC33772C_TH_AN6_OT_OFFSET, MC33772C_TH_AN6_OT_POR_VAL, MC33772C_TH_ANx_OT_INIT_VALUE},
+    {MC33772C_TH_AN5_OT_OFFSET, MC33772C_TH_AN5_OT_POR_VAL, MC33772C_TH_ANx_OT_INIT_VALUE},
+    {MC33772C_TH_AN4_OT_OFFSET, MC33772C_TH_AN4_OT_POR_VAL, MC33772C_TH_ANx_OT_INIT_VALUE},
+    {MC33772C_TH_AN3_OT_OFFSET, MC33772C_TH_AN3_OT_POR_VAL, MC33772C_TH_ANx_OT_INIT_VALUE},
+    {MC33772C_TH_AN2_OT_OFFSET, MC33772C_TH_AN2_OT_POR_VAL, MC33772C_TH_ANx_OT_INIT_VALUE},
+    {MC33772C_TH_AN1_OT_OFFSET, MC33772C_TH_AN1_OT_POR_VAL, MC33772C_TH_ANx_OT_INIT_VALUE},
+    {MC33772C_TH_AN0_OT_OFFSET, MC33772C_TH_AN0_OT_POR_VAL, MC33772C_TH_ANx_OT_INIT_VALUE},
+
+    {MC33772C_TH_AN6_UT_OFFSET, MC33772C_TH_AN6_UT_POR_VAL, MC33772C_TH_ANx_UT_INIT_VALUE},
+    {MC33772C_TH_AN5_UT_OFFSET, MC33772C_TH_AN5_UT_POR_VAL, MC33772C_TH_ANx_UT_INIT_VALUE},
+    {MC33772C_TH_AN4_UT_OFFSET, MC33772C_TH_AN4_UT_POR_VAL, MC33772C_TH_ANx_UT_INIT_VALUE},
+    {MC33772C_TH_AN3_UT_OFFSET, MC33772C_TH_AN3_UT_POR_VAL, MC33772C_TH_ANx_UT_INIT_VALUE},
+    {MC33772C_TH_AN2_UT_OFFSET, MC33772C_TH_AN2_UT_POR_VAL, MC33772C_TH_ANx_UT_INIT_VALUE},
+    {MC33772C_TH_AN1_UT_OFFSET, MC33772C_TH_AN1_UT_POR_VAL, MC33772C_TH_ANx_UT_INIT_VALUE},
+    {MC33772C_TH_AN0_UT_OFFSET, MC33772C_TH_AN0_UT_POR_VAL, MC33772C_TH_ANx_UT_INIT_VALUE},
+    BCC_INIT_REG(TH_ISENSE_OC),
+    BCC_INIT_REG(TH_COULOMB_CNT_MSB),
+    BCC_INIT_REG(TH_COULOMB_CNT_LSB)};
+#endif
+
+#include "../../../../deps/BCC_SW_Driver/bcc/bcc.c"
+#include "../../../../deps/BCC_SW_Driver/bcc/bcc_communication.c"
+#endif  // BCC_STLIB_IMPLEMENTATION
+#endif  // BCC_STLIB_H

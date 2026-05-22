@@ -73,9 +73,7 @@ int main(void) {
 
     Actuators::init();
     Sensors::init();
-
-    //HVBMS::state_machine.start();
-
+    
     while (1) {
         FaultController::check_transitions();
         eth_instance->update();
