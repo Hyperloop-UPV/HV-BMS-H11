@@ -41,11 +41,14 @@ constexpr DigitalInputDomain::DigitalInput aux_contactor_PD12{ST_LIB::PD12};
 constexpr DigitalInputDomain::DigitalInput aux_contactor_PD13{ST_LIB::PD13};
 constexpr DigitalInputDomain::DigitalInput aux_contactor_PD14{ST_LIB::PD14};
 
+constexpr DigitalInputDomain::DigitalInput battery_intb_PE1{ST_LIB::PE1};
+
 namespace DI {
 inline DigitalInputDomain::Instance* aux_contactor_low;
 inline DigitalInputDomain::Instance* aux_contactor_high;
 inline DigitalInputDomain::Instance* aux_contactor_precharge;
 inline DigitalInputDomain::Instance* aux_contactor_discharge;
+inline DigitalInputDomain::Instance* battery_intb;
 }  // namespace DI
 
 using ST_LIB::ADCDomain;
@@ -105,8 +108,6 @@ inline TimerWrapper<timer_imd> input_timer;
 using ST_LIB::DMA_Domain;
 using ST_LIB::SPIDomain;
 
-// cambiar todo el spi
-// Configuración SPI para LTC6810
 
 consteval SPIDomain::SPIConfig get_tx_config() {
     SPIDomain::SPIConfig c{

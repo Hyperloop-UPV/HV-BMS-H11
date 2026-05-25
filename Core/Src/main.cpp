@@ -27,7 +27,7 @@ using myBoard =
                   contactor_PD9, contactor_PD10, contactor_PB14, aux_contactor_PD12,
                   aux_contactor_PG2, aux_contactor_PD13, aux_contactor_PD14, sdc_PB4, adc_PA4,
                   adc_PA5, timer_us_tick_def, timer_imd, sdc_PB5, imd_enable_PE11, imd_ok_PE12,
-                  cs_tx_PE4, bms_spi_tx, bms_spi_rx, spi_enable_PE3>;
+                  cs_tx_PE4, bms_spi_tx, bms_spi_rx, spi_enable_PE3, battery_intb_PE1>;
 
 int main(void) {
     Hard_fault_check();
@@ -47,6 +47,7 @@ int main(void) {
     DI::aux_contactor_low = &myBoard::instance_of<aux_contactor_PD13>();
     DI::aux_contactor_high = &myBoard::instance_of<aux_contactor_PD14>();
     DI::aux_contactor_precharge = &myBoard::instance_of<aux_contactor_PG2>();
+    DI::battery_intb = &myBoard::instance_of<battery_intb_PE1>();
 
     ADC::adc_voltage_ch2 = &myBoard::instance_of<adc_PA4>();
     ADC::adc_current = &myBoard::instance_of<adc_PA5>();

@@ -42,7 +42,7 @@
  * Includes
  ******************************************************************************/
 
-#include "HALAL/Models/MPU.hpp"
+#include "../../ST-LIB/Inc/HALAL/Models/MPU.hpp"
 
 #include "MC33771C.h"
 #include "MC33772C.h"
