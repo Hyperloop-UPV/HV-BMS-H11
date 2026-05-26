@@ -26,7 +26,7 @@ using myBoard =
                   dc_current_protection, dc_voltage_protection, led_PG13, led_PG9, contactor_PD8,
                   contactor_PD9, contactor_PD10, contactor_PB14, aux_contactor_PD12,
                   aux_contactor_PG2, aux_contactor_PD13, aux_contactor_PD14, sdc_PB4, adc_PA4,
-                  adc_PA5, timer_us_tick_def, timer_imd, sdc_PB5, imd_enable_PE11, imd_ok_PE12,
+                  adc_PA5, timer_us_tick_def, timer_imd, timeout_timer_def, sdc_PB5, imd_enable_PE11, imd_ok_PE12,
                   cs_tx_PE4, bms_spi_tx, bms_spi_rx, spi_enable_PE3, battery_intb_PE1>;
 
 int main(void) {
@@ -66,6 +66,11 @@ int main(void) {
     GlobalTimer::input_timer = get_timer_instance(myBoard, timer_imd);
 
     GlobalTimer::input_timer.instance->tim->PSC = 600;
+
+    TimerWrapper<timeout_timer_def> battery_timer = get_timer_instance(myBoard, timeout_timer_def);
+    GlobalTimer::timeout_timer = battery_timer.instance->tim;
+    battery_timer.set_prescaler((uint16_t)(us_timer.get_clock_frequency() / 1000'000) - 1);
+    battery_timer.counter_enable();
 
     SDC::sdc_interrupt =
         &myBoard::instance_of<sdc_PB5>();  // Por culpa de C++ tengo que tener esto fuera

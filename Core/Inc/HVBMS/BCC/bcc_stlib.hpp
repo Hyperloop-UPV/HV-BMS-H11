@@ -117,9 +117,9 @@ void BCC_MCU_WaitUs(uint32_t delay) {
  */
 bcc_status_t BCC_MCU_StartTimeout(uint32_t timeoutUs) {
     bcc_exceeded_timeout = false;
-    timeout_timer->CNT = 0;
-    timeout_timer->ARR = timeoutUs;
-    SET_BIT(timeout_timer->CR1, TIM_CR1_CEN);
+    GlobalTimer::timeout_timer->CNT = 0;
+    GlobalTimer::timeout_timer->ARR = timeoutUs;
+    SET_BIT(GlobalTimer::timeout_timer->CR1, TIM_CR1_CEN);
     return BCC_STATUS_SUCCESS;
 }
 

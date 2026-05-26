@@ -88,6 +88,8 @@ using ST_LIB::TimerWrapper;
 
 constexpr TimerDomain::Timer timer_us_tick_def{{.request = TimerRequest::GeneralPurpose32bit_5}};
 
+constexpr TimerDomain::Timer timeout_timer_def{{.request = TimerRequest::GeneralPurpose32bit_23}};
+
 namespace GlobalTimer {
 constexpr TimerPin ic_pin = {
     .af = TimerAF::InputCapture, .pin = ST_LIB::PA6, .channel = TimerChannel::CHANNEL_1};
@@ -100,6 +102,7 @@ inline constexpr TimerDomain::Timer timer_imd{{
 namespace GlobalTimer {
 // inline TimerWrapper<timer_us_tick_def> global_us_timer;
 inline TIM_TypeDef* global_us_timer;
+inline TIM_TypeDef* timeout_timer;
 inline TimerWrapper<timer_imd> input_timer;
 };  // namespace GlobalTimer
 
