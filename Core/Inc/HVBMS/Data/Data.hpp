@@ -152,7 +152,6 @@ inline constexpr auto bms_spi_rx =
 
 
 namespace NewSPI {
-inline SPIDomain::Instance* cs_tx_pin;
 inline std::optional<SPIDomain::SPIWrapper<bms_spi_tx>> bms_wrapper_tx;
 inline std::optional<SPIDomain::SPIWrapper<bms_spi_rx>> bms_wrapper_rx;
 }  // namespace NewSPI

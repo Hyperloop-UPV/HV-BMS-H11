@@ -5,18 +5,15 @@
 #include "BatteryPack.hpp"
 #include "IMD.hpp"
 #include "SDC.hpp"
+#include "BatteryH11.hpp"
 
 #define BATTERIES_CONNECTED 1
 #define N_BATTERIES 16
 
 class Sensors {
-    // Voltage sensor for HVBMS with ID 4
-    // Hecho tambien
     static constexpr float VOLTAGE_SLOPE{122.03744695176259};
     static constexpr float VOLTAGE_OFFSET{-3.57028270765926};
 
-    // Current sensor for HVBMS with ID 1
-    // Hecho
     static constexpr float CURRENT_SLOPE{89.94180359377545};
     static constexpr float CURRENT_OFFSET{-151.40450651439056};
 
@@ -29,6 +26,8 @@ class Sensors {
     inline static SDC sdc;
 
     inline static BatteryPack<N_BATTERIES> batteries;
+
+    inline static Batteries battery_h11;
 
     inline static IMD imd;
 

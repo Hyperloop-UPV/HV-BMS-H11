@@ -145,34 +145,58 @@ bool BCC_MCU_TimeoutExpired(void) { return bcc_exceeded_timeout; }
  */
 bcc_status_t BCC_MCU_TransferSpi(const uint8_t drvInstance, volatile uint8_t txBuf[],
                                  volatile uint8_t rxBuf[]) {
-    return BCC_STATUS_TPL_FAIL;
+    return BCC_STATUS_SPI_FAIL;
 }
+// #define D1_NC __attribute__((section(".mpu_ram_d1_nc.user"), used)) volatile
 
 // HVBMS does use TPL
 bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance, volatile uint8_t txBuf[],
                                  volatile uint8_t rxBuf[], const uint16_t rxTrCnt) {
-    uint16_t total_rx_bytes = rxTrCnt * 6;
+    // 0. Definir flags de estado para el DMA (estos sí pueden estar en stack)
+    static volatile bool rx_complete = false;
+    static volatile bool tx_complete = false;
+    rx_complete = false;
+    tx_complete = false;
 
-    // 1. Iniciar Recepción DMA
-    NewSPI::bms_wrapper_rx->receive_dma((uint8_t*)rxBuf, total_rx_bytes);
+    // Obtenemos el frame_size del wrapper
+    using RxWrapperType = std::remove_pointer_t<decltype(NewSPI::bms_wrapper_rx)>;
+    uint32_t f_size = NewSPI::bms_wrapper_rx->frame_size;
 
-    // 2. Pequeño margen para asegurar que el DMA está rearmado
-    BCC_MCU_WaitUs(2);
+    // 1. Buffers DMA en D1_NC
+    D1_NC static uint8_t rx_buffer[6 * 8];  // Ajusta el tamaño según tu protocolo
+    D1_NC static uint8_t tx_buffer[6 * 8];  // Ajusta el tamaño según tu protocolo
 
-    // 3. Iniciar Transmisión
-    bool tx_ok = NewSPI::bms_wrapper_tx->transmit_dma((uint8_t*)txBuf, 6);
-    if (!tx_ok) return BCC_STATUS_SPI_FAIL;
+    // Copiar datos de entrada a buffer D1_NC
+    uint32_t rx_size = static_cast<size_t>(rxTrCnt * f_size);
+    memcpy(const_cast<uint8_t*>(rx_buffer), rxBuf, rx_size);
+    memcpy(const_cast<uint8_t*>(tx_buffer), txBuf, rx_size);
 
-    // 4. Timeout dinámico (aprox 50us por trama + margen)
-    // 8 tramas * 50us = 400us. Con 2000us (2ms) vas sobradísimo y no bloqueas el sistema 8ms.
+    // 2. Crear spans desde los buffers en D1_NC
+    span<uint8_t> rx_span{rx_buffer, rx_size};
+    span<uint8_t> tx_span{tx_buffer, rx_size};
+
+    // 3. Iniciar Recepción DMA
+    if (!NewSPI::bms_wrapper_rx->listen(rx_span, &rx_complete)) {
+        return BCC_STATUS_SPI_FAIL;
+    }
+
+    // 4. Iniciar Transmisión DMA
+    NewSPI::bms_wrapper_tx->send(tx_span);
+
+    // 5. Timeout dinámico
     uint32_t timeout_us = rxTrCnt * 100;
-    uint32_t start_wait = GlobalTimer::global_us_timer->CNT;
+    uint32_t start_wait = Scheduler::get_global_tick();
 
-    while (NewSPI::bms_wrapper_rx->is_busy()) {
-        if ((uint32_t)(GlobalTimer::global_us_timer->CNT - start_wait) > timeout_us) {
+    // 6. Esperar a que la recepción termine
+    while (!rx_complete) {
+        if ((uint32_t)(Scheduler::get_global_tick() - start_wait) > timeout_us) {
+            NewSPI::bms_wrapper_rx->abort_and_recover();
             return BCC_STATUS_COM_TIMEOUT;
         }
     }
+
+    // 7. Copiar resultado de vuelta al buffer original
+    memcpy(rxBuf, rx_buffer, rx_size);
 
     return BCC_STATUS_SUCCESS;
 }
@@ -192,9 +216,9 @@ bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance, volatile uint8_t txB
  */
 void BCC_MCU_WriteCsbPin(const uint8_t drvInstance, const uint8_t value) {
     if (value) {
-        NewSPI::cs_tx_pin->turn_on();
+        DO::cs_tx->turn_on();
     } else {
-        NewSPI::cs_tx_pin->turn_off();
+        DO::cs_tx->turn_off();
     }
 }
 

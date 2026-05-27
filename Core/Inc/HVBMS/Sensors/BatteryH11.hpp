@@ -87,15 +87,15 @@ struct Batteries {
         }
     }
 
-    static float coulomb_counting_SOC(float current) {
-        uint32_t current_time = HAL_GetTick();
+    // static float coulomb_counting_SOC(float current) {
+    //     uint32_t current_time = HAL_GetTick();
 
-        float delta_time = (current_time - last_reading_time) / 1000.0f;
-        last_reading_time = current_time;
+    //     float delta_time = (current_time - last_reading_time) / 1000.0f;
+    //     last_reading_time = current_time;
 
-        float delta_SOC = current * delta_time / CAPACITY_AH * 3600.0f;
-        return delta_SOC;
-    }
+    //     float delta_SOC = current * delta_time / CAPACITY_AH * 3600.0f;
+    //     return delta_SOC;
+    // }
 
     static float ocv_battery_SOC() {
         float total_voltage = 0;

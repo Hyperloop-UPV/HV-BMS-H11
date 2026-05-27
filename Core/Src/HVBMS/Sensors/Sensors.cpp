@@ -3,8 +3,6 @@
 void Sensors::init() {
     imd.bind(DO::imd_enable);
     imd.power_on();
-
-    NewSPI::bms_wrapper_tx.emplace(*NewSPI::cs_tx_pin);
     
     DO::spi_enable->turn_on();
     

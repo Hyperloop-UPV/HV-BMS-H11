@@ -52,8 +52,6 @@ int main(void) {
     ADC::adc_voltage_ch2 = &myBoard::instance_of<adc_PA4>();
     ADC::adc_current = &myBoard::instance_of<adc_PA5>();
 
-    NewSPI::cs_tx_pin = &myBoard::instance_of<bms_spi_tx>();
-    NewSPI::bms_wrapper_tx.emplace(*NewSPI::cs_tx_pin);
     NewSPI::bms_wrapper_rx.emplace(myBoard::instance_of<bms_spi_rx>());
 
     auto eth_instance = &myBoard::instance_of<eth>();
