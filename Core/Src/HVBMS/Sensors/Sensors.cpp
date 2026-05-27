@@ -11,14 +11,14 @@ void Sensors::init() {
     sdc.enable();
 
     battery_h11.init();
+    battery_h11.start();
 
     Scheduler::register_task(10000, []() { Sensors::update_batteries(); });
 }
 
 void Sensors::update_batteries() {
     if constexpr (BATTERIES_CONNECTED) {
-        //batteries.update();
-        //batteries.read(ADC_reading::current_reading);
+        battery_h11.read();
     }
 }
 

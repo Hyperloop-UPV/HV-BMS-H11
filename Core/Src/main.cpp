@@ -53,6 +53,7 @@ int main(void) {
     ADC::adc_current = &myBoard::instance_of<adc_PA5>();
 
     NewSPI::bms_wrapper_rx.emplace(myBoard::instance_of<bms_spi_rx>());
+    NewSPI::bms_wrapper_tx.emplace(myBoard::instance_of<bms_spi_tx>());
 
     auto eth_instance = &myBoard::instance_of<eth>();
 

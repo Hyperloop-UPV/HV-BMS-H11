@@ -22,8 +22,10 @@ class HVBMS {
     static constexpr auto connecting_state =
         make_state(DataPackets::gsm_status::CONNECTING,
                    Transition<DataPackets::gsm_status>{
-                       DataPackets::gsm_status::OPERATIONAL,
-                       []() { return OrderPackets::control_station_tcp->is_connected(); }});
+                       DataPackets::gsm_status::OPERATIONAL, []() {
+                           return OrderPackets::control_station_tcp != nullptr &&
+                                  OrderPackets::control_station_tcp->is_connected();
+                       }});
 
     static constexpr auto operational_state =
         make_state(DataPackets::gsm_status::OPERATIONAL);
@@ -39,18 +41,15 @@ class HVBMS {
             // Acciones ON ENTRY
             // CONNECTING
             bms_sm.add_enter_action(
-                []() {
-                    Comms::start();
-                    // LUEGO TENGO QUE INICIAR BATERIAS
-                    //Sensors::batteries.start();
-                    //DO::sdc_fw_fault->turn_on();
-                },
-                connecting_state);
+                 []() {
+                     Comms::start();
+                 },
+                 connecting_state);
 
             // OPERATIONAL
             bms_sm.add_enter_action([]() { DO::operational_led->turn_on(); }, operational_state);
 
-            // Acciones CÍCLICAS
+            // Acciones CÍCLICAS    
             using namespace std::chrono_literals;
             // CONNECTING
             bms_sm.add_cyclic_action([]() { Actuators::toggle_operational_led(); }, 300ms,

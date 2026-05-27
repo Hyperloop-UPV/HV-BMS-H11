@@ -5,30 +5,36 @@
 #include "HVBMS/Data/Data.hpp"
 #include "ST-LIB.hpp"
 
+#define H11_N_BATTERIES 8
+#define H11_N_CELLS 12
+#define H11_N_GPIO 4
+#define H11_N_TEMPS 2
+// Tengo que revisar estos parametros
+#define H11_CAPACITY_AH 4.2f * 3.0f // Como esta en paralelo, tengo que multiplicar por 3
+#define H11_MIN_VOLTAGE 22.0f
+#define H11_MAX_VOLTAGE 25.0f
+
+struct BatteryData {
+    float cells[H11_N_CELLS]{};
+    float total_voltage{};
+    float conv_rate{};
+};
+
 struct Batteries {
     static inline bcc_drv_config_t bcc_config{};
-
-    struct BatteryData {
-        float cells[12];
-    };
+    static inline BatteryData battery[H11_N_BATTERIES]{};
+    static inline float temperature[H11_N_BATTERIES * H11_N_TEMPS]{};
 
     static inline float SOC{50.0f};
-
     static inline float current{};
-
     static inline float min_cell{};
     static inline float max_cell{};
-
     static inline float total_voltage{};
-
     static inline float min_temperature{};
     static inline float max_temperature{};
 
-    static inline BatteryData battery[8]{};
-    static inline float temperature[4]{};
-
-    // NOTE: For coulomb counting SOC (do I need this or does the library give me it?)
     static inline uint32_t last_reading_time{};
+    static inline int32_t period_ms{};
 
     static bcc_status_t Init_BCC_Registers() {
         bcc_status_t status;
@@ -49,17 +55,26 @@ struct Batteries {
     }
 
     static bcc_status_t Clear_BCC_FaultRegisters() {
-        // TODO
+        bcc_status_t status;
+        uint16_t flt_status[BCC_STAT_CNT];
+
+        for (uint8_t cid = 1; cid <= bcc_config.devicesCnt; cid++) {
+            status = BCC_Fault_GetStatus(&bcc_config, (bcc_cid_t)cid, flt_status);
+            if (status != BCC_STATUS_SUCCESS) {
+                return status;
+            }
+        }
+
         return BCC_STATUS_SUCCESS;
     }
 
     static void init() {
         bcc_config.drvInstance = 0U;
         bcc_config.commMode = BCC_MODE_TPL;
-        bcc_config.devicesCnt = 8U;
+        bcc_config.devicesCnt = H11_N_BATTERIES;
         for (uint8_t i = 0; i < (uint8_t)bcc_config.devicesCnt; i++) {
             bcc_config.device[i] = BCC_DEVICE_MC33771C;
-            bcc_config.cellCnt[i] = 12U;
+            bcc_config.cellCnt[i] = H11_N_CELLS;
         }
 
         bcc_status_t status = BCC_Init(&bcc_config);
@@ -81,67 +96,117 @@ struct Batteries {
         }
     }
 
-    // static float coulomb_counting_SOC(float current) {
-    //     uint32_t current_time = HAL_GetTick();
+    static void start() {
+        bcc_status_t status = BCC_Meas_StartConversionGlobal(&bcc_config,
+                                                              MC33771C_ADC_CFG_INIT_VALUE);
+        if (status != BCC_STATUS_SUCCESS) {
+            FAULT("Could not start BCC conversion: %s", get_bcc_error_str(status));
+        }
+    }
 
-    //     float delta_time = (current_time - last_reading_time) / 1000.0f;
-    //     last_reading_time = current_time;
+    static void read_cells() {
+        uint32_t cell_voltages[H11_N_CELLS];
+        float voltage_sum = 0.0f;
+        float min_v = std::numeric_limits<float>::max();
+        float max_v = std::numeric_limits<float>::lowest();
 
-    //     float delta_SOC = current * delta_time / CAPACITY_AH * 3600.0f;
-    //     return delta_SOC;
-    // }
+        for (uint8_t cid = 1; cid <= bcc_config.devicesCnt; cid++) {
+            bcc_status_t status =
+                BCC_Meas_GetCellVoltages(&bcc_config, (bcc_cid_t)cid, cell_voltages);
+            if (status != BCC_STATUS_SUCCESS) {
+                continue;
+            }
 
-    static float ocv_battery_SOC() {
-        float total_voltage = 0;
-        for (uint8_t i = 0; i < (uint8_t)bcc_config.devicesCnt; i++) {
-            total_voltage += battery[i].cells[0] + battery[i].cells[1] + battery[i].cells[2] +
-                             battery[i].cells[3] + battery[i].cells[4] + battery[i].cells[5] +
-                             battery[i].cells[6] + battery[i].cells[7] + battery[i].cells[8] +
-                             battery[i].cells[9] + battery[i].cells[10] + battery[i].cells[11];
+            float device_voltage = 0.0f;
+            for (uint8_t cell = 0; cell < H11_N_CELLS; cell++) {
+                battery[cid - 1].cells[cell] =
+                    static_cast<float>(cell_voltages[cell]) / 1000.0f;
+                device_voltage += battery[cid - 1].cells[cell];
+                min_v = std::min(min_v, battery[cid - 1].cells[cell]);
+                max_v = std::max(max_v, battery[cid - 1].cells[cell]);
+            }
+            battery[cid - 1].total_voltage = device_voltage;
+            voltage_sum += device_voltage;
         }
 
-        // Tengo que dividir por las celdas?
-        float x = total_voltage;  
-        float result = -62.5 + (14.9 * x) + (21.9 * x * x) + (-4.18 * x * x * x);
+        total_voltage = voltage_sum;
+        min_cell = min_v;   
+        max_cell = max_v;
+    }
+
+    static void read_analog() {
+        uint32_t an_voltages[H11_N_GPIO];
+
+        for (uint8_t cid = 1; cid <= bcc_config.devicesCnt; cid++) {
+            bcc_status_t status =
+                BCC_Meas_GetAnVoltages(&bcc_config, (bcc_cid_t)cid, an_voltages);
+            if (status != BCC_STATUS_SUCCESS) {
+                continue;
+            }
+
+            for (uint8_t gpio = 0; gpio < H11_N_TEMPS; gpio++) {
+                float voltage = static_cast<float>(an_voltages[gpio]) / 1000.0f;
+                float resistance = (voltage * 1000.0f) / (3.0f - voltage);
+                temperature[(cid - 1) * H11_N_TEMPS + gpio] =
+                    (resistance - 100.0f) / (0.00385f * 100.0f);
+            }
+        }
+    }
+
+    static float ocv_battery_SOC() {
+        float sum_voltage = 0;
+        for (uint8_t i = 0; i < (uint8_t)bcc_config.devicesCnt; i++) {
+            sum_voltage += battery[i].total_voltage;
+        }
+
+        float avg_voltage = sum_voltage / static_cast<float>(bcc_config.devicesCnt);
+        float x = avg_voltage;
+        // Esta formula es mentira!!! Hay que hacer una curva de OCV real y meterla aqui
+        float result = -62.5f + (14.9f * x) + (21.9f * x * x) + (-4.18f * x * x * x);
+        if (result < 0.0f) result = 0.0f;
+        if (result > 100.0f) result = 100.0f;
         return result;
     }
 
     static void update_SOC() { SOC = ocv_battery_SOC(); }
 
-    // static void get_max_min_cells() {
-    //     float maximum = FLT_MIN;
-    //     float minimum = FLT_MIN;
-    //     for (unsigned int i = 0; i < ARRAY_LENGTH(LV_BMS::battery[0].cells); i++) {
-    //         float v = LV_BMS::battery[0].cells[i];
-    //         maximum = std::max(v, maximum);
-    //         minimum = std::min(v, minimum);
-    //     }
+    static float get_min_cell() { return min_cell; }
+    static float get_max_cell() { return max_cell; }
+    static float get_total_voltage() { return total_voltage; }
+    static float get_min_temperature() { return min_temperature; }
+    static float get_max_temperature() { return max_temperature; }
+    static float get_SOC() { return SOC; }
 
-    //     max_cell = maximum;
-    //     min_cell = minimum;
-    // }
-
-    // static void get_max_min_temperatures() {
-    //     float maximum = FLT_MIN;
-    //     float minimum = FLT_MIN;
-    //     for (unsigned int i = 0; i < ARRAY_LENGTH(LV_BMS::temperature); i++) {
-    //         float v = LV_BMS::temperature[i];
-    //         maximum = std::max(v, maximum);
-    //         minimum = std::min(v, minimum);
-    //     }
-
-    //     max_temperature = maximum;
-    //     min_temperature = minimum;
-    // }
-
-    static void read() {
-        //get_max_min_cells();
-        update_SOC();
-        //get_max_min_temperatures();
+    static void read_current() {
+        int32_t isense_uv;
+        bcc_status_t status =
+            BCC_Meas_GetIsenseVoltage(&bcc_config, (bcc_cid_t)1, &isense_uv);
+        if (status == BCC_STATUS_SUCCESS) {
+            current = static_cast<float>(isense_uv) / 1000.0f;
+        }
     }
 
-    // static void read_temperature(const float voltage, float* temperature) {
-    //     auto resistance = (voltage * RESISTANCE_REFERENCE) / (VOLTAGE_REFERENCE - voltage);
-    //     *temperature = (resistance - R0) / (TCR * R0);
-    // }
+    static void read() {
+        bcc_status_t status =
+            BCC_Meas_StartAndWait(&bcc_config, (bcc_cid_t)1, BCC_AVG_8);
+        if (status != BCC_STATUS_SUCCESS) {
+            return;
+        }
+
+        read_cells();
+        read_analog();
+        get_max_min_temperatures();
+        update_SOC();
+    }
+
+    static void get_max_min_temperatures() {
+        float min_t = std::numeric_limits<float>::max();
+        float max_t = std::numeric_limits<float>::lowest();
+        for (uint16_t i = 0; i < bcc_config.devicesCnt * H11_N_TEMPS; i++) {
+            min_t = std::min(min_t, temperature[i]);
+            max_t = std::max(max_t, temperature[i]);
+        } 
+        min_temperature = min_t;
+        max_temperature = max_t;
+    }
 };

@@ -8,7 +8,7 @@
 #include "BatteryH11.hpp"
 
 #define BATTERIES_CONNECTED 1
-#define N_BATTERIES 16
+#define N_BATTERIES 8
 
 class Sensors {
     static constexpr float VOLTAGE_SLOPE{122.03744695176259};
@@ -24,8 +24,6 @@ class Sensors {
     inline static LinearSensor<float> current_sensor { *ADC::adc_current, CURRENT_SLOPE, CURRENT_OFFSET, ADC_reading::current_reading};
 
     inline static SDC sdc;
-
-    //inline static BatteryPack<N_BATTERIES> batteries;
 
     inline static Batteries battery_h11;
 
