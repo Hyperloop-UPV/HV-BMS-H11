@@ -1,3 +1,4 @@
+#define BCC_STLIB_IMPLEMENTATION
 #include "HVBMS/Sensors/Sensors.hpp"
 
 void Sensors::init() {

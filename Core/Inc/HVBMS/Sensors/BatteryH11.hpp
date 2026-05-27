@@ -1,6 +1,5 @@
 #pragma once
 
-#define USE_MC33771C
 #include "../../../deps/BCC_SW_Driver/bcc/bcc.h"
 #include "HVBMS/BCC/bcc_stlib.hpp"
 #include "HVBMS/Data/Data.hpp"

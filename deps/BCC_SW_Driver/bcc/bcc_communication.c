@@ -372,7 +372,7 @@ bcc_status_t BCC_Reg_ReadTpl(bcc_drv_config_t* const drvConfig,
     const bcc_cid_t cid, const uint8_t regAddr, const uint8_t regCnt,
     uint16_t* regVal)
 {
-    volatile uint8_t txBuf[BCC_MSG_SIZE]; /* Transmission buffer. */
+    uint8_t txBuf[BCC_MSG_SIZE]; /* Transmission buffer. */
     uint8_t *rxBuf;              /* Pointer to received data. */
     uint8_t regIdx;              /* Index of a received register. */
     bcc_status_t status;
