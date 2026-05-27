@@ -1134,7 +1134,7 @@ extern void BCC_MCU_Assert(const bool x);
  * @return bcc_status_t Error code.
  */
 extern bcc_status_t BCC_MCU_TransferSpi(const uint8_t drvInstance,
-    uint8_t txBuf[], uint8_t rxBuf[]);
+    volatile uint8_t txBuf[], volatile uint8_t rxBuf[]);
 
 /*!
  * @brief This function sends and receives data to MC33664 via TX and RX SPI
@@ -1154,7 +1154,7 @@ extern bcc_status_t BCC_MCU_TransferSpi(const uint8_t drvInstance,
  * @return bcc_status_t Error code.
  */
 extern bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance,
-    uint8_t txBuf[], uint8_t rxBuf[], const uint16_t recvTrCnt);
+    volatile uint8_t txBuf[], volatile uint8_t rxBuf[], const uint16_t recvTrCnt);
 
 /*!
  * @brief Writes logic 0 or 1 to the CSB (SPI mode) or CSB_TX pin (TPL mode).

@@ -14,6 +14,7 @@ public:
     {
         CONNECTING = 0,
         OPERATIONAL = 1,
+        FAULT = 2,
     };
     enum class imd_status : uint8_t
     {

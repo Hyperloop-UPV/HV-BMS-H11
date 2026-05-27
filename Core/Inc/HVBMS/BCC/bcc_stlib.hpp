@@ -7,13 +7,12 @@
 inline bool bcc_exceeded_timeout = false;
 
 typedef struct {
-    const uint8_t address;
-    const uint16_t defaultVal;
-    const uint16_t value;
+    uint8_t address;
+    uint16_t defaultVal;
+    uint16_t value;
 } bcc_init_reg_t;
 
 #define MC33771C_INIT_CONF_REG_CNT 59U
-inline bcc_init_reg_t bcc_init_regs[MC33771C_INIT_CONF_REG_CNT];
 
 inline const char* get_bcc_error_str(bcc_status_t status) {
     switch (status) {
@@ -48,7 +47,7 @@ inline const char* get_bcc_error_str(bcc_status_t status) {
     return "BCC Error: Unknown";
 }
 
-void timeout_timer_callback(void* rawinfo) {
+inline void timeout_timer_callback(void* rawinfo) {
     (void)rawinfo;
     bcc_exceeded_timeout = true;
 }
@@ -58,14 +57,14 @@ void timeout_timer_callback(void* rawinfo) {
  *
  * @return SCG system clock frequency.
  */
-uint32_t BCC_MCU_GetSystemClockFreq(void) { return SystemCoreClock; }
+inline uint32_t BCC_MCU_GetSystemClockFreq(void) { return SystemCoreClock; }
 
 /*!
  * @brief Waits for specified amount of seconds.
  *
  * @param delay Number of seconds to wait.
  */
-void BCC_MCU_WaitSec(uint16_t delay) {
+inline void BCC_MCU_WaitSec(uint16_t delay) {
     uint32_t total = delay * 1000;
     uint32_t i = 0;
     for (; i < total; i += UINT16_MAX) {
@@ -79,7 +78,7 @@ void BCC_MCU_WaitSec(uint16_t delay) {
  *
  * @param delay Number of milliseconds to wait.
  */
-void BCC_MCU_WaitMs(uint16_t delay) {
+inline void BCC_MCU_WaitMs(uint16_t delay) {
     // NOTE: Assume the counter for the timer has started
     // NOTE: This also assumes the timer is counting in microseconds per CNT step
     BCC_MCU_Assert((GlobalTimer::global_us_timer->CR1 & TIM_CR1_CEN) != 0);
@@ -91,7 +90,7 @@ void BCC_MCU_WaitMs(uint16_t delay) {
  *
  * @param delay Number of microseconds to wait.
  */
-void BCC_MCU_WaitUs(uint32_t delay) {
+inline void BCC_MCU_WaitUs(uint32_t delay) {
     // NOTE: Assume the counter for the timer has started
     // NOTE: This also assumes the timer is counting in microseconds per CNT step
     // BCC_MCU_Assert((global_us_timer->CR1 & TIM_CR1_CEN) != 0);
@@ -115,7 +114,7 @@ void BCC_MCU_WaitUs(uint32_t delay) {
  * @return Returns BCC_STATUS_TIMEOUT_START in case of error, BCC_STATUS_SUCCESS
  *         otherwise.
  */
-bcc_status_t BCC_MCU_StartTimeout(uint32_t timeoutUs) {
+inline bcc_status_t BCC_MCU_StartTimeout(uint32_t timeoutUs) {
     bcc_exceeded_timeout = false;
     GlobalTimer::timeout_timer->CNT = 0;
     GlobalTimer::timeout_timer->ARR = timeoutUs;
@@ -129,7 +128,7 @@ bcc_status_t BCC_MCU_StartTimeout(uint32_t timeoutUs) {
  *
  * @return True if timeout expired, false otherwise.
  */
-bool BCC_MCU_TimeoutExpired(void) { return bcc_exceeded_timeout; }
+inline bool BCC_MCU_TimeoutExpired(void) { return bcc_exceeded_timeout; }
 
 /*!
  * @brief This function performs one 48b transfer via SPI bus. Intended for SPI
@@ -143,69 +142,54 @@ bool BCC_MCU_TimeoutExpired(void) { return bcc_exceeded_timeout; }
  *
  * @return bcc_status_t Error code.
  */
-bcc_status_t BCC_MCU_TransferSpi(const uint8_t drvInstance, volatile uint8_t txBuf[],
+inline bcc_status_t BCC_MCU_TransferSpi(const uint8_t drvInstance, volatile uint8_t txBuf[],
                                  volatile uint8_t rxBuf[]) {
     return BCC_STATUS_SPI_FAIL;
 }
 // #define D1_NC __attribute__((section(".mpu_ram_d1_nc.user"), used)) volatile
 
 // HVBMS does use TPL
-bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance, volatile uint8_t txBuf[],
+inline bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance, volatile uint8_t txBuf[],
                                  volatile uint8_t rxBuf[], const uint16_t rxTrCnt) {
     // 0. Definir flags de estado para el DMA (estos sí pueden estar en stack)
     static volatile bool rx_complete = false;
-    static volatile bool tx_complete = false;
     rx_complete = false;
-    tx_complete = false;
 
     // Obtenemos el frame_size del wrapper
-    using RxWrapperType = std::remove_pointer_t<decltype(NewSPI::bms_wrapper_rx)>;
-    uint32_t f_size = NewSPI::bms_wrapper_rx->frame_size;
-
-    // 1. Buffers DMA en D1_NC
-    D1_NC static uint8_t rx_buffer[6 * 8];  // Ajusta el tamaño según tu protocolo
-    D1_NC static uint8_t tx_buffer[6 * 8];  // Ajusta el tamaño según tu protocolo
 
     // Copiar datos de entrada a buffer D1_NC
-    uint32_t rx_size = static_cast<size_t>(rxTrCnt * f_size);
-    memcpy(const_cast<uint8_t*>(rx_buffer), rxBuf, rx_size);
-    memcpy(const_cast<uint8_t*>(tx_buffer), txBuf, rx_size);
+    uint32_t rx_size = static_cast<size_t>(6 * rxTrCnt); // 48b * (chips + echo)
 
     // 2. Crear spans desde los buffers en D1_NC
-    span<uint8_t> rx_span{rx_buffer, rx_size};
-    span<uint8_t> tx_span{tx_buffer, rx_size};
+    span<volatile uint8_t> tx_span{txBuf, 6}; // 48b tx transfer
+    span<volatile uint8_t> rx_span{rxBuf, rx_size};
 
     // 3. Iniciar Recepción DMA
-    if (!NewSPI::bms_wrapper_rx->listen(rx_span, &rx_complete)) {
-        return BCC_STATUS_SPI_FAIL;
-    }
+    NewSPI::bms_wrapper_rx->listen(rx_span, &rx_complete);
 
     // 4. Iniciar Transmisión DMA
     NewSPI::bms_wrapper_tx->send(tx_span);
 
     // 5. Timeout dinámico
     uint32_t timeout_us = rxTrCnt * 100;
-    uint32_t start_wait = Scheduler::get_global_tick();
+    uint32_t start_wait = GlobalTimer::timeout_timer->CNT;
 
     // 6. Esperar a que la recepción termine
     while (!rx_complete) {
-        if ((uint32_t)(Scheduler::get_global_tick() - start_wait) > timeout_us) {
+        if ((uint32_t)(GlobalTimer::timeout_timer->CNT - start_wait) > timeout_us) {
             NewSPI::bms_wrapper_rx->abort_and_recover();
             return BCC_STATUS_COM_TIMEOUT;
         }
     }
 
-    // 7. Copiar resultado de vuelta al buffer original
-    memcpy(rxBuf, rx_buffer, rx_size);
-
     return BCC_STATUS_SUCCESS;
 }
 
-#define BCC_MCU_Assert(expr)                            \
-    do {                                                \
-        if (!(expr)) {                                  \
-            FAULT("BCC assert fail: " stringify(expr)); \
-        }                                               \
+#define BCC_MCU_Assert(expr)                      \
+    do {                                           \
+        if (!(expr)) {                             \
+            FAULT("BCC assert fail: " #expr);      \
+        }                                          \
     } while (0)
 
 /*!
@@ -214,7 +198,7 @@ bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance, volatile uint8_t txB
  * @param drvInstance Instance of BCC driver.
  * @param value       Zero or one to be set to CSB (CSB_TX) pin.
  */
-void BCC_MCU_WriteCsbPin(const uint8_t drvInstance, const uint8_t value) {
+inline void BCC_MCU_WriteCsbPin(const uint8_t drvInstance, const uint8_t value) {
     if (value) {
         DO::cs_tx->turn_on();
     } else {
@@ -223,11 +207,11 @@ void BCC_MCU_WriteCsbPin(const uint8_t drvInstance, const uint8_t value) {
 }
 
 // NOTE: Unused since I don't have SPI
-void BCC_MCU_WriteRstPin(const uint8_t drvInstance, const uint8_t value) {
+inline void BCC_MCU_WriteRstPin(const uint8_t drvInstance, const uint8_t value) {
     // I do not have a RST pin
 }
 
-void BCC_MCU_WriteEnPin(const uint8_t drvInstance, const uint8_t value) {
+inline void BCC_MCU_WriteEnPin(const uint8_t drvInstance, const uint8_t value) {
     if (value) {
         DO::spi_enable->turn_on();
     } else {
@@ -235,14 +219,37 @@ void BCC_MCU_WriteEnPin(const uint8_t drvInstance, const uint8_t value) {
     }
 }
 
-uint32_t BCC_MCU_ReadIntbPin(const uint8_t drvInstance) {
+inline uint32_t BCC_MCU_ReadIntbPin(const uint8_t drvInstance) {
     return (uint32_t)DI::battery_intb->read();
 }
 
+/* MC33771C init register values — using POR defaults for now.
+ * TODO (@Jorge_Canut): review and set proper values */
+#define MC33771C_GPIO_CFG1_INIT_VALUE MC33771C_GPIO_CFG1_POR_VAL
+#define MC33771C_GPIO_CFG2_INIT_VALUE MC33771C_GPIO_CFG2_POR_VAL
+#define MC33771C_TH_ALL_CT_INIT_VALUE MC33771C_TH_ALL_CT_POR_VAL
+#define MC33771C_TH_CTX_INIT_VALUE MC33771C_TH_CT14_POR_VAL
+#define MC33771C_TH_ANX_OT_INIT_VALUE MC33771C_TH_AN6_OT_POR_VAL
+#define MC33771C_TH_ANX_UT_INIT_VALUE MC33771C_TH_AN6_UT_POR_VAL
+#define MC33771C_TH_ISENSE_OC_INIT_VALUE MC33771C_TH_ISENSE_OC_POR_VAL
+#define MC33771C_TH_COULOMB_CNT_MSB_INIT_VALUE MC33771C_TH_COULOMB_CNT_MSB_POR_VAL
+#define MC33771C_TH_COULOMB_CNT_LSB_INIT_VALUE MC33771C_TH_COULOMB_CNT_LSB_POR_VAL
+#define MC33771C_CBX_CFG_INIT_VALUE MC33771C_CB14_CFG_POR_VAL
+#define MC33771C_OV_UV_EN_INIT_VALUE MC33771C_OV_UV_EN_POR_VAL
+#define MC33771C_SYS_CFG1_INIT_VALUE MC33771C_SYS_CFG1_POR_VAL
+#define MC33771C_SYS_CFG2_INIT_VALUE MC33771C_SYS_CFG2_POR_VAL
+#define MC33771C_ADC_CFG_INIT_VALUE MC33771C_ADC_CFG_POR_VAL
+#define MC33771C_ADC2_OFFSET_COMP_INIT_VALUE MC33771C_ADC2_OFFSET_COMP_POR_VAL
+#define MC33771C_FAULT_MASK1_INIT_VALUE MC33771C_FAULT_MASK1_POR_VAL
+#define MC33771C_FAULT_MASK2_INIT_VALUE MC33771C_FAULT_MASK2_POR_VAL
+#define MC33771C_FAULT_MASK3_INIT_VALUE MC33771C_FAULT_MASK3_POR_VAL
+#define MC33771C_WAKEUP_MASK1_INIT_VALUE MC33771C_WAKEUP_MASK1_POR_VAL
+#define MC33771C_WAKEUP_MASK2_INIT_VALUE MC33771C_WAKEUP_MASK2_POR_VAL
+#define MC33771C_WAKEUP_MASK3_INIT_VALUE MC33771C_WAKEUP_MASK3_POR_VAL
+
 #ifdef USE_MC33771C
-// TODO (@Jorge_Canut): check these init registers (taken from an example)
 /* address, defaultVal, value */
-bcc_init_reg_t bcc_init_regs[MC33771C_INIT_CONF_REG_CNT] = {
+inline bcc_init_reg_t bcc_init_regs[MC33771C_INIT_CONF_REG_CNT] = {
     {MC33771C_GPIO_CFG1_OFFSET, MC33771C_GPIO_CFG1_POR_VAL, MC33771C_GPIO_CFG1_INIT_VALUE},
     {MC33771C_GPIO_CFG2_OFFSET, MC33771C_GPIO_CFG2_POR_VAL, MC33771C_GPIO_CFG2_INIT_VALUE},
     {MC33771C_TH_ALL_CT_OFFSET, MC33771C_TH_ALL_CT_POR_VAL, MC33771C_TH_ALL_CT_INIT_VALUE},
@@ -589,7 +596,7 @@ static constexpr double OVERVOLTAGE_THRESHOLD_ONE_CONVERTED_F64 =
 static constexpr double OVERVOLTAGE_THRESHOLD_ONE_CONVERTED =
     ((uint8_t)(OVERVOLTAGE_THRESHOLD_ONE_CONVERTED_F64 - 0.5));
 
-void bcc_dummy_check() {
+inline void bcc_dummy_check() {
     FAULT("This function should not be called");
 
     if constexpr ((UNDERVOLTAGE_THRESHOLD_ONE_F64 < 0.0) ||
@@ -644,7 +651,7 @@ void bcc_dummy_check() {
 /* address, default value, init value */
 #define BCC_INIT_REG(x) {MC33772C_##x##_OFFSET, MC33772C_##x##_POR_VAL, MC33772C_##x##_INIT_VALUE}
 
-bcc_init_reg_t bcc_init_regs[MC33772C_INIT_CONF_REG_CNT] = {
+inline bcc_init_reg_t bcc_init_regs[MC33772C_INIT_CONF_REG_CNT] = {
     BCC_INIT_REG(SYS_CFG1),
     BCC_INIT_REG(SYS_CFG2),
     BCC_INIT_REG(ADC_CFG),
@@ -694,7 +701,4 @@ bcc_init_reg_t bcc_init_regs[MC33772C_INIT_CONF_REG_CNT] = {
     BCC_INIT_REG(TH_COULOMB_CNT_LSB)};
 #endif
 
-#include "../../../../deps/BCC_SW_Driver/bcc/bcc.c"
-#include "../../../../deps/BCC_SW_Driver/bcc/bcc_communication.c"
-#endif  // BCC_STLIB_IMPLEMENTATION
 #endif  // BCC_STLIB_H
