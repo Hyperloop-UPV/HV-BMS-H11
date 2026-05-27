@@ -1118,7 +1118,7 @@ extern bool BCC_MCU_TimeoutExpired(void);
  *
  * @param x True if everything is OK.
  */
-extern void BCC_MCU_Assert(const bool x);
+//extern void BCC_MCU_Assert(const bool x);
 
 /*!
  * @brief This function performs one 48b transfer via SPI bus. Intended for SPI

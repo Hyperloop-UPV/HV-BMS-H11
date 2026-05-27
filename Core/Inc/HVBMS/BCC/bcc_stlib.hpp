@@ -4,7 +4,7 @@
 #include "HVBMS/Data/Data.hpp"
 #include "ST-LIB.hpp"
 
-inline bool bcc_exceeded_timeout = false;
+bool bcc_exceeded_timeout = false;
 
 typedef struct {
     uint8_t address;
@@ -14,7 +14,14 @@ typedef struct {
 
 #define MC33771C_INIT_CONF_REG_CNT 59U
 
-inline const char* get_bcc_error_str(bcc_status_t status) {
+#define BCC_MCU_Assert(expr)                  \
+    do {                                      \
+        if (!(expr)) {                        \
+            FAULT("BCC assert fail: " #expr); \
+        }                                     \
+    } while (0)
+
+const char* get_bcc_error_str(bcc_status_t status) {
     switch (status) {
         case BCC_STATUS_SUCCESS:
             return "BCC Success";
@@ -47,7 +54,7 @@ inline const char* get_bcc_error_str(bcc_status_t status) {
     return "BCC Error: Unknown";
 }
 
-inline void timeout_timer_callback(void* rawinfo) {
+void timeout_timer_callback(void* rawinfo) {
     (void)rawinfo;
     bcc_exceeded_timeout = true;
 }
@@ -57,14 +64,14 @@ inline void timeout_timer_callback(void* rawinfo) {
  *
  * @return SCG system clock frequency.
  */
-inline uint32_t BCC_MCU_GetSystemClockFreq(void) { return SystemCoreClock; }
+uint32_t BCC_MCU_GetSystemClockFreq(void) { return SystemCoreClock; }
 
 /*!
  * @brief Waits for specified amount of seconds.
  *
  * @param delay Number of seconds to wait.
  */
-inline void BCC_MCU_WaitSec(uint16_t delay) {
+void BCC_MCU_WaitSec(uint16_t delay) {
     uint32_t total = delay * 1000;
     uint32_t i = 0;
     for (; i < total; i += UINT16_MAX) {
@@ -78,7 +85,7 @@ inline void BCC_MCU_WaitSec(uint16_t delay) {
  *
  * @param delay Number of milliseconds to wait.
  */
-inline void BCC_MCU_WaitMs(uint16_t delay) {
+void BCC_MCU_WaitMs(uint16_t delay) {
     // NOTE: Assume the counter for the timer has started
     // NOTE: This also assumes the timer is counting in microseconds per CNT step
     BCC_MCU_Assert((GlobalTimer::global_us_timer->CR1 & TIM_CR1_CEN) != 0);
@@ -90,7 +97,7 @@ inline void BCC_MCU_WaitMs(uint16_t delay) {
  *
  * @param delay Number of microseconds to wait.
  */
-inline void BCC_MCU_WaitUs(uint32_t delay) {
+void BCC_MCU_WaitUs(uint32_t delay) {
     // NOTE: Assume the counter for the timer has started
     // NOTE: This also assumes the timer is counting in microseconds per CNT step
     // BCC_MCU_Assert((global_us_timer->CR1 & TIM_CR1_CEN) != 0);
@@ -114,7 +121,7 @@ inline void BCC_MCU_WaitUs(uint32_t delay) {
  * @return Returns BCC_STATUS_TIMEOUT_START in case of error, BCC_STATUS_SUCCESS
  *         otherwise.
  */
-inline bcc_status_t BCC_MCU_StartTimeout(uint32_t timeoutUs) {
+bcc_status_t BCC_MCU_StartTimeout(uint32_t timeoutUs) {
     bcc_exceeded_timeout = false;
     GlobalTimer::timeout_timer->CNT = 0;
     GlobalTimer::timeout_timer->ARR = timeoutUs;
@@ -128,7 +135,7 @@ inline bcc_status_t BCC_MCU_StartTimeout(uint32_t timeoutUs) {
  *
  * @return True if timeout expired, false otherwise.
  */
-inline bool BCC_MCU_TimeoutExpired(void) { return bcc_exceeded_timeout; }
+bool BCC_MCU_TimeoutExpired(void) { return bcc_exceeded_timeout; }
 
 /*!
  * @brief This function performs one 48b transfer via SPI bus. Intended for SPI
@@ -142,14 +149,14 @@ inline bool BCC_MCU_TimeoutExpired(void) { return bcc_exceeded_timeout; }
  *
  * @return bcc_status_t Error code.
  */
-inline bcc_status_t BCC_MCU_TransferSpi(const uint8_t drvInstance, volatile uint8_t txBuf[],
+bcc_status_t BCC_MCU_TransferSpi(const uint8_t drvInstance, volatile uint8_t txBuf[],
                                  volatile uint8_t rxBuf[]) {
     return BCC_STATUS_SPI_FAIL;
 }
 // #define D1_NC __attribute__((section(".mpu_ram_d1_nc.user"), used)) volatile
 
 // HVBMS does use TPL
-inline bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance, volatile uint8_t txBuf[],
+bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance, volatile uint8_t txBuf[],
                                  volatile uint8_t rxBuf[], const uint16_t rxTrCnt) {
     // 0. Definir flags de estado para el DMA (estos sí pueden estar en stack)
     static volatile bool rx_complete = false;
@@ -158,10 +165,10 @@ inline bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance, volatile uint
     // Obtenemos el frame_size del wrapper
 
     // Copiar datos de entrada a buffer D1_NC
-    uint32_t rx_size = static_cast<size_t>(6 * rxTrCnt); // 48b * (chips + echo)
+    uint32_t rx_size = static_cast<size_t>(6 * rxTrCnt);  // 48b * (chips + echo)
 
     // 2. Crear spans desde los buffers en D1_NC
-    span<volatile uint8_t> tx_span{txBuf, 6}; // 48b tx transfer
+    span<volatile uint8_t> tx_span{txBuf, 6};  // 48b tx transfer
     span<volatile uint8_t> rx_span{rxBuf, rx_size};
 
     // 3. Iniciar Recepción DMA
@@ -185,20 +192,13 @@ inline bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance, volatile uint
     return BCC_STATUS_SUCCESS;
 }
 
-#define BCC_MCU_Assert(expr)                      \
-    do {                                           \
-        if (!(expr)) {                             \
-            FAULT("BCC assert fail: " #expr);      \
-        }                                          \
-    } while (0)
-
 /*!
  * @brief Writes logic 0 or 1 to the CSB (SPI mode) or CSB_TX pin (TPL mode).
  *
  * @param drvInstance Instance of BCC driver.
  * @param value       Zero or one to be set to CSB (CSB_TX) pin.
  */
-inline void BCC_MCU_WriteCsbPin(const uint8_t drvInstance, const uint8_t value) {
+void BCC_MCU_WriteCsbPin(const uint8_t drvInstance, const uint8_t value) {
     if (value) {
         DO::cs_tx->turn_on();
     } else {
@@ -207,11 +207,11 @@ inline void BCC_MCU_WriteCsbPin(const uint8_t drvInstance, const uint8_t value) 
 }
 
 // NOTE: Unused since I don't have SPI
-inline void BCC_MCU_WriteRstPin(const uint8_t drvInstance, const uint8_t value) {
+void BCC_MCU_WriteRstPin(const uint8_t drvInstance, const uint8_t value) {
     // I do not have a RST pin
 }
 
-inline void BCC_MCU_WriteEnPin(const uint8_t drvInstance, const uint8_t value) {
+void BCC_MCU_WriteEnPin(const uint8_t drvInstance, const uint8_t value) {
     if (value) {
         DO::spi_enable->turn_on();
     } else {
@@ -219,7 +219,7 @@ inline void BCC_MCU_WriteEnPin(const uint8_t drvInstance, const uint8_t value) {
     }
 }
 
-inline uint32_t BCC_MCU_ReadIntbPin(const uint8_t drvInstance) {
+uint32_t BCC_MCU_ReadIntbPin(const uint8_t drvInstance) {
     return (uint32_t)DI::battery_intb->read();
 }
 
@@ -249,7 +249,7 @@ inline uint32_t BCC_MCU_ReadIntbPin(const uint8_t drvInstance) {
 
 #ifdef USE_MC33771C
 /* address, defaultVal, value */
-inline bcc_init_reg_t bcc_init_regs[MC33771C_INIT_CONF_REG_CNT] = {
+bcc_init_reg_t bcc_init_regs[MC33771C_INIT_CONF_REG_CNT] = {
     {MC33771C_GPIO_CFG1_OFFSET, MC33771C_GPIO_CFG1_POR_VAL, MC33771C_GPIO_CFG1_INIT_VALUE},
     {MC33771C_GPIO_CFG2_OFFSET, MC33771C_GPIO_CFG2_POR_VAL, MC33771C_GPIO_CFG2_INIT_VALUE},
     {MC33771C_TH_ALL_CT_OFFSET, MC33771C_TH_ALL_CT_POR_VAL, MC33771C_TH_ALL_CT_INIT_VALUE},
@@ -596,7 +596,7 @@ static constexpr double OVERVOLTAGE_THRESHOLD_ONE_CONVERTED_F64 =
 static constexpr double OVERVOLTAGE_THRESHOLD_ONE_CONVERTED =
     ((uint8_t)(OVERVOLTAGE_THRESHOLD_ONE_CONVERTED_F64 - 0.5));
 
-inline void bcc_dummy_check() {
+void bcc_dummy_check() {
     FAULT("This function should not be called");
 
     if constexpr ((UNDERVOLTAGE_THRESHOLD_ONE_F64 < 0.0) ||
@@ -651,7 +651,7 @@ inline void bcc_dummy_check() {
 /* address, default value, init value */
 #define BCC_INIT_REG(x) {MC33772C_##x##_OFFSET, MC33772C_##x##_POR_VAL, MC33772C_##x##_INIT_VALUE}
 
-inline bcc_init_reg_t bcc_init_regs[MC33772C_INIT_CONF_REG_CNT] = {
+bcc_init_reg_t bcc_init_regs[MC33772C_INIT_CONF_REG_CNT] = {
     BCC_INIT_REG(SYS_CFG1),
     BCC_INIT_REG(SYS_CFG2),
     BCC_INIT_REG(ADC_CFG),

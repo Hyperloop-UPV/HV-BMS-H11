@@ -41,7 +41,8 @@ class HVBMS {
             bms_sm.add_enter_action(
                 []() {
                     Comms::start();
-                    Sensors::batteries.start();
+                    // LUEGO TENGO QUE INICIAR BATERIAS
+                    //Sensors::batteries.start();
                     //DO::sdc_fw_fault->turn_on();
                 },
                 connecting_state);

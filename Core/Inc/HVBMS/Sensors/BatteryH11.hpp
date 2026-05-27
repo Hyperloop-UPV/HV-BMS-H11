@@ -6,12 +6,6 @@
 #include "HVBMS/Data/Data.hpp"
 #include "ST-LIB.hpp"
 
-#define RESISTANCE_REFERENCE 1000.0  // Ohmios
-#define VOLTAGE_REFERENCE 3.0        // V
-#define R0 100.0                     // Ohmios+
-#define TCR 0.00385
-#define CAPACITY_AH 1000 // cambiar esto 
-
 struct Batteries {
     static inline bcc_drv_config_t bcc_config{};
 
@@ -147,8 +141,8 @@ struct Batteries {
         //get_max_min_temperatures();
     }
 
-    static void read_temperature(const float voltage, float* temperature) {
-        auto resistance = (voltage * RESISTANCE_REFERENCE) / (VOLTAGE_REFERENCE - voltage);
-        *temperature = (resistance - R0) / (TCR * R0);
-    }
+    // static void read_temperature(const float voltage, float* temperature) {
+    //     auto resistance = (voltage * RESISTANCE_REFERENCE) / (VOLTAGE_REFERENCE - voltage);
+    //     *temperature = (resistance - R0) / (TCR * R0);
+    // }
 };

@@ -9,13 +9,15 @@ void Sensors::init() {
     DO::sdc_fw_fault->turn_on();
     sdc.enable();
 
+    battery_h11.init();
+
     Scheduler::register_task(10000, []() { Sensors::update_batteries(); });
 }
 
 void Sensors::update_batteries() {
     if constexpr (BATTERIES_CONNECTED) {
-        batteries.update();
-        batteries.read(ADC_reading::current_reading);
+        //batteries.update();
+        //batteries.read(ADC_reading::current_reading);
     }
 }
 

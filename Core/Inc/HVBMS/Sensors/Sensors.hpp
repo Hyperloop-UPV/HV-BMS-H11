@@ -25,7 +25,7 @@ class Sensors {
 
     inline static SDC sdc;
 
-    inline static BatteryPack<N_BATTERIES> batteries;
+    //inline static BatteryPack<N_BATTERIES> batteries;
 
     inline static Batteries battery_h11;
 
