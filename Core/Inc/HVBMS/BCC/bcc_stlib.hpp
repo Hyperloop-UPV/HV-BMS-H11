@@ -13,9 +13,9 @@ typedef struct {
 } bcc_init_reg_t;
 
 #define MC33771C_INIT_CONF_REG_CNT 59U
-extern bcc_init_reg_t bcc_init_regs[MC33771C_INIT_CONF_REG_CNT];
+inline bcc_init_reg_t bcc_init_regs[MC33771C_INIT_CONF_REG_CNT];
 
-const char* get_bcc_error_str(bcc_status_t status) {
+inline const char* get_bcc_error_str(bcc_status_t status) {
     switch (status) {
         case BCC_STATUS_SUCCESS:
             return "BCC Success";
@@ -151,31 +151,28 @@ bcc_status_t BCC_MCU_TransferSpi(const uint8_t drvInstance, volatile uint8_t txB
 // HVBMS does use TPL
 bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance, volatile uint8_t txBuf[],
                                  volatile uint8_t rxBuf[], const uint16_t rxTrCnt) {
-    // No entiendo muy bien estom, pero el chat esta convencido
-    // Creo que es porque tiene 6 bytes cada mensaje?
     uint16_t total_rx_bytes = rxTrCnt * 6;
 
-    // 2. Preparar el Esclavo (RX) antes que nada
-    // Esto es lo más importante para no perder el Eco
+    // 1. Iniciar Recepción DMA
     NewSPI::bms_wrapper_rx->receive_dma((uint8_t*)rxBuf, total_rx_bytes);
 
-    // 3. Pequeño retardo de seguridad (microsegundos) para que el DMA esté listo
-    BCC_MCU_WaitUs(5);
+    // 2. Pequeño margen para asegurar que el DMA está rearmado
+    BCC_MCU_WaitUs(2);
 
-    // 4. Iniciar la transmisión del comando (Master)
-    // BCC_MCU_WriteCsbPin ya habrá bajado el CS_TX
+    // 3. Iniciar Transmisión
     bool tx_ok = NewSPI::bms_wrapper_tx->transmit_dma((uint8_t*)txBuf, 6);
-
     if (!tx_ok) return BCC_STATUS_SPI_FAIL;
 
-    // 5. Esperar a que el Slave termine (Eco + Respuestas)
-    uint32_t timeout = rxTrCnt * 1000;  // 1ms por trama es muy generoso
-    while (NewSPI::bms_wrapper_rx->is_busy() && timeout > 0) {
-        BCC_MCU_WaitUs(1);
-        timeout--;
-    }
+    // 4. Timeout dinámico (aprox 50us por trama + margen)
+    // 8 tramas * 50us = 400us. Con 2000us (2ms) vas sobradísimo y no bloqueas el sistema 8ms.
+    uint32_t timeout_us = rxTrCnt * 100;
+    uint32_t start_wait = GlobalTimer::global_us_timer->CNT;
 
-    if (timeout == 0) return BCC_STATUS_COM_TIMEOUT;
+    while (NewSPI::bms_wrapper_rx->is_busy()) {
+        if ((uint32_t)(GlobalTimer::global_us_timer->CNT - start_wait) > timeout_us) {
+            return BCC_STATUS_COM_TIMEOUT;
+        }
+    }
 
     return BCC_STATUS_SUCCESS;
 }
