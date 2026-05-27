@@ -49,7 +49,16 @@ struct Batteries {
     }
 
     static bcc_status_t Clear_BCC_FaultRegisters() {
-        // TODO
+        bcc_status_t status;
+        for (uint8_t cid = 1; cid <= bcc_config.devicesCnt; cid++) {
+            for (uint8_t i = 0; i < BCC_STAT_CNT; i++) {
+                status = BCC_Fault_ClearStatus(&bcc_config, (bcc_cid_t)cid,
+                                               (bcc_fault_status_t)i);
+                if (status != BCC_STATUS_SUCCESS) {
+                    return status;
+                }
+            }
+        }
         return BCC_STATUS_SUCCESS;
     }
 
