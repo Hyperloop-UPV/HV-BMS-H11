@@ -10,7 +10,9 @@ public:
     
 
     inline static bool FAULT_flag{false};
+    inline static bool close_contactors_flag{false};
     inline static bool open_contactors_flag{false};
+    inline static bool sdc_obccu_flag{false};
     inline static bool start_precharge_flag{false};
     inline static bool bypass_imd_flag{false};
     
@@ -18,7 +20,9 @@ public:
     OrderPackets() = default;
 
     inline static HeapOrder *FAULT_order{nullptr};
+    inline static HeapOrder *close_contactors_order{nullptr};
     inline static HeapOrder *open_contactors_order{nullptr};
+    inline static HeapOrder *sdc_obccu_order{nullptr};
     inline static HeapOrder *start_precharge_order{nullptr};
     inline static HeapOrder *bypass_imd_order{nullptr};
     
@@ -27,9 +31,17 @@ public:
     {
         FAULT_order = new HeapOrder(0, &FAULT_cb);
     }
+    static void close_contactors_init()
+    {
+        close_contactors_order = new HeapOrder(900, &close_contactors_cb);
+    }
     static void open_contactors_init()
     {
         open_contactors_order = new HeapOrder(901, &open_contactors_cb);
+    }
+    static void sdc_obccu_init()
+    {
+        sdc_obccu_order = new HeapOrder(902, &sdc_obccu_cb);
     }
     static void start_precharge_init()
     {
@@ -50,8 +62,14 @@ public:
         if (FAULT_order == nullptr) {
             PANIC("Order FAULT not initialized");
         }
+        if (close_contactors_order == nullptr) {
+            PANIC("Order close_contactors not initialized");
+        }
         if (open_contactors_order == nullptr) {
             PANIC("Order open_contactors not initialized");
+        }
+        if (sdc_obccu_order == nullptr) {
+            PANIC("Order sdc_obccu not initialized");
         }
         if (start_precharge_order == nullptr) {
             PANIC("Order start_precharge not initialized");
@@ -70,9 +88,17 @@ private:
     {
         FAULT_flag = true;
     }
+    static void close_contactors_cb()
+    {
+        close_contactors_flag = true;
+    }
     static void open_contactors_cb()
     {
         open_contactors_flag = true;
+    }
+    static void sdc_obccu_cb()
+    {
+        sdc_obccu_flag = true;
     }
     static void start_precharge_cb()
     {

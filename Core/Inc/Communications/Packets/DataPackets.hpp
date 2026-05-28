@@ -14,7 +14,6 @@ public:
     {
         CONNECTING = 0,
         OPERATIONAL = 1,
-        FAULT = 2,
     };
     enum class imd_status : uint8_t
     {
@@ -47,94 +46,44 @@ public:
         sdc_packet = new HeapPacket(static_cast<uint16_t>(944), &sdc_status);
     }
 
-    static void battery_1_init(float &battery1_SOC, float &battery1_cell1, float &battery1_cell2, float &battery1_cell3, float &battery1_cell4, float &battery1_cell5, float &battery1_cell6, float &battery1_total_voltage, float &battery1_conv_rate)
+    static void battery_1_init(float &battery1_cell1, float &battery1_cell2, float &battery1_cell3, float &battery1_cell4, float &battery1_cell5, float &battery1_cell6, float &battery1_cell7, float &battery1_cell8, float &battery1_cell9, float &battery1_cell10, float &battery1_cell11, float &battery1_cell12, float &battery1_total_voltage)
     {
-        battery_1_packet = new HeapPacket(static_cast<uint16_t>(910), &battery1_SOC, &battery1_cell1, &battery1_cell2, &battery1_cell3, &battery1_cell4, &battery1_cell5, &battery1_cell6, &battery1_total_voltage, &battery1_conv_rate);
+        battery_1_packet = new HeapPacket(static_cast<uint16_t>(910), &battery1_cell1, &battery1_cell2, &battery1_cell3, &battery1_cell4, &battery1_cell5, &battery1_cell6, &battery1_cell7, &battery1_cell8, &battery1_cell9, &battery1_cell10, &battery1_cell11, &battery1_cell12, &battery1_total_voltage);
     }
 
-    static void battery_2_init(float &battery2_SOC, float &battery2_cell1, float &battery2_cell2, float &battery2_cell3, float &battery2_cell4, float &battery2_cell5, float &battery2_cell6, float &battery2_total_voltage, float &battery2_conv_rate)
+    static void battery_2_init(float &battery2_cell1, float &battery2_cell2, float &battery2_cell3, float &battery2_cell4, float &battery2_cell5, float &battery2_cell6, float &battery2_cell7, float &battery2_cell8, float &battery2_cell9, float &battery2_cell10, float &battery2_cell11, float &battery2_cell12, float &battery2_total_voltage)
     {
-        battery_2_packet = new HeapPacket(static_cast<uint16_t>(911), &battery2_SOC, &battery2_cell1, &battery2_cell2, &battery2_cell3, &battery2_cell4, &battery2_cell5, &battery2_cell6, &battery2_total_voltage, &battery2_conv_rate);
+        battery_2_packet = new HeapPacket(static_cast<uint16_t>(911), &battery2_cell1, &battery2_cell2, &battery2_cell3, &battery2_cell4, &battery2_cell5, &battery2_cell6, &battery2_cell7, &battery2_cell8, &battery2_cell9, &battery2_cell10, &battery2_cell11, &battery2_cell12, &battery2_total_voltage);
     }
 
-    static void battery_3_init(float &battery3_SOC, float &battery3_cell1, float &battery3_cell2, float &battery3_cell3, float &battery3_cell4, float &battery3_cell5, float &battery3_cell6, float &battery3_total_voltage, float &battery3_conv_rate)
+    static void battery_3_init(float &battery3_cell1, float &battery3_cell2, float &battery3_cell3, float &battery3_cell4, float &battery3_cell5, float &battery3_cell6, float &battery3_cell7, float &battery3_cell8, float &battery3_cell9, float &battery3_cell10, float &battery3_cell11, float &battery3_cell12, float &battery3_total_voltage)
     {
-        battery_3_packet = new HeapPacket(static_cast<uint16_t>(912), &battery3_SOC, &battery3_cell1, &battery3_cell2, &battery3_cell3, &battery3_cell4, &battery3_cell5, &battery3_cell6, &battery3_total_voltage, &battery3_conv_rate);
+        battery_3_packet = new HeapPacket(static_cast<uint16_t>(912), &battery3_cell1, &battery3_cell2, &battery3_cell3, &battery3_cell4, &battery3_cell5, &battery3_cell6, &battery3_cell7, &battery3_cell8, &battery3_cell9, &battery3_cell10, &battery3_cell11, &battery3_cell12, &battery3_total_voltage);
     }
 
-    static void battery_4_init(float &battery4_SOC, float &battery4_cell1, float &battery4_cell2, float &battery4_cell3, float &battery4_cell4, float &battery4_cell5, float &battery4_cell6, float &battery4_total_voltage, float &battery4_conv_rate)
+    static void battery_4_init(float &battery4_cell1, float &battery4_cell2, float &battery4_cell3, float &battery4_cell4, float &battery4_cell5, float &battery4_cell6, float &battery4_cell7, float &battery4_cell8, float &battery4_cell9, float &battery4_cell10, float &battery4_cell11, float &battery4_cell12, float &battery4_total_voltage)
     {
-        battery_4_packet = new HeapPacket(static_cast<uint16_t>(913), &battery4_SOC, &battery4_cell1, &battery4_cell2, &battery4_cell3, &battery4_cell4, &battery4_cell5, &battery4_cell6, &battery4_total_voltage, &battery4_conv_rate);
+        battery_4_packet = new HeapPacket(static_cast<uint16_t>(913), &battery4_cell1, &battery4_cell2, &battery4_cell3, &battery4_cell4, &battery4_cell5, &battery4_cell6, &battery4_cell7, &battery4_cell8, &battery4_cell9, &battery4_cell10, &battery4_cell11, &battery4_cell12, &battery4_total_voltage);
     }
 
-    static void battery_5_init(float &battery5_SOC, float &battery5_cell1, float &battery5_cell2, float &battery5_cell3, float &battery5_cell4, float &battery5_cell5, float &battery5_cell6, float &battery5_total_voltage, float &battery5_conv_rate)
+    static void battery_5_init(float &battery5_cell1, float &battery5_cell2, float &battery5_cell3, float &battery5_cell4, float &battery5_cell5, float &battery5_cell6, float &battery5_cell7, float &battery5_cell8, float &battery5_cell9, float &battery5_cell10, float &battery5_cell11, float &battery5_cell12, float &battery5_total_voltage)
     {
-        battery_5_packet = new HeapPacket(static_cast<uint16_t>(914), &battery5_SOC, &battery5_cell1, &battery5_cell2, &battery5_cell3, &battery5_cell4, &battery5_cell5, &battery5_cell6, &battery5_total_voltage, &battery5_conv_rate);
+        battery_5_packet = new HeapPacket(static_cast<uint16_t>(914), &battery5_cell1, &battery5_cell2, &battery5_cell3, &battery5_cell4, &battery5_cell5, &battery5_cell6, &battery5_cell7, &battery5_cell8, &battery5_cell9, &battery5_cell10, &battery5_cell11, &battery5_cell12, &battery5_total_voltage);
     }
 
-    static void battery_6_init(float &battery6_SOC, float &battery6_cell1, float &battery6_cell2, float &battery6_cell3, float &battery6_cell4, float &battery6_cell5, float &battery6_cell6, float &battery6_total_voltage, float &battery6_conv_rate)
+    static void battery_6_init(float &battery6_cell1, float &battery6_cell2, float &battery6_cell3, float &battery6_cell4, float &battery6_cell5, float &battery6_cell6, float &battery6_cell7, float &battery6_cell8, float &battery6_cell9, float &battery6_cell10, float &battery6_cell11, float &battery6_cell12, float &battery6_total_voltage)
     {
-        battery_6_packet = new HeapPacket(static_cast<uint16_t>(915), &battery6_SOC, &battery6_cell1, &battery6_cell2, &battery6_cell3, &battery6_cell4, &battery6_cell5, &battery6_cell6, &battery6_total_voltage, &battery6_conv_rate);
+        battery_6_packet = new HeapPacket(static_cast<uint16_t>(915), &battery6_cell1, &battery6_cell2, &battery6_cell3, &battery6_cell4, &battery6_cell5, &battery6_cell6, &battery6_cell7, &battery6_cell8, &battery6_cell9, &battery6_cell10, &battery6_cell11, &battery6_cell12, &battery6_total_voltage);
     }
 
-    static void battery_7_init(float &battery7_SOC, float &battery7_cell1, float &battery7_cell2, float &battery7_cell3, float &battery7_cell4, float &battery7_cell5, float &battery7_cell6, float &battery7_total_voltage, float &battery7_conv_rate)
+    static void battery_7_init(float &battery7_cell1, float &battery7_cell2, float &battery7_cell3, float &battery7_cell4, float &battery7_cell5, float &battery7_cell6, float &battery7_cell7, float &battery7_cell8, float &battery7_cell9, float &battery7_cell10, float &battery7_cell11, float &battery7_cell12, float &battery7_total_voltage)
     {
-        battery_7_packet = new HeapPacket(static_cast<uint16_t>(916), &battery7_SOC, &battery7_cell1, &battery7_cell2, &battery7_cell3, &battery7_cell4, &battery7_cell5, &battery7_cell6, &battery7_total_voltage, &battery7_conv_rate);
+        battery_7_packet = new HeapPacket(static_cast<uint16_t>(916), &battery7_cell1, &battery7_cell2, &battery7_cell3, &battery7_cell4, &battery7_cell5, &battery7_cell6, &battery7_cell7, &battery7_cell8, &battery7_cell9, &battery7_cell10, &battery7_cell11, &battery7_cell12, &battery7_total_voltage);
     }
 
-    static void battery_8_init(float &battery8_SOC, float &battery8_cell1, float &battery8_cell2, float &battery8_cell3, float &battery8_cell4, float &battery8_cell5, float &battery8_cell6, float &battery8_total_voltage, float &battery8_conv_rate)
+    static void battery_8_init(float &battery8_cell1, float &battery8_cell2, float &battery8_cell3, float &battery8_cell4, float &battery8_cell5, float &battery8_cell6, float &battery8_cell7, float &battery8_cell8, float &battery8_cell9, float &battery8_cell10, float &battery8_cell11, float &battery8_cell12, float &battery8_total_voltage)
     {
-        battery_8_packet = new HeapPacket(static_cast<uint16_t>(917), &battery8_SOC, &battery8_cell1, &battery8_cell2, &battery8_cell3, &battery8_cell4, &battery8_cell5, &battery8_cell6, &battery8_total_voltage, &battery8_conv_rate);
-    }
-
-    static void battery_9_init(float &battery9_SOC, float &battery9_cell1, float &battery9_cell2, float &battery9_cell3, float &battery9_cell4, float &battery9_cell5, float &battery9_cell6, float &battery9_total_voltage, float &battery9_conv_rate)
-    {
-        battery_9_packet = new HeapPacket(static_cast<uint16_t>(918), &battery9_SOC, &battery9_cell1, &battery9_cell2, &battery9_cell3, &battery9_cell4, &battery9_cell5, &battery9_cell6, &battery9_total_voltage, &battery9_conv_rate);
-    }
-
-    static void battery_10_init(float &battery10_SOC, float &battery10_cell1, float &battery10_cell2, float &battery10_cell3, float &battery10_cell4, float &battery10_cell5, float &battery10_cell6, float &battery10_total_voltage, float &battery10_conv_rate)
-    {
-        battery_10_packet = new HeapPacket(static_cast<uint16_t>(919), &battery10_SOC, &battery10_cell1, &battery10_cell2, &battery10_cell3, &battery10_cell4, &battery10_cell5, &battery10_cell6, &battery10_total_voltage, &battery10_conv_rate);
-    }
-
-    static void battery_11_init(float &battery11_SOC, float &battery11_cell1, float &battery11_cell2, float &battery11_cell3, float &battery11_cell4, float &battery11_cell5, float &battery11_cell6, float &battery11_total_voltage, float &battery11_conv_rate)
-    {
-        battery_11_packet = new HeapPacket(static_cast<uint16_t>(920), &battery11_SOC, &battery11_cell1, &battery11_cell2, &battery11_cell3, &battery11_cell4, &battery11_cell5, &battery11_cell6, &battery11_total_voltage, &battery11_conv_rate);
-    }
-
-    static void battery_12_init(float &battery12_SOC, float &battery12_cell1, float &battery12_cell2, float &battery12_cell3, float &battery12_cell4, float &battery12_cell5, float &battery12_cell6, float &battery12_total_voltage, float &battery12_conv_rate)
-    {
-        battery_12_packet = new HeapPacket(static_cast<uint16_t>(921), &battery12_SOC, &battery12_cell1, &battery12_cell2, &battery12_cell3, &battery12_cell4, &battery12_cell5, &battery12_cell6, &battery12_total_voltage, &battery12_conv_rate);
-    }
-
-    static void battery_13_init(float &battery13_SOC, float &battery13_cell1, float &battery13_cell2, float &battery13_cell3, float &battery13_cell4, float &battery13_cell5, float &battery13_cell6, float &battery13_total_voltage, float &battery13_conv_rate)
-    {
-        battery_13_packet = new HeapPacket(static_cast<uint16_t>(922), &battery13_SOC, &battery13_cell1, &battery13_cell2, &battery13_cell3, &battery13_cell4, &battery13_cell5, &battery13_cell6, &battery13_total_voltage, &battery13_conv_rate);
-    }
-
-    static void battery_14_init(float &battery14_SOC, float &battery14_cell1, float &battery14_cell2, float &battery14_cell3, float &battery14_cell4, float &battery14_cell5, float &battery14_cell6, float &battery14_total_voltage, float &battery14_conv_rate)
-    {
-        battery_14_packet = new HeapPacket(static_cast<uint16_t>(923), &battery14_SOC, &battery14_cell1, &battery14_cell2, &battery14_cell3, &battery14_cell4, &battery14_cell5, &battery14_cell6, &battery14_total_voltage, &battery14_conv_rate);
-    }
-
-    static void battery_15_init(float &battery15_SOC, float &battery15_cell1, float &battery15_cell2, float &battery15_cell3, float &battery15_cell4, float &battery15_cell5, float &battery15_cell6, float &battery15_total_voltage, float &battery15_conv_rate)
-    {
-        battery_15_packet = new HeapPacket(static_cast<uint16_t>(924), &battery15_SOC, &battery15_cell1, &battery15_cell2, &battery15_cell3, &battery15_cell4, &battery15_cell5, &battery15_cell6, &battery15_total_voltage, &battery15_conv_rate);
-    }
-
-    static void battery_16_init(float &battery16_SOC, float &battery16_cell1, float &battery16_cell2, float &battery16_cell3, float &battery16_cell4, float &battery16_cell5, float &battery16_cell6, float &battery16_total_voltage, float &battery16_conv_rate)
-    {
-        battery_16_packet = new HeapPacket(static_cast<uint16_t>(925), &battery16_SOC, &battery16_cell1, &battery16_cell2, &battery16_cell3, &battery16_cell4, &battery16_cell5, &battery16_cell6, &battery16_total_voltage, &battery16_conv_rate);
-    }
-
-    static void battery_17_init(float &battery17_SOC, float &battery17_cell1, float &battery17_cell2, float &battery17_cell3, float &battery17_cell4, float &battery17_cell5, float &battery17_cell6, float &battery17_total_voltage, float &battery17_conv_rate)
-    {
-        battery_17_packet = new HeapPacket(static_cast<uint16_t>(926), &battery17_SOC, &battery17_cell1, &battery17_cell2, &battery17_cell3, &battery17_cell4, &battery17_cell5, &battery17_cell6, &battery17_total_voltage, &battery17_conv_rate);
-    }
-
-    static void battery_18_init(float &battery18_SOC, float &battery18_cell1, float &battery18_cell2, float &battery18_cell3, float &battery18_cell4, float &battery18_cell5, float &battery18_cell6, float &battery18_total_voltage, float &battery18_conv_rate)
-    {
-        battery_18_packet = new HeapPacket(static_cast<uint16_t>(927), &battery18_SOC, &battery18_cell1, &battery18_cell2, &battery18_cell3, &battery18_cell4, &battery18_cell5, &battery18_cell6, &battery18_total_voltage, &battery18_conv_rate);
+        battery_8_packet = new HeapPacket(static_cast<uint16_t>(917), &battery8_cell1, &battery8_cell2, &battery8_cell3, &battery8_cell4, &battery8_cell5, &battery8_cell6, &battery8_cell7, &battery8_cell8, &battery8_cell9, &battery8_cell10, &battery8_cell11, &battery8_cell12, &battery8_total_voltage);
     }
 
     static void general_state_machine_init(gsm_status &gsm_status)
@@ -180,16 +129,6 @@ public:
     inline static HeapPacket *battery_6_packet{nullptr};
     inline static HeapPacket *battery_7_packet{nullptr};
     inline static HeapPacket *battery_8_packet{nullptr};
-    inline static HeapPacket *battery_9_packet{nullptr};
-    inline static HeapPacket *battery_10_packet{nullptr};
-    inline static HeapPacket *battery_11_packet{nullptr};
-    inline static HeapPacket *battery_12_packet{nullptr};
-    inline static HeapPacket *battery_13_packet{nullptr};
-    inline static HeapPacket *battery_14_packet{nullptr};
-    inline static HeapPacket *battery_15_packet{nullptr};
-    inline static HeapPacket *battery_16_packet{nullptr};
-    inline static HeapPacket *battery_17_packet{nullptr};
-    inline static HeapPacket *battery_18_packet{nullptr};
     inline static HeapPacket *general_state_machine_packet{nullptr};
     inline static HeapPacket *driver_diagnosis_packet{nullptr};
     inline static HeapPacket *imd_packet{nullptr};
@@ -238,36 +177,6 @@ public:
         if (battery_8_packet == nullptr) {
             PANIC("Packet battery_8 not initialized");
         }
-        if (battery_9_packet == nullptr) {
-            PANIC("Packet battery_9 not initialized");
-        }
-        if (battery_10_packet == nullptr) {
-            PANIC("Packet battery_10 not initialized");
-        }
-        if (battery_11_packet == nullptr) {
-            PANIC("Packet battery_11 not initialized");
-        }
-        if (battery_12_packet == nullptr) {
-            PANIC("Packet battery_12 not initialized");
-        }
-        if (battery_13_packet == nullptr) {
-            PANIC("Packet battery_13 not initialized");
-        }
-        if (battery_14_packet == nullptr) {
-            PANIC("Packet battery_14 not initialized");
-        }
-        if (battery_15_packet == nullptr) {
-            PANIC("Packet battery_15 not initialized");
-        }
-        if (battery_16_packet == nullptr) {
-            PANIC("Packet battery_16 not initialized");
-        }
-        if (battery_17_packet == nullptr) {
-            PANIC("Packet battery_17 not initialized");
-        }
-        if (battery_18_packet == nullptr) {
-            PANIC("Packet battery_18 not initialized");
-        }
         if (general_state_machine_packet == nullptr) {
             PANIC("Packet general_state_machine not initialized");
         }
@@ -303,16 +212,6 @@ public:
             DataPackets::control_station_udp->send_packet(*DataPackets::battery_6_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::battery_7_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::battery_8_packet);
-            DataPackets::control_station_udp->send_packet(*DataPackets::battery_9_packet);
-            DataPackets::control_station_udp->send_packet(*DataPackets::battery_10_packet);
-            DataPackets::control_station_udp->send_packet(*DataPackets::battery_11_packet);
-            DataPackets::control_station_udp->send_packet(*DataPackets::battery_12_packet);
-            DataPackets::control_station_udp->send_packet(*DataPackets::battery_13_packet);
-            DataPackets::control_station_udp->send_packet(*DataPackets::battery_14_packet);
-            DataPackets::control_station_udp->send_packet(*DataPackets::battery_15_packet);
-            DataPackets::control_station_udp->send_packet(*DataPackets::battery_16_packet);
-            DataPackets::control_station_udp->send_packet(*DataPackets::battery_17_packet);
-            DataPackets::control_station_udp->send_packet(*DataPackets::battery_18_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::general_state_machine_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::driver_diagnosis_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::imd_packet);

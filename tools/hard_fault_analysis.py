@@ -129,7 +129,7 @@ def decode_cfsr(cfsr, fault_addr):
 
 
 def addr2line(addr):
-    cmd = ["arm-none-eabi-addr2line", "-e", ELF_FILE, "-f", "-C", hex(addr)]
+    cmd = ["addr2line", "-e", ELF_FILE, "-f", "-C", hex(addr)]
     try:
         output = subprocess.check_output(cmd, text=True).strip()
         return output
