@@ -350,14 +350,20 @@ const char* get_bcc_error_str(bcc_status_t status) {
     }
 
     void BCC_MCU_WaitUs(uint32_t delay) {
-        uint32_t start = GlobalTimer::global_us_timer->CNT;
-        uint32_t end = start + delay;
-        if (start > end) [[unlikely]] {
-            while (GlobalTimer::global_us_timer->CNT > end) /* wait */
-                ;
-        }
-        while (GlobalTimer::global_us_timer->CNT < end) /* wait */
-            ;
+        // 6-cycle loop with dual-issue capability
+        uint32_t count = delay * 48 * 4;  // Approximately 400/6 ≈ 67
+
+        __asm volatile(
+            "1:                     \n"
+            "subs   %0, %0, #1      \n"
+            "nop                    \n"
+            "nop                    \n"
+            "nop                    \n"
+            "nop                    \n"
+            "bne    1b              \n"
+            : "+r"(count)
+            :
+            : "cc");
     }
 
     bcc_status_t BCC_MCU_StartTimeout(uint32_t timeoutUs) {
