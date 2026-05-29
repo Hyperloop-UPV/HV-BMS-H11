@@ -392,9 +392,6 @@ const char* get_bcc_error_str(bcc_status_t status) {
         uint32_t rx_size = static_cast<size_t>(6 * rxTrCnt);  // 48b * (chips + echo)
         (void)rx_size;
         D3_NC static uint8_t rx_buffer_nc[1000];
-        for (size_t i = 0; i < rxTrCnt * 6; i++) {
-            rx_buffer_nc[i] = rxBuf[i];
-        }
 
         span<volatile uint8_t> tx_span{txBuf, 6};  // 48b tx transfer
         span<volatile uint8_t> rx_span{rx_buffer_nc, 6U * rxTrCnt};
@@ -416,6 +413,9 @@ const char* get_bcc_error_str(bcc_status_t status) {
         }
         NewSPI::bms_wrapper_rx->set_software_nss(false);
         BCC_MCU_WriteCsbPin(drvInstance, 1);
+        for (size_t i = 0; i < rxTrCnt * 6; i++) {
+            rxBuf[i] = rx_buffer_nc[i];
+        }
         return BCC_STATUS_SUCCESS;
     }
 
