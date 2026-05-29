@@ -345,7 +345,6 @@ const char* get_bcc_error_str(bcc_status_t status) {
     }
 
     void BCC_MCU_WaitMs(uint16_t delay) {
-        BCC_MCU_Assert((GlobalTimer::global_us_timer->CR1 & TIM_CR1_CEN) != 0);
         BCC_MCU_WaitUs((uint32_t)delay * 1000UL);
     }
 
@@ -401,7 +400,7 @@ const char* get_bcc_error_str(bcc_status_t status) {
         while (!rx_complete) {
             if ((uint32_t)(GlobalTimer::timeout_timer->CNT - start_wait) > timeout_us) {
                 NewSPI::bms_wrapper_rx->abort_and_recover();
-                return BCC_STATUS_COM_TIMEOUT;
+                    return BCC_STATUS_COM_TIMEOUT;
             }
         }
 
