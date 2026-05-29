@@ -390,9 +390,14 @@ const char* get_bcc_error_str(bcc_status_t status) {
         rx_complete = false;
 
         uint32_t rx_size = static_cast<size_t>(6 * rxTrCnt);  // 48b * (chips + echo)
+        (void)rx_size;
+        D3_NC static uint8_t rx_buffer_nc[1000];
+        for (size_t i = 0; i < rxTrCnt * 6; i++) {
+            rx_buffer_nc[i] = rxBuf[i];
+        }
 
         span<volatile uint8_t> tx_span{txBuf, 6};  // 48b tx transfer
-        span<volatile uint8_t> rx_span{rxBuf, rx_size};
+        span<volatile uint8_t> rx_span{rx_buffer_nc, 6U * rxTrCnt};
 
         NewSPI::bms_wrapper_rx->listen(rx_span, &rx_complete);
         NewSPI::bms_wrapper_rx->set_software_nss(true);
@@ -404,12 +409,12 @@ const char* get_bcc_error_str(bcc_status_t status) {
         while (!rx_complete) {
             if ((uint32_t)(GlobalTimer::timeout_timer->CNT - start_wait) > timeout_us) {
                 BCC_MCU_WriteCsbPin(drvInstance, 1);
-                NewSPI::bms_wrapper_rx->set_software_nss(true);
+                NewSPI::bms_wrapper_rx->set_software_nss(false);
                 NewSPI::bms_wrapper_rx->abort_and_recover();
                     return BCC_STATUS_COM_TIMEOUT;
             }
         }
-        NewSPI::bms_wrapper_rx->set_software_nss(true);
+        NewSPI::bms_wrapper_rx->set_software_nss(false);
         BCC_MCU_WriteCsbPin(drvInstance, 1);
         return BCC_STATUS_SUCCESS;
     }
