@@ -383,6 +383,9 @@ const char* get_bcc_error_str(bcc_status_t status) {
     // HVBMS does use TPL
     bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance, volatile uint8_t txBuf[],
                                      volatile uint8_t rxBuf[], const uint16_t rxTrCnt) {
+        
+        BCC_MCU_WriteCsbPin(drvInstance, 0);
+        HAL_Delay(1);
         static volatile bool rx_complete = false;
         rx_complete = false;
 
@@ -392,18 +395,22 @@ const char* get_bcc_error_str(bcc_status_t status) {
         span<volatile uint8_t> rx_span{rxBuf, rx_size};
 
         NewSPI::bms_wrapper_rx->listen(rx_span, &rx_complete);
+        NewSPI::bms_wrapper_rx->set_software_nss(true);
         NewSPI::bms_wrapper_tx->send(tx_span);
 
-        uint32_t timeout_us = rxTrCnt * 100;
+        uint32_t timeout_us = rxTrCnt * 1000000000;
         uint32_t start_wait = GlobalTimer::timeout_timer->CNT;
 
         while (!rx_complete) {
             if ((uint32_t)(GlobalTimer::timeout_timer->CNT - start_wait) > timeout_us) {
+                BCC_MCU_WriteCsbPin(drvInstance, 1);
+                NewSPI::bms_wrapper_rx->set_software_nss(true);
                 NewSPI::bms_wrapper_rx->abort_and_recover();
                     return BCC_STATUS_COM_TIMEOUT;
             }
         }
-
+        NewSPI::bms_wrapper_rx->set_software_nss(true);
+        BCC_MCU_WriteCsbPin(drvInstance, 1);
         return BCC_STATUS_SUCCESS;
     }
 
