@@ -5,7 +5,6 @@ void Sensors::init() {
     imd.bind(DO::imd_enable);
     imd.power_on();
     
-    DI::battery_intb->read();
 
     DO::sdc_fw_fault->turn_on();
     sdc.enable();

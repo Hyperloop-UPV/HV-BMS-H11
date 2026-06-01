@@ -5,8 +5,8 @@
 #include "HVBMS/Data/Data.hpp"
 #include "ST-LIB.hpp"
 
-#define H11_N_BATTERIES 1
-#define H11_N_CELLS 12
+#define H11_N_MODULES 1
+#define H11_N_SEGMENTS 12 // Each segment has 3 cells
 #define H11_N_GPIO 4
 #define H11_N_TEMPS 2
 // Tengo que revisar estos parametros
@@ -15,15 +15,15 @@
 #define H11_MAX_VOLTAGE 25.0f
 
 struct BatteryData {
-    float cells[H11_N_CELLS]{};
+    float cells[H11_N_SEGMENTS]{};
     float total_voltage{};
     float conv_rate{};
 };
 
 struct Batteries {
     static inline bcc_drv_config_t bcc_config{};
-    static inline BatteryData battery[H11_N_BATTERIES]{};
-    static inline float temperature[H11_N_BATTERIES * H11_N_TEMPS]{};
+    static inline BatteryData battery[H11_N_MODULES]{};
+    static inline float temperature[H11_N_MODULES * H11_N_TEMPS]{};
 
     static inline float SOC{50.0f};
     static inline float current{};
@@ -71,10 +71,10 @@ struct Batteries {
     static void init() {
         bcc_config.drvInstance = 0U;
         bcc_config.commMode = BCC_MODE_TPL;
-        bcc_config.devicesCnt = H11_N_BATTERIES;
+        bcc_config.devicesCnt = H11_N_MODULES;
         for (uint8_t i = 0; i < (uint8_t)bcc_config.devicesCnt; i++) {
             bcc_config.device[i] = BCC_DEVICE_MC33771C;
-            bcc_config.cellCnt[i] = H11_N_CELLS;
+            bcc_config.cellCnt[i] = H11_N_SEGMENTS;
         }
 
         bcc_status_t status = BCC_Init(&bcc_config);
@@ -105,7 +105,7 @@ struct Batteries {
     }
 
     static void read_cells() {
-        uint32_t cell_voltages[H11_N_CELLS];
+        uint32_t cell_voltages[H11_N_SEGMENTS];
         float voltage_sum = 0.0f;
         float min_v = std::numeric_limits<float>::max();
         float max_v = std::numeric_limits<float>::lowest();
@@ -118,7 +118,7 @@ struct Batteries {
             }
 
             float device_voltage = 0.0f;
-            for (uint8_t cell = 0; cell < H11_N_CELLS; cell++) {
+            for (uint8_t cell = 0; cell < H11_N_SEGMENTS; cell++) {
                 battery[cid - 1].cells[cell] =
                     static_cast<float>(cell_voltages[cell]) / 1000.0f;
                 device_voltage += battery[cid - 1].cells[cell];
