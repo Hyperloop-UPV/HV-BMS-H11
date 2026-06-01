@@ -127,10 +127,10 @@ consteval SPIDomain::SPIConfig get_rx_config() {
     SPIDomain::SPIConfig c{
         SPIDomain::ClockPolarity::LOW, SPIDomain::ClockPhase::FIRST_EDGE,
         SPIDomain::BitOrder::MSB_FIRST,
-        SPIDomain::NSSMode::SOFTWARE // Este CS lo maneja el MC33664
+        SPIDomain::NSSMode::HARDWARE // Este CS lo maneja el MC33664
     };
     c.data_size = ST_LIB::SPIDomain::DataSize::SIZE_8BIT;
-    //c.nss_polarity = ST_LIB::SPIDomain::NSSPolarity::ACTIVE_LOW; 
+    c.nss_polarity = ST_LIB::SPIDomain::NSSPolarity::ACTIVE_LOW; 
     return c;
 }
 
@@ -148,7 +148,7 @@ inline constexpr auto bms_spi_rx =
         ST_LIB::PF7,  // SCLK_RX
         ST_LIB::PF8,  // ESTE PIN NO ESTA EN USO!
         ST_LIB::PF9,  // DATA_RX
-        // ST_LIB::PF6,  // El CS pin
+        ST_LIB::PF6,  // El CS pin
         get_rx_config());
 
 

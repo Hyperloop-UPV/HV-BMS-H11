@@ -392,7 +392,6 @@ bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance, volatile uint8_t txB
     span<volatile uint8_t> rx_span{rx_buffer_nc, 6U * rxTrCnt};
 
     NewSPI::bms_wrapper_rx->listen(rx_span, &rx_complete);
-    NewSPI::bms_wrapper_rx->set_software_nss(true);
     BCC_MCU_WriteCsbPin(drvInstance, 0);
     NewSPI::bms_wrapper_tx->send(tx_span);
     BCC_MCU_WriteCsbPin(drvInstance, 1);
@@ -402,12 +401,10 @@ bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance, volatile uint8_t txB
 
     while (!rx_complete) {
         if ((uint32_t)(GlobalTimer::timeout_timer->CNT - start_wait) > timeout_us) {
-            NewSPI::bms_wrapper_rx->set_software_nss(false);
             NewSPI::bms_wrapper_rx->abort_and_recover();
             return BCC_STATUS_COM_TIMEOUT;
         }
     }
-    NewSPI::bms_wrapper_rx->set_software_nss(false);
     for (size_t i = 0; i < rxTrCnt * 6; i++) {
         rxBuf[i] = rx_buffer_nc[i];
     }
