@@ -56,10 +56,59 @@ struct Batteries {
 
     static bcc_status_t Clear_BCC_FaultRegisters() {
         bcc_status_t status;
-        uint16_t flt_status[BCC_STAT_CNT];
 
         for (uint8_t cid = 1; cid <= bcc_config.devicesCnt; cid++) {
-            status = BCC_Fault_GetStatus(&bcc_config, (bcc_cid_t)cid, flt_status);
+            status = BCC_Fault_ClearStatus(&bcc_config, (bcc_cid_t)cid, BCC_FS_CELL_OV);
+            if (status != BCC_STATUS_SUCCESS) {
+                return status;
+            }
+
+            status = BCC_Fault_ClearStatus(&bcc_config, (bcc_cid_t)cid, BCC_FS_CELL_UV);
+            if (status != BCC_STATUS_SUCCESS) {
+                return status;
+            }
+
+            status = BCC_Fault_ClearStatus(&bcc_config, (bcc_cid_t)cid, BCC_FS_CB_OPEN);
+            if (status != BCC_STATUS_SUCCESS) {
+                return status;
+            }
+
+            status = BCC_Fault_ClearStatus(&bcc_config, (bcc_cid_t)cid, BCC_FS_CB_SHORT);
+            if (status != BCC_STATUS_SUCCESS) {
+                return status;
+            }
+
+            status = BCC_Fault_ClearStatus(&bcc_config, (bcc_cid_t)cid, BCC_FS_GPIO_STATUS);
+            if (status != BCC_STATUS_SUCCESS) {
+                return status;
+            }
+
+            status = BCC_Fault_ClearStatus(&bcc_config, (bcc_cid_t)cid, BCC_FS_AN_OT_UT);
+            if (status != BCC_STATUS_SUCCESS) {
+                return status;
+            }
+
+            status = BCC_Fault_ClearStatus(&bcc_config, (bcc_cid_t)cid, BCC_FS_GPIO_SHORT);
+            if (status != BCC_STATUS_SUCCESS) {
+                return status;
+            }
+
+            status = BCC_Fault_ClearStatus(&bcc_config, (bcc_cid_t)cid, BCC_FS_COMM);
+            if (status != BCC_STATUS_SUCCESS) {
+                return status;
+            }
+
+            status = BCC_Fault_ClearStatus(&bcc_config, (bcc_cid_t)cid, BCC_FS_FAULT1);
+            if (status != BCC_STATUS_SUCCESS) {
+                return status;
+            }
+
+            status = BCC_Fault_ClearStatus(&bcc_config, (bcc_cid_t)cid, BCC_FS_FAULT2);
+            if (status != BCC_STATUS_SUCCESS) {
+                return status;
+            }
+
+            status = BCC_Fault_ClearStatus(&bcc_config, (bcc_cid_t)cid, BCC_FS_FAULT3);
             if (status != BCC_STATUS_SUCCESS) {
                 return status;
             }
@@ -190,6 +239,7 @@ struct Batteries {
         bcc_status_t status =
             BCC_Meas_StartAndWait(&bcc_config, (bcc_cid_t)1, BCC_AVG_8);
         if (status != BCC_STATUS_SUCCESS) {
+            FAULT("Batteries could not be read");
             return;
         }
 
