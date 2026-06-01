@@ -15,11 +15,10 @@ constexpr DigitalOutputDomain::DigitalOutput contactor_PB14{ST_LIB::PB14};
 
 constexpr DigitalOutputDomain::DigitalOutput sdc_PB4{ST_LIB::PB4};
 
-constexpr DigitalOutputDomain::DigitalOutput cs_tx_PE4{ST_LIB::PE4}; 
+constexpr DigitalOutputDomain::DigitalOutput cs_tx_PE4{ST_LIB::PE4};
 constexpr DigitalOutputDomain::DigitalOutput spi_enable_PE3{ST_LIB::PE3};
 
 constexpr DigitalOutputDomain::DigitalOutput imd_enable_PE11{ST_LIB::PE11};
-
 
 namespace DO {
 inline DigitalOutputDomain::Instance* operational_led;
@@ -56,15 +55,13 @@ using ST_LIB::ADCDomain;
 static float voltage_reading_ch2_raw;
 static float current_reading_raw;
 
-
-
 inline constexpr ADCDomain::ADC adc_PA4{ST_LIB::PA4, voltage_reading_ch2_raw};
 inline constexpr ADCDomain::ADC adc_PA5{ST_LIB::PA5, current_reading_raw};
 
-namespace ADC_reading{
+namespace ADC_reading {
 inline float voltage_reading{0.0f};
 inline float current_reading{0.0f};
-}
+}  // namespace ADC_reading
 
 inline constexpr auto dc_voltage_protection =
     Protections::protection<"dc_bus_voltage", ADC_reading::voltage_reading>(
@@ -95,9 +92,8 @@ constexpr TimerPin ic_pin = {
     .af = TimerAF::InputCapture, .pin = ST_LIB::PA6, .channel = TimerChannel::CHANNEL_1};
 };
 
-inline constexpr TimerDomain::Timer timer_imd{{
-    .request = TimerRequest::GeneralPurpose_3
-}, GlobalTimer::ic_pin};
+inline constexpr TimerDomain::Timer timer_imd{{.request = TimerRequest::GeneralPurpose_3},
+                                              GlobalTimer::ic_pin};
 
 namespace GlobalTimer {
 // inline TimerWrapper<timer_us_tick_def> global_us_timer;
@@ -110,7 +106,6 @@ inline TimerWrapper<timer_imd> input_timer;
 
 using ST_LIB::DMA_Domain;
 using ST_LIB::SPIDomain;
-
 
 consteval SPIDomain::SPIConfig get_tx_config() {
     SPIDomain::SPIConfig c{
@@ -125,12 +120,12 @@ consteval SPIDomain::SPIConfig get_tx_config() {
 // Configuración para el lado de RECEPCIÓN (Slave)
 consteval SPIDomain::SPIConfig get_rx_config() {
     SPIDomain::SPIConfig c{
-        SPIDomain::ClockPolarity::LOW, SPIDomain::ClockPhase::FIRST_EDGE,
+        SPIDomain::ClockPolarity::LOW, SPIDomain::ClockPhase::SECOND_EDGE,
         SPIDomain::BitOrder::MSB_FIRST,
-        SPIDomain::NSSMode::HARDWARE // Este CS lo maneja el MC33664
+        SPIDomain::NSSMode::HARDWARE  // Este CS lo maneja el MC33664
     };
     c.data_size = ST_LIB::SPIDomain::DataSize::SIZE_8BIT;
-    c.nss_polarity = ST_LIB::SPIDomain::NSSPolarity::ACTIVE_LOW; 
+    c.nss_polarity = ST_LIB::SPIDomain::NSSPolarity::ACTIVE_LOW;
     return c;
 }
 
@@ -150,7 +145,6 @@ inline constexpr auto bms_spi_rx =
         ST_LIB::PF9,  // DATA_RX
         ST_LIB::PF6,  // El CS pin
         get_rx_config());
-
 
 namespace NewSPI {
 inline std::optional<SPIDomain::SPIWrapper<bms_spi_tx>> bms_wrapper_tx;

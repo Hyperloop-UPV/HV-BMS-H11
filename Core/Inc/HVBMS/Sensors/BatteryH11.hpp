@@ -143,6 +143,16 @@ struct Batteries {
             FAULT("Could not clear BCC fault registers: %s", get_bcc_error_str(status));
             return;
         }
+
+        uint64_t guid;
+        status = BCC_GUID_Read(&bcc_config, (bcc_cid_t)1, &guid);
+        if (status != BCC_STATUS_SUCCESS) {
+            WARNING("Could not read device guid: %s", get_bcc_error_str(status));
+            return;
+        } else {
+            INFO("BCC device guid: %02X%04X%04X", (uint16_t)((guid >> 32) & 0x001FU),
+                 (uint16_t)((guid >> 16) & 0xFFFFU), (uint16_t)(guid & 0xFFFFU));
+        }
     }
 
     static void start() {
@@ -151,6 +161,7 @@ struct Batteries {
         if (status != BCC_STATUS_SUCCESS) {
             FAULT("Could not start BCC conversion: %s", get_bcc_error_str(status));
         }
+
     }
 
     static void read_cells() {
