@@ -21,13 +21,13 @@ constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "67:67
 #error "No PHY selected for Ethernet pinset selection"
 #endif
 
-using myBoard =
-    ST_LIB::Board<ST_LIB::FaultPolicy<HVBMS::state_machine, &HVBMS::on_fault_enter>, eth,
-                  dc_current_protection, dc_voltage_protection, led_PG13, led_PG9, contactor_PD8,
-                  contactor_PD9, contactor_PD10, contactor_PB14, aux_contactor_PD12,
-                  aux_contactor_PG2, aux_contactor_PD13, aux_contactor_PD14, sdc_PB4, adc_PA4,
-                  adc_PA5, timer_us_tick_def, timer_imd, timeout_timer_def, sdc_PB5, imd_enable_PE11, imd_ok_PE12,
-                  cs_tx_PE4, bms_spi_tx, bms_spi_rx, spi_enable_PE3, battery_intb_PE1>;
+using myBoard = ST_LIB::Board<ST_LIB::FaultPolicy<HVBMS::state_machine, &HVBMS::on_fault_enter>,
+                              eth, dc_current_protection, dc_voltage_protection, led_PG13, led_PG9,
+                              contactor_PD8, contactor_PD9, contactor_PD10, contactor_PB14, contactor_PB15,
+                              aux_contactor_PD12, aux_contactor_PG2, aux_contactor_PD13,
+                              aux_contactor_PD14, aux_contactor_PD15, sdc_PB4, adc_PA4, adc_PA5, timer_us_tick_def,
+                              timer_imd, timeout_timer_def, sdc_PB5, imd_enable_PE11, imd_ok_PE12,
+                              cs_tx_PE4, bms_spi_tx, bms_spi_rx, spi_enable_PE3, battery_intb_PE1>;
 
 int main(void) {
     Hard_fault_check();
@@ -38,6 +38,7 @@ int main(void) {
     DO::contactor_low = &myBoard::instance_of<contactor_PD9>();
     DO::contactor_discharge = &myBoard::instance_of<contactor_PD10>();
     DO::contactor_precharge = &myBoard::instance_of<contactor_PB14>();
+    DO::contactor_common_high = &myBoard::instance_of<contactor_PB15>();
     DO::sdc_fw_fault = &myBoard::instance_of<sdc_PB4>();
     DO::cs_tx = &myBoard::instance_of<cs_tx_PE4>();
     DO::spi_enable = &myBoard::instance_of<spi_enable_PE3>();
@@ -47,6 +48,7 @@ int main(void) {
     DI::aux_contactor_low = &myBoard::instance_of<aux_contactor_PD13>();
     DI::aux_contactor_high = &myBoard::instance_of<aux_contactor_PD14>();
     DI::aux_contactor_precharge = &myBoard::instance_of<aux_contactor_PG2>();
+    DI::aux_contactor_common_high = &myBoard::instance_of<aux_contactor_PD15>();
     DI::battery_intb = &myBoard::instance_of<battery_intb_PE1>();
 
     ADC::adc_voltage_ch2 = &myBoard::instance_of<adc_PA4>();
@@ -78,7 +80,7 @@ int main(void) {
 
     Actuators::init();
     Sensors::init();
-    
+
     while (1) {
         FaultController::check_transitions();
         eth_instance->update();

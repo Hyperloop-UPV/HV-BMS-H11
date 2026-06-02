@@ -12,6 +12,7 @@ constexpr DigitalOutputDomain::DigitalOutput contactor_PD8{ST_LIB::PD8};
 constexpr DigitalOutputDomain::DigitalOutput contactor_PD9{ST_LIB::PD9};
 constexpr DigitalOutputDomain::DigitalOutput contactor_PD10{ST_LIB::PD10};
 constexpr DigitalOutputDomain::DigitalOutput contactor_PB14{ST_LIB::PB14};
+constexpr DigitalOutputDomain::DigitalOutput contactor_PB15{ST_LIB::PB15};
 
 constexpr DigitalOutputDomain::DigitalOutput sdc_PB4{ST_LIB::PB4};
 
@@ -27,6 +28,7 @@ inline DigitalOutputDomain::Instance* contactor_low;
 inline DigitalOutputDomain::Instance* contactor_high;
 inline DigitalOutputDomain::Instance* contactor_precharge;
 inline DigitalOutputDomain::Instance* contactor_discharge;
+inline DigitalOutputDomain::Instance* contactor_common_high;
 inline DigitalOutputDomain::Instance* sdc_fw_fault;
 inline DigitalOutputDomain::Instance* cs_tx;
 inline DigitalOutputDomain::Instance* imd_enable;
@@ -39,6 +41,7 @@ constexpr DigitalInputDomain::DigitalInput aux_contactor_PG2{ST_LIB::PG2};
 constexpr DigitalInputDomain::DigitalInput aux_contactor_PD12{ST_LIB::PD12};
 constexpr DigitalInputDomain::DigitalInput aux_contactor_PD13{ST_LIB::PD13};
 constexpr DigitalInputDomain::DigitalInput aux_contactor_PD14{ST_LIB::PD14};
+constexpr DigitalInputDomain::DigitalInput aux_contactor_PD15{ST_LIB::PD15};
 
 constexpr DigitalInputDomain::DigitalInput battery_intb_PE1{ST_LIB::PE1};
 
@@ -47,6 +50,7 @@ inline DigitalInputDomain::Instance* aux_contactor_low;
 inline DigitalInputDomain::Instance* aux_contactor_high;
 inline DigitalInputDomain::Instance* aux_contactor_precharge;
 inline DigitalInputDomain::Instance* aux_contactor_discharge;
+inline DigitalInputDomain::Instance* aux_contactor_common_high;
 inline DigitalInputDomain::Instance* battery_intb;
 }  // namespace DI
 

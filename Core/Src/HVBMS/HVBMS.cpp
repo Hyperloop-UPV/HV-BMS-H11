@@ -4,7 +4,6 @@
 
 
 void HVBMS::update() {
-    state_machine.check_transitions();
 
     if (OrderPackets::start_precharge_flag) {
         OrderPackets::start_precharge_flag = false;

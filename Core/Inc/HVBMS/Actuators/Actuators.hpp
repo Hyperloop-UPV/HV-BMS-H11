@@ -7,6 +7,7 @@ private:
     static Contactor contactor_high; // 1
     static Contactor contactor_precharge; //2
     static Contactor contactor_discharge; //3
+    static Contactor contactor_common_high; // 4
 
     static uint8_t contactors_timeout_id;
 
@@ -26,6 +27,7 @@ public:
     static bool& get_contactor_high_state();
     static bool& get_contactor_precharge_state();
     static bool& get_contactor_discharge_state();
+    static bool& get_contactor_common_high_state();
 
     static void update_contactors();
 };
