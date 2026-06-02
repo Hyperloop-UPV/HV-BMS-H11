@@ -50,7 +50,6 @@ struct Batteries {
                 }
             }
         }
-
         return BCC_STATUS_SUCCESS;
     }
 
@@ -155,6 +154,7 @@ struct Batteries {
         }
     }
 
+
     static void start() {
         bcc_status_t status = BCC_Meas_StartConversionGlobal(&bcc_config,
                                                               MC33771C_ADC_CFG_INIT_VALUE);
@@ -163,6 +163,7 @@ struct Batteries {
         }
 
     }
+
 
     static void read_cells() {
         uint32_t cell_voltages[H11_N_SEGMENTS];
@@ -247,17 +248,17 @@ struct Batteries {
     }
 
     static void read() {
-        bcc_status_t status =
-            BCC_Meas_StartAndWait(&bcc_config, (bcc_cid_t)1, BCC_AVG_8);
-        if (status != BCC_STATUS_SUCCESS) {
-            FAULT("Batteries could not be read");
-            return;
-        }
+        // bcc_status_t status =
+        //     BCC_Meas_StartAndWait(&bcc_config, (bcc_cid_t)1, BCC_AVG_8);
+        // if (status != BCC_STATUS_SUCCESS) {
+        //     FAULT("Batteries could not be read");
+        //     return;
+        // }
 
         read_cells();
-        read_analog();
-        get_max_min_temperatures();
-        update_SOC();
+        // read_analog();
+        // get_max_min_temperatures();
+        // update_SOC();
     }
 
     static void get_max_min_temperatures() {
