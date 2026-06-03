@@ -7,8 +7,6 @@
 #include "SDC.hpp"
 #include "BatteryH11.hpp"
 
-#define BATTERIES_CONNECTED 1
-#define N_BATTERIES 8
 
 class Sensors {
     static constexpr float VOLTAGE_SLOPE{122.03744695176259};

@@ -5,7 +5,8 @@
 #include "HVBMS/Data/Data.hpp"
 #include "ST-LIB.hpp"
 
-#define H11_N_MODULES 2
+#define BATTERIES_CONNECTED 1
+#define H11_N_MODULES 1
 #define H11_N_SEGMENTS 14// Each segment has 3 cells
 #define H11_N_GPIO 4
 #define H11_N_TEMPS 2
