@@ -30,7 +30,6 @@ using myBoard = ST_LIB::Board<ST_LIB::FaultPolicy<HVBMS::state_machine, &HVBMS::
                               cs_tx_PE4, bms_spi_tx, bms_spi_rx, spi_enable_PE3, battery_intb_PE1>;
 
 int main(void) {
-    Hard_fault_check();
     myBoard::init();
     DO::operational_led = &myBoard::instance_of<led_PG9>();
     DO::fault_led = &myBoard::instance_of<led_PG13>();
