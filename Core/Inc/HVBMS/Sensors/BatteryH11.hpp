@@ -181,11 +181,13 @@ struct Batteries {
 
             float device_voltage = 0.0f;
             for (uint8_t cell = 0; cell < H11_N_SEGMENTS; cell++) {
-                battery[cid - 1].cells[cell] =
-                    static_cast<float>(cell_voltages[cell]) / 1000.0f;
-                device_voltage += battery[cid - 1].cells[cell];
-                min_v = std::min(min_v, battery[cid - 1].cells[cell]);
-                max_v = std::max(max_v, battery[cid - 1].cells[cell]);
+                if (cid - 1 != 4 || cid - 1 != 5){
+                    battery[cid - 1].cells[cell] =
+                        static_cast<float>(cell_voltages[cell]) / 1000.0f;
+                    device_voltage += battery[cid - 1].cells[cell];
+                    min_v = std::min(min_v, battery[cid - 1].cells[cell]);
+                    max_v = std::max(max_v, battery[cid - 1].cells[cell]);
+                }
             }
             battery[cid - 1].total_voltage = device_voltage;
             voltage_sum += device_voltage;

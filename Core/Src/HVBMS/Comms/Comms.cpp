@@ -93,7 +93,7 @@ void Comms::start() {
 
     DataPackets::contactor_status_init(
         Actuators::get_contactor_discharge_state(), Actuators::get_contactor_precharge_state(),
-        Actuators::get_contactor_low_state(), Actuators::get_contactor_high_state());
+        Actuators::get_contactor_low_state(), Actuators::get_contactor_high_state() , Actuators::get_contactor_common_high_state());
 
     DataPackets::batteries_data_init(Sensors::battery_h11.min_cell, Sensors::battery_h11.max_cell,
                                      Sensors::battery_h11.min_temperature,

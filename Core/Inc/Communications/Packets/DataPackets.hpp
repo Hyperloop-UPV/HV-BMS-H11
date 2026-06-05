@@ -111,9 +111,9 @@ public:
         batteries_data_packet = new HeapPacket(static_cast<uint16_t>(947), &voltage_min, &voltage_max, &temp_min, &temp_max);
     }
 
-    static void contactor_status_init(bool &contactor_discharge, bool &contactor_precharge, bool &contactor_low, bool &contactor_high)
+    static void contactor_status_init(bool &contactor_discharge, bool &contactor_precharge, bool &contactor_low, bool &contactor_high, bool &contactor_common_high)
     {
-        contactor_status_packet = new HeapPacket(static_cast<uint16_t>(956), &contactor_discharge, &contactor_precharge, &contactor_low, &contactor_high);
+        contactor_status_packet = new HeapPacket(static_cast<uint16_t>(956), &contactor_discharge, &contactor_precharge, &contactor_low, &contactor_high, &contactor_common_high);
     }
 
     public:
