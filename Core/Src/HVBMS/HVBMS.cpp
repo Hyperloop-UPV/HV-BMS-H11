@@ -1,6 +1,7 @@
 #include "HVBMS/HVBMS.hpp"
 
 #include "HVBMS/Data/Data.hpp"
+#include "HVBMS/Sensors/BatteryH11.hpp"
 
 
 void HVBMS::update() {
@@ -30,16 +31,20 @@ void HVBMS::update() {
     if (OrderPackets::open_contactors_flag) {
         OrderPackets::open_contactors_flag = false;
         Actuators::open_HV();
-        if (OrderPackets::bypass_imd_flag) {
-            // OrderPackets::bypass_imd_flag = false;
-            // DO::imd_bypass->toggle(); no tengo bypass aqui
-        }
         Scheduler::cancel_timeout(id_timeout_precharge);
         Scheduler::unregister_task(id_check_precharge);
     }
-    if (OrderPackets::bypass_imd_flag) {
-        //OrderPackets::bypass_imd_flag = false;
-        //DO::imd_bypass->toggle(); no tengo bypass aqui
+    if (OrderPackets::check_faults_flag) {
+        bcc_status_t status;
+        for (uint8_t cid = 1; cid <= Batteries::bcc_config.devicesCnt; cid++) {
+            status = BCC_Fault_GetStatus(&Batteries::bcc_config, (bcc_cid_t)cid, &Batteries::faults);
+            if (status != BCC_STATUS_SUCCESS) {
+                FAULT("Could not read fault status: %s", get_bcc_error_str(status));
+                return;
+            }
+
+            INFO("FAULT %u: %u", cid, Batteries::faults);
+        }
     }
     if (OrderPackets::FAULT_flag) {
         FAULT("FAULT order triggered");

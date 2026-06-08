@@ -46,44 +46,44 @@ public:
         sdc_packet = new HeapPacket(static_cast<uint16_t>(944), &sdc_status);
     }
 
-    static void battery_1_init(float &battery1_cell1, float &battery1_cell2, float &battery1_cell3, float &battery1_cell4, float &battery1_cell5, float &battery1_cell6, float &battery1_cell7, float &battery1_cell8, float &battery1_cell9, float &battery1_cell10, float &battery1_cell11, float &battery1_cell12, float &battery1_total_voltage)
+    static void battery_1_init(float &battery1_cell1, float &battery1_cell2, float &battery1_cell3, float &battery1_cell4, float &battery1_cell5, float &battery1_cell6, float &battery1_cell7, float &battery1_cell8, float &battery1_cell9, float &battery1_cell10, float &battery1_cell11, float &battery1_cell12, float &battery1_total_voltage, float &battery1_max_temp, float &battery1_min_temp)
     {
-        battery_1_packet = new HeapPacket(static_cast<uint16_t>(910), &battery1_cell1, &battery1_cell2, &battery1_cell3, &battery1_cell4, &battery1_cell5, &battery1_cell6, &battery1_cell7, &battery1_cell8, &battery1_cell9, &battery1_cell10, &battery1_cell11, &battery1_cell12, &battery1_total_voltage);
+        battery_1_packet = new HeapPacket(static_cast<uint16_t>(910), &battery1_cell1, &battery1_cell2, &battery1_cell3, &battery1_cell4, &battery1_cell5, &battery1_cell6, &battery1_cell7, &battery1_cell8, &battery1_cell9, &battery1_cell10, &battery1_cell11, &battery1_cell12, &battery1_total_voltage, &battery1_max_temp, &battery1_min_temp);
     }
 
-    static void battery_2_init(float &battery2_cell1, float &battery2_cell2, float &battery2_cell3, float &battery2_cell4, float &battery2_cell5, float &battery2_cell6, float &battery2_cell7, float &battery2_cell8, float &battery2_cell9, float &battery2_cell10, float &battery2_cell11, float &battery2_cell12, float &battery2_total_voltage)
+    static void battery_2_init(float &battery2_cell1, float &battery2_cell2, float &battery2_cell3, float &battery2_cell4, float &battery2_cell5, float &battery2_cell6, float &battery2_cell7, float &battery2_cell8, float &battery2_cell9, float &battery2_cell10, float &battery2_cell11, float &battery2_cell12, float &battery2_total_voltage, float &battery2_max_temp, float &battery2_min_temp)
     {
-        battery_2_packet = new HeapPacket(static_cast<uint16_t>(911), &battery2_cell1, &battery2_cell2, &battery2_cell3, &battery2_cell4, &battery2_cell5, &battery2_cell6, &battery2_cell7, &battery2_cell8, &battery2_cell9, &battery2_cell10, &battery2_cell11, &battery2_cell12, &battery2_total_voltage);
+        battery_2_packet = new HeapPacket(static_cast<uint16_t>(911), &battery2_cell1, &battery2_cell2, &battery2_cell3, &battery2_cell4, &battery2_cell5, &battery2_cell6, &battery2_cell7, &battery2_cell8, &battery2_cell9, &battery2_cell10, &battery2_cell11, &battery2_cell12, &battery2_total_voltage, &battery2_max_temp, &battery2_min_temp);
     }
 
-    static void battery_3_init(float &battery3_cell1, float &battery3_cell2, float &battery3_cell3, float &battery3_cell4, float &battery3_cell5, float &battery3_cell6, float &battery3_cell7, float &battery3_cell8, float &battery3_cell9, float &battery3_cell10, float &battery3_cell11, float &battery3_cell12, float &battery3_total_voltage)
+    static void battery_3_init(float &battery3_cell1, float &battery3_cell2, float &battery3_cell3, float &battery3_cell4, float &battery3_cell5, float &battery3_cell6, float &battery3_cell7, float &battery3_cell8, float &battery3_cell9, float &battery3_cell10, float &battery3_cell11, float &battery3_cell12, float &battery3_total_voltage, float &battery3_max_temp, float &battery3_min_temp)
     {
-        battery_3_packet = new HeapPacket(static_cast<uint16_t>(912), &battery3_cell1, &battery3_cell2, &battery3_cell3, &battery3_cell4, &battery3_cell5, &battery3_cell6, &battery3_cell7, &battery3_cell8, &battery3_cell9, &battery3_cell10, &battery3_cell11, &battery3_cell12, &battery3_total_voltage);
+        battery_3_packet = new HeapPacket(static_cast<uint16_t>(912), &battery3_cell1, &battery3_cell2, &battery3_cell3, &battery3_cell4, &battery3_cell5, &battery3_cell6, &battery3_cell7, &battery3_cell8, &battery3_cell9, &battery3_cell10, &battery3_cell11, &battery3_cell12, &battery3_total_voltage, &battery3_max_temp, &battery3_min_temp);
     }
 
-    static void battery_4_init(float &battery4_cell1, float &battery4_cell2, float &battery4_cell3, float &battery4_cell4, float &battery4_cell5, float &battery4_cell6, float &battery4_cell7, float &battery4_cell8, float &battery4_cell9, float &battery4_cell10, float &battery4_cell11, float &battery4_cell12, float &battery4_total_voltage)
+    static void battery_4_init(float &battery4_cell1, float &battery4_cell2, float &battery4_cell3, float &battery4_cell4, float &battery4_cell5, float &battery4_cell6, float &battery4_cell7, float &battery4_cell8, float &battery4_cell9, float &battery4_cell10, float &battery4_cell11, float &battery4_cell12, float &battery4_total_voltage, float &battery4_max_temp, float &battery4_min_temp)
     {
-        battery_4_packet = new HeapPacket(static_cast<uint16_t>(913), &battery4_cell1, &battery4_cell2, &battery4_cell3, &battery4_cell4, &battery4_cell5, &battery4_cell6, &battery4_cell7, &battery4_cell8, &battery4_cell9, &battery4_cell10, &battery4_cell11, &battery4_cell12, &battery4_total_voltage);
+        battery_4_packet = new HeapPacket(static_cast<uint16_t>(913), &battery4_cell1, &battery4_cell2, &battery4_cell3, &battery4_cell4, &battery4_cell5, &battery4_cell6, &battery4_cell7, &battery4_cell8, &battery4_cell9, &battery4_cell10, &battery4_cell11, &battery4_cell12, &battery4_total_voltage, &battery4_max_temp, &battery4_min_temp);
     }
 
-    static void battery_5_init(float &battery5_cell1, float &battery5_cell2, float &battery5_cell3, float &battery5_cell4, float &battery5_cell5, float &battery5_cell6, float &battery5_cell7, float &battery5_cell8, float &battery5_cell9, float &battery5_cell10, float &battery5_cell11, float &battery5_cell12, float &battery5_total_voltage)
+    static void battery_5_init(float &battery5_cell1, float &battery5_cell2, float &battery5_cell3, float &battery5_cell4, float &battery5_cell5, float &battery5_cell6, float &battery5_cell7, float &battery5_cell8, float &battery5_cell9, float &battery5_cell10, float &battery5_cell11, float &battery5_cell12, float &battery5_total_voltage, float &battery5_max_temp, float &battery5_min_temp)
     {
-        battery_5_packet = new HeapPacket(static_cast<uint16_t>(914), &battery5_cell1, &battery5_cell2, &battery5_cell3, &battery5_cell4, &battery5_cell5, &battery5_cell6, &battery5_cell7, &battery5_cell8, &battery5_cell9, &battery5_cell10, &battery5_cell11, &battery5_cell12, &battery5_total_voltage);
+        battery_5_packet = new HeapPacket(static_cast<uint16_t>(914), &battery5_cell1, &battery5_cell2, &battery5_cell3, &battery5_cell4, &battery5_cell5, &battery5_cell6, &battery5_cell7, &battery5_cell8, &battery5_cell9, &battery5_cell10, &battery5_cell11, &battery5_cell12, &battery5_total_voltage, &battery5_max_temp, &battery5_min_temp);
     }
 
-    static void battery_6_init(float &battery6_cell1, float &battery6_cell2, float &battery6_cell3, float &battery6_cell4, float &battery6_cell5, float &battery6_cell6, float &battery6_cell7, float &battery6_cell8, float &battery6_cell9, float &battery6_cell10, float &battery6_cell11, float &battery6_cell12, float &battery6_total_voltage)
+    static void battery_6_init(float &battery6_cell1, float &battery6_cell2, float &battery6_cell3, float &battery6_cell4, float &battery6_cell5, float &battery6_cell6, float &battery6_cell7, float &battery6_cell8, float &battery6_cell9, float &battery6_cell10, float &battery6_cell11, float &battery6_cell12, float &battery6_total_voltage, float &battery6_max_temp, float &battery6_min_temp)
     {
-        battery_6_packet = new HeapPacket(static_cast<uint16_t>(915), &battery6_cell1, &battery6_cell2, &battery6_cell3, &battery6_cell4, &battery6_cell5, &battery6_cell6, &battery6_cell7, &battery6_cell8, &battery6_cell9, &battery6_cell10, &battery6_cell11, &battery6_cell12, &battery6_total_voltage);
+        battery_6_packet = new HeapPacket(static_cast<uint16_t>(915), &battery6_cell1, &battery6_cell2, &battery6_cell3, &battery6_cell4, &battery6_cell5, &battery6_cell6, &battery6_cell7, &battery6_cell8, &battery6_cell9, &battery6_cell10, &battery6_cell11, &battery6_cell12, &battery6_total_voltage, &battery6_max_temp, &battery6_min_temp);
     }
 
-    static void battery_7_init(float &battery7_cell1, float &battery7_cell2, float &battery7_cell3, float &battery7_cell4, float &battery7_cell5, float &battery7_cell6, float &battery7_cell7, float &battery7_cell8, float &battery7_cell9, float &battery7_cell10, float &battery7_cell11, float &battery7_cell12, float &battery7_total_voltage)
+    static void battery_7_init(float &battery7_cell1, float &battery7_cell2, float &battery7_cell3, float &battery7_cell4, float &battery7_cell5, float &battery7_cell6, float &battery7_cell7, float &battery7_cell8, float &battery7_cell9, float &battery7_cell10, float &battery7_cell11, float &battery7_cell12, float &battery7_total_voltage, float &battery7_max_temp, float &battery7_min_temp)
     {
-        battery_7_packet = new HeapPacket(static_cast<uint16_t>(916), &battery7_cell1, &battery7_cell2, &battery7_cell3, &battery7_cell4, &battery7_cell5, &battery7_cell6, &battery7_cell7, &battery7_cell8, &battery7_cell9, &battery7_cell10, &battery7_cell11, &battery7_cell12, &battery7_total_voltage);
+        battery_7_packet = new HeapPacket(static_cast<uint16_t>(916), &battery7_cell1, &battery7_cell2, &battery7_cell3, &battery7_cell4, &battery7_cell5, &battery7_cell6, &battery7_cell7, &battery7_cell8, &battery7_cell9, &battery7_cell10, &battery7_cell11, &battery7_cell12, &battery7_total_voltage, &battery7_max_temp, &battery7_min_temp);
     }
 
-    static void battery_8_init(float &battery8_cell1, float &battery8_cell2, float &battery8_cell3, float &battery8_cell4, float &battery8_cell5, float &battery8_cell6, float &battery8_cell7, float &battery8_cell8, float &battery8_cell9, float &battery8_cell10, float &battery8_cell11, float &battery8_cell12, float &battery8_total_voltage)
+    static void battery_8_init(float &battery8_cell1, float &battery8_cell2, float &battery8_cell3, float &battery8_cell4, float &battery8_cell5, float &battery8_cell6, float &battery8_cell7, float &battery8_cell8, float &battery8_cell9, float &battery8_cell10, float &battery8_cell11, float &battery8_cell12, float &battery8_total_voltage, float &battery8_max_temp, float &battery8_min_temp)
     {
-        battery_8_packet = new HeapPacket(static_cast<uint16_t>(917), &battery8_cell1, &battery8_cell2, &battery8_cell3, &battery8_cell4, &battery8_cell5, &battery8_cell6, &battery8_cell7, &battery8_cell8, &battery8_cell9, &battery8_cell10, &battery8_cell11, &battery8_cell12, &battery8_total_voltage);
+        battery_8_packet = new HeapPacket(static_cast<uint16_t>(917), &battery8_cell1, &battery8_cell2, &battery8_cell3, &battery8_cell4, &battery8_cell5, &battery8_cell6, &battery8_cell7, &battery8_cell8, &battery8_cell9, &battery8_cell10, &battery8_cell11, &battery8_cell12, &battery8_total_voltage, &battery8_max_temp, &battery8_min_temp);
     }
 
     static void general_state_machine_init(gsm_status &gsm_status)

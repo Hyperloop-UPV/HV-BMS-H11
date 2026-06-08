@@ -12,7 +12,7 @@ public:
     inline static bool FAULT_flag{false};
     inline static bool open_contactors_flag{false};
     inline static bool start_precharge_flag{false};
-    inline static bool bypass_imd_flag{false};
+    inline static bool check_faults_flag{false};
     
 
     OrderPackets() = default;
@@ -20,7 +20,7 @@ public:
     inline static HeapOrder *FAULT_order{nullptr};
     inline static HeapOrder *open_contactors_order{nullptr};
     inline static HeapOrder *start_precharge_order{nullptr};
-    inline static HeapOrder *bypass_imd_order{nullptr};
+    inline static HeapOrder *check_faults_order{nullptr};
     
 
     static void FAULT_init()
@@ -35,9 +35,9 @@ public:
     {
         start_precharge_order = new HeapOrder(903, &start_precharge_cb);
     }
-    static void bypass_imd_init()
+    static void check_faults_init()
     {
-        bypass_imd_order = new HeapOrder(904, &bypass_imd_cb);
+        check_faults_order = new HeapOrder(904, &check_faults_cb);
     }
     
 
@@ -56,8 +56,8 @@ public:
         if (start_precharge_order == nullptr) {
             PANIC("Order start_precharge not initialized");
         }
-        if (bypass_imd_order == nullptr) {
-            PANIC("Order bypass_imd not initialized");
+        if (check_faults_order == nullptr) {
+            PANIC("Order check_faults not initialized");
         }
         
 
@@ -78,9 +78,9 @@ private:
     {
         start_precharge_flag = true;
     }
-    static void bypass_imd_cb()
+    static void check_faults_cb()
     {
-        bypass_imd_flag = true;
+        check_faults_flag = true;
     }
     
 };

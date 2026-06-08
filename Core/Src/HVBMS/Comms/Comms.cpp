@@ -10,7 +10,9 @@ void Comms::start() {
         Sensors::battery_h11.battery[0].cells[8], Sensors::battery_h11.battery[0].cells[9],
         Sensors::battery_h11.battery[0].cells[10], Sensors::battery_h11.battery[0].cells[11],
         Sensors::battery_h11.battery[0].cells[12], Sensors::battery_h11.battery[0].cells[13],
-        Sensors::battery_h11.battery[0].total_voltage);
+        Sensors::battery_h11.battery[0].total_voltage,
+        Sensors::battery_h11.battery[0].max_temp,
+        Sensors::battery_h11.battery[0].min_temp);
 
     DataPackets::battery_2_init(
         Sensors::battery_h11.battery[1].cells[0], Sensors::battery_h11.battery[1].cells[1],
@@ -19,7 +21,9 @@ void Comms::start() {
         Sensors::battery_h11.battery[1].cells[8], Sensors::battery_h11.battery[1].cells[9],
         Sensors::battery_h11.battery[1].cells[10], Sensors::battery_h11.battery[1].cells[11],
         Sensors::battery_h11.battery[1].cells[12], Sensors::battery_h11.battery[1].cells[13],
-        Sensors::battery_h11.battery[1].total_voltage);
+        Sensors::battery_h11.battery[1].total_voltage,
+        Sensors::battery_h11.battery[1].max_temp,
+        Sensors::battery_h11.battery[1].min_temp);
 
     DataPackets::battery_3_init(
         Sensors::battery_h11.battery[2].cells[0], Sensors::battery_h11.battery[2].cells[1],
@@ -28,7 +32,9 @@ void Comms::start() {
         Sensors::battery_h11.battery[2].cells[8], Sensors::battery_h11.battery[2].cells[9],
         Sensors::battery_h11.battery[2].cells[10], Sensors::battery_h11.battery[2].cells[11],
         Sensors::battery_h11.battery[2].cells[12], Sensors::battery_h11.battery[2].cells[13],
-        Sensors::battery_h11.battery[2].total_voltage);
+        Sensors::battery_h11.battery[2].total_voltage,
+        Sensors::battery_h11.battery[2].max_temp,
+        Sensors::battery_h11.battery[2].min_temp);
 
     DataPackets::battery_4_init(
         Sensors::battery_h11.battery[3].cells[0], Sensors::battery_h11.battery[3].cells[1],
@@ -37,7 +43,9 @@ void Comms::start() {
         Sensors::battery_h11.battery[3].cells[8], Sensors::battery_h11.battery[3].cells[9],
         Sensors::battery_h11.battery[3].cells[10], Sensors::battery_h11.battery[3].cells[11],
         Sensors::battery_h11.battery[3].cells[12], Sensors::battery_h11.battery[3].cells[13],
-        Sensors::battery_h11.battery[3].total_voltage);
+        Sensors::battery_h11.battery[3].total_voltage,
+        Sensors::battery_h11.battery[3].max_temp,
+        Sensors::battery_h11.battery[3].min_temp);
 
     DataPackets::battery_5_init(
         Sensors::battery_h11.battery[4].cells[0], Sensors::battery_h11.battery[4].cells[1],
@@ -46,7 +54,9 @@ void Comms::start() {
         Sensors::battery_h11.battery[4].cells[8], Sensors::battery_h11.battery[4].cells[9],
         Sensors::battery_h11.battery[4].cells[10], Sensors::battery_h11.battery[4].cells[11],
         Sensors::battery_h11.battery[4].cells[12], Sensors::battery_h11.battery[4].cells[13],
-        Sensors::battery_h11.battery[4].total_voltage);
+        Sensors::battery_h11.battery[4].total_voltage,
+        Sensors::battery_h11.battery[4].max_temp,
+        Sensors::battery_h11.battery[4].min_temp);
 
     DataPackets::battery_6_init(
         Sensors::battery_h11.battery[5].cells[0], Sensors::battery_h11.battery[5].cells[1],
@@ -55,7 +65,9 @@ void Comms::start() {
         Sensors::battery_h11.battery[5].cells[8], Sensors::battery_h11.battery[5].cells[9],
         Sensors::battery_h11.battery[5].cells[10], Sensors::battery_h11.battery[5].cells[11],
         Sensors::battery_h11.battery[5].cells[12], Sensors::battery_h11.battery[5].cells[13],
-        Sensors::battery_h11.battery[5].total_voltage);
+        Sensors::battery_h11.battery[5].total_voltage,
+        Sensors::battery_h11.battery[5].max_temp,
+        Sensors::battery_h11.battery[5].min_temp);
 
     DataPackets::battery_7_init(
         Sensors::battery_h11.battery[6].cells[0], Sensors::battery_h11.battery[6].cells[1],
@@ -64,7 +76,9 @@ void Comms::start() {
         Sensors::battery_h11.battery[6].cells[8], Sensors::battery_h11.battery[6].cells[9],
         Sensors::battery_h11.battery[6].cells[10], Sensors::battery_h11.battery[6].cells[11],
         Sensors::battery_h11.battery[6].cells[12], Sensors::battery_h11.battery[6].cells[13],
-        Sensors::battery_h11.battery[6].total_voltage);
+        Sensors::battery_h11.battery[6].total_voltage,
+        Sensors::battery_h11.battery[6].max_temp,
+        Sensors::battery_h11.battery[6].min_temp);
 
     DataPackets::battery_8_init(
         Sensors::battery_h11.battery[7].cells[0], Sensors::battery_h11.battery[7].cells[1],
@@ -73,7 +87,9 @@ void Comms::start() {
         Sensors::battery_h11.battery[7].cells[8], Sensors::battery_h11.battery[7].cells[9],
         Sensors::battery_h11.battery[7].cells[10], Sensors::battery_h11.battery[7].cells[11],
         Sensors::battery_h11.battery[7].cells[12], Sensors::battery_h11.battery[7].cells[13],
-        Sensors::battery_h11.battery[7].total_voltage);
+        Sensors::battery_h11.battery[7].total_voltage,
+        Sensors::battery_h11.battery[7].max_temp,
+        Sensors::battery_h11.battery[7].min_temp);
     DataPackets::batteries_voltage_init(Sensors::battery_h11.total_voltage);
 
     DataPackets::voltage_sensor_init(ADC_reading::voltage_reading);
@@ -103,7 +119,6 @@ void Comms::start() {
 
     OrderPackets::open_contactors_init();
     OrderPackets::start_precharge_init();
-    OrderPackets::bypass_imd_init();
     OrderPackets::FAULT_init();
 
     OrderPackets::start();
