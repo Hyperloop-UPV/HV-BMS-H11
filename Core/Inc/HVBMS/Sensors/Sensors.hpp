@@ -9,11 +9,13 @@
 
 
 class Sensors {
-    static constexpr float VOLTAGE_SLOPE{122.03744695176259};
-    static constexpr float VOLTAGE_OFFSET{-3.57028270765926};
+    // Real characterization HVBMS-H11 (channel 1 voltage)
+    static constexpr float VOLTAGE_SLOPE{181.04199675052496};
+    static constexpr float VOLTAGE_OFFSET{-9.393116311187555};
 
-    static constexpr float CURRENT_SLOPE{89.94180359377545};
-    static constexpr float CURRENT_OFFSET{-151.40450651439056};
+    // Current al reves
+    static constexpr float CURRENT_SLOPE{-336.6379022410105};
+    static constexpr float CURRENT_OFFSET{570.2997963006376};
 
    public:
 
