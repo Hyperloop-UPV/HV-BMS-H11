@@ -402,6 +402,7 @@ bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance, volatile uint8_t txB
     while (!rx_complete) {
         if ((uint32_t)(GlobalTimer::timeout_timer->CNT - start_wait) > timeout_us) {
             NewSPI::bms_wrapper_rx->abort_and_recover();
+            FAULT("MC33771C is not answering");
             return BCC_STATUS_COM_TIMEOUT;
         }
     }
