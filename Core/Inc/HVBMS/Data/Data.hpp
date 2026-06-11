@@ -56,10 +56,10 @@ inline DigitalInputDomain::Instance* battery_intb;
 
 using ST_LIB::ADCDomain;
 
-static float voltage_reading_ch2_raw;
+static float voltage_reading_ch1_raw;
 static float current_reading_raw;
 
-inline constexpr ADCDomain::ADC adc_PA4{ST_LIB::PA4, voltage_reading_ch2_raw};
+inline constexpr ADCDomain::ADC adc_PA3{ST_LIB::PA3, voltage_reading_ch1_raw};
 inline constexpr ADCDomain::ADC adc_PA5{ST_LIB::PA5, current_reading_raw};
 
 namespace ADC_reading {
@@ -76,7 +76,7 @@ inline constexpr auto dc_current_protection =
         Protections::Rules::above(120.0f));
 
 namespace ADC {
-inline ADCDomain::Instance* adc_voltage_ch2;
+inline ADCDomain::Instance* adc_voltage_ch1;
 inline ADCDomain::Instance* adc_current;
 };  // namespace ADC
 

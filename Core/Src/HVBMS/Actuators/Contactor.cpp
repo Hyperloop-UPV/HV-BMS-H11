@@ -2,9 +2,7 @@
 
 Contactor::Contactor(DigitalOutputDomain::Instance* output, DigitalInputDomain::Instance* input,
                      bool normally_opened)
-    : output{output},
-      input{input},
-      normally_opened(normally_opened) {}
+    : output{output}, input{input}, normally_opened(normally_opened) {}
 
 void Contactor::open() {
     if (normally_opened)
@@ -13,14 +11,22 @@ void Contactor::open() {
         output->turn_on();
 }
 
-// hay que mirar si es reset o set
 bool Contactor::is_open() {
     if (input->read() == GPIO_PinState::GPIO_PIN_SET)
-        state = true;
-    else 
-        state = false;
+        if (normally_opened) {
+            state = true;
+        } else {
+            state = false;
+        }
+    else {
+        if (normally_opened) {
+            state = false;
+        } else {
+            state = true;
+        }
+    }
     return state;
- }
+}
 
 void Contactor::close() {
     if (normally_opened)
@@ -31,9 +37,18 @@ void Contactor::close() {
 
 bool Contactor::is_closed() {
     if (input->read() == GPIO_PinState::GPIO_PIN_RESET)
-        state = true;
-    else
-        state = false;
+        if (normally_opened) {
+            state = false;
+        } else {
+            state = true;
+        }
+    else {
+        if (normally_opened) {
+            state = true;
+        } else {
+            state = false;
+        }
+    }
     return state;
 }
 

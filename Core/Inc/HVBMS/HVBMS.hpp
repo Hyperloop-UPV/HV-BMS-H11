@@ -16,7 +16,12 @@ class HVBMS {
 
     static void update();
     static void on_fault_enter();
-    inline static bool prueba{false};
+
+    inline static void control_station_disconnected() {
+        if (!OrderPackets::control_station_tcp->is_connected()) {
+            FAULT("Control station disconnected");
+        }
+    }
 
     // Crear estados
     static constexpr auto connecting_state =
@@ -54,11 +59,11 @@ class HVBMS {
             // CONNECTING
             bms_sm.add_cyclic_action([]() { Actuators::toggle_operational_led(); }, 300ms,
                                      connecting_state);
-            bms_sm.add_cyclic_action([]() { Sensors::update_sensors(); }, 10ms, connecting_state);
 
             // OPERATIONAL
-            bms_sm.add_cyclic_action([]() { Sensors::update_sensors(); }, 1ms, operational_state);
-
+            // Si me desconecto me tengo que ir a fault
+            bms_sm.add_cyclic_action([]() { control_station_disconnected();}, 50ms, operational_state);
             return bms_sm;
         }();
+
 };

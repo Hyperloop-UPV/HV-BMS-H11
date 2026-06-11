@@ -20,11 +20,11 @@ void HVBMS::update() {
             });
 
             id_check_precharge = Scheduler::register_task(100, []() {
-                // if (ADC_reading::voltage_reading / Sensors::batteries.total_voltage >= 0.95) {
-                //     Scheduler::cancel_timeout(id_timeout_precharge);
-                //     Actuators::close_HV();
-                //     Scheduler::unregister_task(id_check_precharge);
-                // }
+                if (ADC_reading::voltage_reading / 50 >= 0.95) {
+                     Scheduler::cancel_timeout(id_timeout_precharge);
+                     Actuators::close_HV();
+                     Scheduler::unregister_task(id_check_precharge);
+                }
             });
         }
     }

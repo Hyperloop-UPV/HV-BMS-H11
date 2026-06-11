@@ -25,7 +25,7 @@ using myBoard = ST_LIB::Board<ST_LIB::FaultPolicy<HVBMS::state_machine, &HVBMS::
                               eth, dc_current_protection, dc_voltage_protection, led_PG13, led_PG9,
                               contactor_PD8, contactor_PD9, contactor_PD10, contactor_PB14, contactor_PB15,
                               aux_contactor_PD12, aux_contactor_PG2, aux_contactor_PD13,
-                              aux_contactor_PD14, aux_contactor_PD15, sdc_PB4, adc_PA4, adc_PA5, timer_us_tick_def,
+                              aux_contactor_PD14, aux_contactor_PD15, sdc_PB4, adc_PA3, adc_PA5, timer_us_tick_def,
                               timer_imd, timeout_timer_def, sdc_PB5, imd_enable_PE11, imd_ok_PE12,
                               cs_tx_PE4, bms_spi_tx, bms_spi_rx, spi_enable_PE3, battery_intb_PE1>;
 
@@ -50,7 +50,7 @@ int main(void) {
     DI::aux_contactor_common_high = &myBoard::instance_of<aux_contactor_PD15>();
     DI::battery_intb = &myBoard::instance_of<battery_intb_PE1>();
 
-    ADC::adc_voltage_ch2 = &myBoard::instance_of<adc_PA4>();
+    ADC::adc_voltage_ch1 = &myBoard::instance_of<adc_PA3>();
     ADC::adc_current = &myBoard::instance_of<adc_PA5>();
 
     NewSPI::bms_wrapper_rx.emplace(myBoard::instance_of<bms_spi_rx>());
