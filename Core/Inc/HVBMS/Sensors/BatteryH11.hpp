@@ -7,14 +7,13 @@
 #include "HVBMS/Data/Data.hpp"
 #include "ST-LIB.hpp"
 
-#define BATTERIES_CONNECTED 0
-#define H11_N_MODULES 1
+#define BATTERIES_CONNECTED 1
+#define H11_N_MODULES 8
 #define H11_N_SEGMENTS 12
 #define H11_N_HW_CELLS 14
 #define H11_N_GPIO 4
 #define H11_N_TEMPS 2
 #define H11_CAPACITY_AH (4.2f * 3.0f)
-
 
 struct BatteryData {
     float cells[H11_N_SEGMENTS]{};
@@ -36,7 +35,7 @@ struct Batteries {
     static inline float total_voltage{};
     static inline float min_temperature{};
     static inline float max_temperature{};
-    static inline uint16_t faults{};
+    static inline uint16_t faults[11]{};
 
     static inline uint32_t last_reading_time{};
     static inline int32_t period_ms{};
@@ -162,8 +161,8 @@ struct Batteries {
     }
 
     static void start() {
-        bcc_status_t status = BCC_Meas_StartConversionGlobal(&bcc_config,
-                                                              MC33771C_ADC_CFG_INIT_VALUE);
+        bcc_status_t status =
+            BCC_Meas_StartConversionGlobal(&bcc_config, MC33771C_ADC_CFG_INIT_VALUE);
         if (status != BCC_STATUS_SUCCESS) {
             FAULT("Could not start BCC conversion: %s", get_bcc_error_str(status));
         }
@@ -172,8 +171,8 @@ struct Batteries {
     static void read_cells() {
         uint32_t cell_voltages[H11_N_HW_CELLS];
 
-        bcc_status_t status = BCC_Meas_GetCellVoltages(&bcc_config, (bcc_cid_t)(read_module + 1),
-                                                        cell_voltages);
+        bcc_status_t status =
+            BCC_Meas_GetCellVoltages(&bcc_config, (bcc_cid_t)(read_module + 1), cell_voltages);
         if (status != BCC_STATUS_SUCCESS) {
             WARNING("Could not read module %u", (bcc_cid_t)(read_module + 1));
             return;
@@ -184,6 +183,7 @@ struct Batteries {
         for (uint8_t hw = 0; hw < H11_N_HW_CELLS; hw++) {
             if (hw == 4 || hw == 5) continue;
             battery[read_module].cells[sw] = static_cast<float>(cell_voltages[hw]) / 1000.0f;
+            if (hw == H11_N_HW_CELLS - 1) battery[read_module].cells[sw] += 255;
             device_voltage += battery[read_module].cells[sw];
             sw++;
         }
@@ -254,8 +254,7 @@ struct Batteries {
 
     static void read_current() {
         int32_t isense_uv;
-        bcc_status_t status =
-            BCC_Meas_GetIsenseVoltage(&bcc_config, (bcc_cid_t)1, &isense_uv);
+        bcc_status_t status = BCC_Meas_GetIsenseVoltage(&bcc_config, (bcc_cid_t)1, &isense_uv);
         if (status == BCC_STATUS_SUCCESS) {
             current = static_cast<float>(isense_uv) / 1000.0f;
         }
@@ -263,9 +262,9 @@ struct Batteries {
 
     static void read() {
         read_cells();
-        //read_analog();
-        //get_max_min_temperatures();
-        //read_current();
+        // read_analog();
+        // get_max_min_temperatures();
+        // read_current();
         if (modules_read < bcc_config.devicesCnt) modules_read++;
         read_module = (read_module + 1) % bcc_config.devicesCnt;
     }

@@ -37,9 +37,9 @@ void HVBMS::update() {
     if (OrderPackets::check_faults_flag) {
         bcc_status_t status;
         for (uint8_t cid = 1; cid <= Batteries::bcc_config.devicesCnt; cid++) {
-            status = BCC_Fault_GetStatus(&Batteries::bcc_config, (bcc_cid_t)cid, &Batteries::faults);
+            status = BCC_Fault_GetStatus(&Batteries::bcc_config, (bcc_cid_t)cid, Batteries::faults);
             if (status != BCC_STATUS_SUCCESS) {
-                FAULT("Could not read fault status: %s", get_bcc_error_str(status));
+                WARNING("Could not read fault status: %s", get_bcc_error_str(status));
                 return;
             }
 

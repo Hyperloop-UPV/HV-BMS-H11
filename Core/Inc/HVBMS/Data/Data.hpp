@@ -69,7 +69,7 @@ inline float current_reading{0.0f};
 
 inline constexpr auto dc_voltage_protection =
     Protections::protection<"dc_bus_voltage", ADC_reading::voltage_reading>(
-        Protections::Rules::above(410.0f));
+        Protections::Rules::above(420.0f));
 
 inline constexpr auto dc_current_protection =
     Protections::protection<"dc_bus_current", ADC_reading::current_reading>(
