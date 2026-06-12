@@ -8,8 +8,10 @@ class SDC {
    private:
     inline static bool enabled{false};
     inline static uint16_t debouncing_timeout{Scheduler::INVALID_ID};
-
-   public:
+    inline static uint16_t emi_timeout{Scheduler::INVALID_ID};
+    
+    public:
+    inline static bool emis{false};
     inline static EXTIDomain::Instance* sdc_interrupt{nullptr};
     inline static DataPackets::sdc_status status{DataPackets::sdc_status::DISENGAGED};
 

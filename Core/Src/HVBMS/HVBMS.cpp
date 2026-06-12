@@ -2,7 +2,7 @@
 
 #include "HVBMS/Data/Data.hpp"
 #include "HVBMS/Sensors/BatteryH11.hpp"
-
+#include "HVBMS/Sensors/SDC.hpp"
 
 void HVBMS::update() {
 
@@ -13,14 +13,15 @@ void HVBMS::update() {
             WARNING("SDC is disengaged, cannot start precharge");
         } else {
             Actuators::start_precharge();
+            SDC::emis = true;
             id_timeout_precharge = Scheduler::set_timeout(4000000, []() {
                 Scheduler::unregister_task(id_check_precharge);
                 Actuators::open_HV();
                 FAULT("Precharge failed");
             });
 
-            id_check_precharge = Scheduler::register_task(100, []() {
-                if (ADC_reading::voltage_reading / 50 >= 0.95) {
+            id_check_precharge = Scheduler::register_task(1000, []() {
+                if (ADC_reading::voltage_reading / 100 >= 0.95) {
                      Scheduler::cancel_timeout(id_timeout_precharge);
                      Actuators::close_HV();
                      Scheduler::unregister_task(id_check_precharge);
