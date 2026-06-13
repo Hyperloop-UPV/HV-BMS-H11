@@ -1,5 +1,6 @@
 #define BCC_STLIB_IMPLEMENTATION
 #include "HVBMS/Sensors/Sensors.hpp"
+
 #include "HALAL/Benchmarking_toolkit/DataWatchpointTrace/DataWatchpointTrace.hpp"
 
 void Sensors::init() {
@@ -31,7 +32,8 @@ void Sensors::update_sensors() {
     ADC_reading::voltage_reading =
         (Sensors::VOLTAGE_SLOPE * ADC::adc_voltage_ch1->get_value()) + Sensors::VOLTAGE_OFFSET;
     if (ADC_reading::voltage_reading <= 8) ADC_reading::voltage_reading -= 5;
-    ADC_reading::current_reading =
-        (Sensors::CURRENT_SLOPE * ADC::adc_current->get_value()) + (Sensors::CURRENT_OFFSET - 6.07);
+    ADC_reading::current_reading = (Sensors::CURRENT_SLOPE * ADC::adc_current->get_value()) +
+                                   (Sensors::CURRENT_OFFSET - 6.07) +
+                                   (Sensors::precharge_offset * ADC_reading::voltage_reading);
     imd.read();
 }

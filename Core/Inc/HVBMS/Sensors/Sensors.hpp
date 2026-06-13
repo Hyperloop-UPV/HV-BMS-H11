@@ -16,15 +16,17 @@ class Sensors {
     static constexpr float CURRENT_SLOPE{-336.6379022410105};
     static constexpr float CURRENT_OFFSET{570.2997963006376};
 
-   public:
+    public:
     // Linear sensor does not work, so i just read directly from the input
     // No need to do otherwise
-
+    
     inline static SDC sdc;
-
+    
     inline static Batteries battery_h11;
-
+    
     inline static IMD imd;
+    
+    inline static float precharge_offset{0.0};
 
     static void init();
     static void update_sensors();

@@ -30,6 +30,7 @@ void Actuators::open_HV() {
     contactor_common_high.open();
     contactor_high.open();
     contactor_precharge.open();
+    Sensors::precharge_offset = 0.0;
 }
 
 bool Actuators::is_HV_open() {
@@ -56,6 +57,7 @@ void Actuators::start_precharge() {
     contactor_common_high.close();
     contactor_precharge.close();
     contactor_high.open();
+    Sensors::precharge_offset = 0.02;
 }
 
 bool Actuators::is_precharging() {

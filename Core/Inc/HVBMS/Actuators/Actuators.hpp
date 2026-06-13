@@ -1,5 +1,6 @@
 #pragma once
 #include "HVBMS/Actuators/Contactor.hpp"
+#include "HVBMS/Sensors/Sensors.hpp"
 
 class Actuators {
 private:
