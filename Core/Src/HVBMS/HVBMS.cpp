@@ -47,6 +47,10 @@ void HVBMS::update() {
             INFO("FAULT %u: %u", cid, Batteries::faults);
         }
     }
+    if (OrderPackets::cell_balance_flag) {
+        OrderPackets::cell_balance_flag = false;
+        Batteries::start_cell_balance();
+    }
     if (OrderPackets::FAULT_flag) {
         FAULT("FAULT order triggered");
     }

@@ -118,6 +118,7 @@ void Comms::start() {
     DataPackets::start();
 
     OrderPackets::open_contactors_init();
+    OrderPackets::cell_balance_init();
     OrderPackets::start_precharge_init();
     OrderPackets::FAULT_init();
     OrderPackets::check_faults_init();

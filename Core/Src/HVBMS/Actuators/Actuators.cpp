@@ -13,7 +13,8 @@ void Actuators::init() {
     contactor_precharge = Contactor{DO::contactor_precharge, DI::aux_contactor_precharge, true};
     contactor_low = Contactor{DO::contactor_low, DI::aux_contactor_low, true};
     contactor_high = Contactor{DO::contactor_high, DI::aux_contactor_high, true};
-    contactor_common_high = Contactor(DO::contactor_common_high, DI::aux_contactor_common_high, true);
+    contactor_common_high =
+        Contactor(DO::contactor_common_high, DI::aux_contactor_common_high, true);
 
     contactor_discharge.close();
     contactor_precharge.open();
@@ -48,7 +49,8 @@ void Actuators::close_HV() {
 
 bool Actuators::is_HV_closed() {
     return contactor_discharge.is_open() && contactor_low.is_closed() &&
-           contactor_high.is_closed() && contactor_precharge.is_open() && contactor_common_high.is_closed();
+           contactor_high.is_closed() && contactor_precharge.is_open() &&
+           contactor_common_high.is_closed();
 }
 
 void Actuators::start_precharge() {
@@ -77,8 +79,7 @@ bool& Actuators::get_contactor_precharge_state() { return contactor_precharge.ge
 
 bool& Actuators::get_contactor_common_high_state() { return contactor_common_high.get_state(); }
 
-
-void Actuators::update_contactors(){
+void Actuators::update_contactors() {
     contactor_discharge.is_open();
     contactor_precharge.is_open();
     contactor_low.is_open();

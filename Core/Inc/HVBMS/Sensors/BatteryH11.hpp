@@ -269,6 +269,57 @@ struct Batteries {
         read_module = (read_module + 1) % bcc_config.devicesCnt;
     }
 
+    static void start_cell_balance() {
+        constexpr float balance_threshold = 0.01f;
+        constexpr uint16_t balance_timer = 0U;
+
+        float avg_voltage = 0.0f;
+        uint16_t total_cells = 0;
+        for (uint8_t m = 0; m < modules_read; m++) {
+            for (uint8_t c = 0; c < H11_N_SEGMENTS; c++) {
+                avg_voltage += battery[m].cells[c];
+                total_cells++;
+            }
+        }
+        if (total_cells == 0) return;
+        avg_voltage /= static_cast<float>(total_cells);
+
+        for (uint8_t cid = 1; cid <= bcc_config.devicesCnt; cid++) {
+            bcc_status_t status =
+                BCC_CB_Enable(&bcc_config, (bcc_cid_t)cid, false);
+            if (status != BCC_STATUS_SUCCESS) {
+                WARNING("Could not disable CB for device %u: %s", cid,
+                        get_bcc_error_str(status));
+                continue;
+            }
+
+            for (uint8_t hw = 0; hw < H11_N_HW_CELLS; hw++) {
+                if (hw == 4 || hw == 5) {
+                    status = BCC_CB_SetIndividual(&bcc_config, (bcc_cid_t)cid, hw,
+                                                  false, balance_timer);
+                } else {
+                    uint8_t sw = (hw < 4) ? hw : (hw - 2);
+                    bool should_balance =
+                        battery[cid - 1].cells[sw] > avg_voltage + balance_threshold;
+                    status = BCC_CB_SetIndividual(&bcc_config, (bcc_cid_t)cid, hw,
+                                                  should_balance, balance_timer);
+                }
+                if (status != BCC_STATUS_SUCCESS) {
+                    WARNING("Could not set CB for device %u cell %u: %s", cid, hw,
+                            get_bcc_error_str(status));
+                }
+            }
+
+            status = BCC_CB_Enable(&bcc_config, (bcc_cid_t)cid, true);
+            if (status != BCC_STATUS_SUCCESS) {
+                WARNING("Could not enable CB for device %u: %s", cid,
+                        get_bcc_error_str(status));
+            }
+        }
+        INFO("Cell balancing configured (threshold: %d mV above avg %.3f V)",
+             static_cast<int>(balance_threshold * 1000), avg_voltage);
+    }
+
     static void get_max_min_temperatures() {
         float min_t = std::numeric_limits<float>::max();
         float max_t = std::numeric_limits<float>::lowest();

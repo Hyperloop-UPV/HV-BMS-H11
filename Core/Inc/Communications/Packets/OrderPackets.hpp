@@ -11,6 +11,7 @@ public:
 
     inline static bool FAULT_flag{false};
     inline static bool open_contactors_flag{false};
+    inline static bool cell_balance_flag{false};
     inline static bool start_precharge_flag{false};
     inline static bool check_faults_flag{false};
     
@@ -19,6 +20,7 @@ public:
 
     inline static HeapOrder *FAULT_order{nullptr};
     inline static HeapOrder *open_contactors_order{nullptr};
+    inline static HeapOrder *cell_balance_order{nullptr};
     inline static HeapOrder *start_precharge_order{nullptr};
     inline static HeapOrder *check_faults_order{nullptr};
     
@@ -30,6 +32,10 @@ public:
     static void open_contactors_init()
     {
         open_contactors_order = new HeapOrder(901, &open_contactors_cb);
+    }
+    static void cell_balance_init()
+    {
+        cell_balance_order = new HeapOrder(902, &cell_balance_cb);
     }
     static void start_precharge_init()
     {
@@ -53,6 +59,9 @@ public:
         if (open_contactors_order == nullptr) {
             PANIC("Order open_contactors not initialized");
         }
+        if (cell_balance_order == nullptr) {
+            PANIC("Order cell_balance not initialized");
+        }
         if (start_precharge_order == nullptr) {
             PANIC("Order start_precharge not initialized");
         }
@@ -73,6 +82,10 @@ private:
     static void open_contactors_cb()
     {
         open_contactors_flag = true;
+    }
+    static void cell_balance_cb()
+    {
+        cell_balance_flag = true;
     }
     static void start_precharge_cb()
     {
