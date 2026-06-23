@@ -115,6 +115,8 @@ void Comms::start() {
                                      Sensors::battery_h11.min_temperature,
                                      Sensors::battery_h11.max_temperature);
 
+    DataPackets::SOC_init(Batteries::SOC);
+
     DataPackets::start();
 
     OrderPackets::open_contactors_init();

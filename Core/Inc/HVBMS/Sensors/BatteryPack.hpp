@@ -9,9 +9,9 @@
 #define CONV_RATE_TIME_MS 1000   // ms
 #define FAKE_TOTAL_VOLTAGE 250.0 // V
 #define NOMINAL_CAPACITY 6       // Ah
-#define MIN_VOLTAGE 22.0         // V
-#define MAX_VOLTAGE 25.0         // V
-#define OCV_POINTS 256
+#define MIN_VOLTAGE_OLD 22.0         // V
+#define MAX_VOLTAGE_OLD 25.0         // V
+#define OCV_POINTS_OLD 256
 
 #define RESISTANCE_REFERENCE 1000.0 // Ohmios
 #define VOLTAGE_REFERENCE 3.0       // V

@@ -13,10 +13,14 @@
 #define H11_N_HW_CELLS 14
 #define H11_N_GPIO 4
 #define H11_N_TEMPS 4
-#define H11_CAPACITY_AH (4.2f * 3.0f)
+
+#define MAX_VOLTAGE 4.2  // V
+#define MIN_VOLTAGE 2.5  // V
+#define OCV_POINTS 2048  // 256 is for losers
 
 struct BatteryData {
     float cells[H11_N_SEGMENTS]{};
+    float cell_soc[H11_N_SEGMENTS]{};
     float total_voltage{};
     float conv_rate{};
     float max_temp{};
@@ -173,7 +177,7 @@ struct Batteries {
     static void read_cells() {
         uint32_t cell_voltages[H11_N_HW_CELLS];
 
-        // Leer voltaje 
+        // Leer voltaje
         bcc_status_t status =
             BCC_Meas_GetCellVoltages(&bcc_config, (bcc_cid_t)(read_module + 1), cell_voltages);
         if (status != BCC_STATUS_SUCCESS) {
@@ -196,7 +200,7 @@ struct Batteries {
         float voltage_sum = 0.0f;
         float min_v = std::numeric_limits<float>::max();
         float max_v = std::numeric_limits<float>::lowest();
-        
+
         // Calcular voltaje minimo de ese module
         for (uint8_t c = 0; c < H11_N_SEGMENTS; c++) {
             min_v = std::min(min_v, battery[read_module].cells[c]);
@@ -237,31 +241,15 @@ struct Batteries {
         battery[read_module].min_temp = mod_min;
     }
 
-    static float ocv_battery_SOC() {
-        float sum_voltage = 0;
-        for (uint8_t i = 0; i < (uint8_t)bcc_config.devicesCnt; i++) {
-            sum_voltage += battery[i].total_voltage;
-        }
-
-        float avg_voltage = sum_voltage / static_cast<float>(bcc_config.devicesCnt);
-        float x = avg_voltage;
-        float result = -62.5f + (14.9f * x) + (21.9f * x * x) + (-4.18f * x * x * x);
-        if (result < 0.0f) result = 0.0f;
-        if (result > 100.0f) result = 100.0f;
-        return result;
-    }
-
-    static void update_SOC() { SOC = ocv_battery_SOC(); }
-
-    static float &get_max_voltage() {
-        max_total_voltage = std::numeric_limits<float>::min(); 
+    static float& get_max_voltage() {
+        max_total_voltage = std::numeric_limits<float>::min();
         for (uint8_t m = 0; m < modules_read; m++) {
             max_total_voltage = std::max(battery[m].max_voltage, max_total_voltage);
         }
         return max_total_voltage;
     }
 
-    static float &get_min_voltage(){
+    static float& get_min_voltage() {
         min_total_voltage = std::numeric_limits<float>::max();
         for (uint8_t m = 0; m < modules_read; m++) {
             min_total_voltage = std::min(battery[m].max_voltage, min_total_voltage);
@@ -283,10 +271,17 @@ struct Batteries {
 
     static void read() {
         read_cells();
+        for (uint8_t c = 0; c < H11_N_SEGMENTS; c++) {
+            battery[read_module].cell_soc[c] = lookup_OCV(battery[read_module].cells[c]);
+        }
         // read_analog();
         // get_max_min_temperatures();
         // read_current();
-        if (modules_read < bcc_config.devicesCnt) modules_read++;
+        if (modules_read < bcc_config.devicesCnt) {
+            modules_read++;
+        } else {
+            update_SOC();
+        }
         read_module = (read_module + 1) % bcc_config.devicesCnt;
     }
 
@@ -300,8 +295,8 @@ struct Batteries {
 
             for (uint8_t hw = 0; hw < H11_N_HW_CELLS; hw++) {
                 status =
-                        BCC_CB_SetIndividual(&bcc_config, (bcc_cid_t)cid, hw, false, balance_timer);
-                
+                    BCC_CB_SetIndividual(&bcc_config, (bcc_cid_t)cid, hw, false, balance_timer);
+
                 if (status != BCC_STATUS_SUCCESS) {
                     WARNING("Could not disble CB for device %u cell %u: %s", cid, hw,
                             get_bcc_error_str(status));
@@ -315,24 +310,22 @@ struct Batteries {
         constexpr uint16_t balance_timer = 0U;
 
         for (uint8_t cid = 1; cid <= bcc_config.devicesCnt; cid++) {
-            bcc_status_t status =
-                BCC_CB_Enable(&bcc_config, (bcc_cid_t)cid, true);
+            bcc_status_t status = BCC_CB_Enable(&bcc_config, (bcc_cid_t)cid, true);
             if (status != BCC_STATUS_SUCCESS) {
-                WARNING("Could not enable CB for device %u: %s", cid,
-                        get_bcc_error_str(status));
+                WARNING("Could not enable CB for device %u: %s", cid, get_bcc_error_str(status));
                 continue;
             }
 
             for (uint8_t hw = 0; hw < H11_N_HW_CELLS; hw++) {
                 if (hw == 4 || hw == 5) {
-                    status = BCC_CB_SetIndividual(&bcc_config, (bcc_cid_t)cid, hw,
-                                                  false, balance_timer);
+                    status =
+                        BCC_CB_SetIndividual(&bcc_config, (bcc_cid_t)cid, hw, false, balance_timer);
                 } else {
                     uint8_t sw = (hw < 4) ? hw : (hw - 2);
-                    bool should_balance =
-                        battery[cid - 1].cells[sw] > battery[cid - 1].min_voltage + balance_threshold;
-                    status = BCC_CB_SetIndividual(&bcc_config, (bcc_cid_t)cid, hw,
-                                                  should_balance, balance_timer);
+                    bool should_balance = battery[cid - 1].cells[sw] >
+                                          battery[cid - 1].min_voltage + balance_threshold;
+                    status = BCC_CB_SetIndividual(&bcc_config, (bcc_cid_t)cid, hw, should_balance,
+                                                  balance_timer);
                 }
                 if (status != BCC_STATUS_SUCCESS) {
                     WARNING("Could not set CB for device %u cell %u: %s", cid, hw,
@@ -343,7 +336,7 @@ struct Batteries {
             Scheduler::set_timeout(300000000, stop_cell_balance);
 
             INFO("Cell balancing in module %d configured to %.3f V)", cid,
-                     battery[cid - 1].min_voltage);
+                 battery[cid - 1].min_voltage);
         }
     }
 
@@ -356,5 +349,49 @@ struct Batteries {
         }
         min_temperature = min_t;
         max_temperature = max_t;
+    }
+
+    template <size_t points>
+    static constexpr array<float, points> calculate_OCV() {
+        float A{-8.698389};
+        float B{154.147195};
+        float C{-1086.692323};
+        float D{3806.408675};
+        float E{-6622.935366};
+        float F{4583.849472};
+
+        auto delta = (MAX_VOLTAGE - MIN_VOLTAGE) / (points - 1);
+        array<float, points> result;
+        for (size_t i{0}; i < points; ++i) {
+            auto x = MIN_VOLTAGE + i * delta;
+            result[i] = (A * x * x * x * x * x) + (B * x * x * x * x) + (C * x * x * x) +
+                        (D * x * x) + (E * x) + F;
+        }
+
+        return result;
+    }
+
+    static inline array<float, OCV_POINTS> ocv{calculate_OCV<OCV_POINTS>()};
+
+    static float lookup_OCV(float voltage) {
+        if (voltage <= MIN_VOLTAGE) return ocv.front();
+        if (voltage >= MAX_VOLTAGE) return ocv.back();
+
+        constexpr float delta = (MAX_VOLTAGE - MIN_VOLTAGE) / (OCV_POINTS - 1);
+        size_t index = static_cast<size_t>((voltage - MIN_VOLTAGE) / delta);
+
+        return ocv[index];
+    }
+
+    static void update_SOC() {
+        float sum_soc = 0;
+        for (uint8_t m = 0; m < modules_read; m++) {
+            if (m == 0) continue; // borrar esto
+            for (uint8_t c = 0; c < H11_N_SEGMENTS; c++) {
+                sum_soc += battery[m].cell_soc[c];
+            }
+        }
+        //SOC = sum_soc / static_cast<float>(modules_read * H11_N_SEGMENTS);
+        SOC = sum_soc;
     }
 };

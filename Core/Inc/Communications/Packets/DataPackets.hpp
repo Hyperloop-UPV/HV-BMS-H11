@@ -116,6 +116,11 @@ public:
         contactor_status_packet = new HeapPacket(static_cast<uint16_t>(956), &contactor_discharge, &contactor_precharge, &contactor_low, &contactor_high, &contactor_common_high);
     }
 
+    static void SOC_init(float &soc)
+    {
+        SOC_packet = new HeapPacket(static_cast<uint16_t>(990), &soc);
+    }
+
     public:
     inline static HeapPacket *batteries_voltage_packet{nullptr};
     inline static HeapPacket *voltage_sensor_packet{nullptr};
@@ -135,6 +140,7 @@ public:
     inline static HeapPacket *minimum_soc_packet{nullptr};
     inline static HeapPacket *batteries_data_packet{nullptr};
     inline static HeapPacket *contactor_status_packet{nullptr};
+    inline static HeapPacket *SOC_packet{nullptr};
     
     inline static DatagramSocket *control_station_udp{nullptr};
     
@@ -195,6 +201,9 @@ public:
         if (contactor_status_packet == nullptr) {
             PANIC("Packet contactor_status not initialized");
         }
+        if (SOC_packet == nullptr) {
+            PANIC("Packet SOC not initialized");
+        }
         
 
         control_station_udp = new DatagramSocket("192.168.1.7",50400,"192.168.0.9",50400);
@@ -218,6 +227,7 @@ public:
             DataPackets::control_station_udp->send_packet(*DataPackets::minimum_soc_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::batteries_data_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::contactor_status_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::SOC_packet);
             });
     }
 
