@@ -271,19 +271,21 @@ struct Batteries {
 
     static void read() {
         read_cells();
-        for (uint8_t c = 0; c < H11_N_SEGMENTS; c++) {
-            battery[read_module].cell_soc[c] = lookup_OCV(battery[read_module].cells[c] / 1000.0f);
-        }
         // read_analog();
         // get_max_min_temperatures();
         // read_current();
         if (modules_read < bcc_config.devicesCnt) {
             modules_read++;
         } else {
+            for (uint8_t c = 0; c < H11_N_SEGMENTS; c++) {
+                battery[read_module].cell_soc[c] =
+                    lookup_OCV(battery[read_module].cells[c] / 1000.0f);
+            }
             update_SOC();
         }
         read_module = (read_module + 1) % bcc_config.devicesCnt;
     }
+    
 
     static void stop_cell_balance() {
         constexpr uint16_t balance_timer = 0U;
@@ -389,13 +391,13 @@ struct Batteries {
     static void update_SOC() {
         float sum_soc = 0;
         for (uint8_t m = 0; m < modules_read; m++) {
-            if (m == 0) continue; // borrar esto
+            if (m == 0) continue;  // borrar esto
             for (uint8_t c = 0; c < H11_N_SEGMENTS; c++) {
                 sum_soc += battery[m].cell_soc[c];
             }
         }
         // y cambiar esto cuando todas lean bien
-        //SOC = sum_soc / static_cast<float>(modules_read * H11_N_SEGMENTS);
+        // SOC = sum_soc / static_cast<float>(modules_read * H11_N_SEGMENTS);
         SOC = sum_soc / static_cast<float>(H11_N_SEGMENTS);
     }
 };
