@@ -18,6 +18,10 @@
 #define MIN_VOLTAGE 2.5  // V
 #define OCV_POINTS 2048  // 256 is for losers
 
+#define CELLS_IN_PARALLEL 3
+#define CELL_CAPACITY_AH 4.2f
+#define SEGMENT_CAPACITY_AH (CELL_CAPACITY_AH * CELLS_IN_PARALLEL)  // 12.6 Ah per 3P segment
+
 struct BatteryData {
     float cells[H11_N_SEGMENTS]{};
     float cell_soc[H11_N_SEGMENTS]{};
@@ -35,6 +39,8 @@ struct Batteries {
     static inline float temperature[H11_N_MODULES * H11_N_TEMPS]{};
 
     static inline float SOC{50.0f};
+    static inline float coulomb_soc{50.0f};
+    static inline bool soc_initialized{false};
     static inline float current{};
     static inline float total_voltage{};
     static inline float min_temperature{};
@@ -269,19 +275,40 @@ struct Batteries {
         }
     }
 
+    static void update_coulomb_counting() {
+        uint32_t now = GetMicroseconds();
+        if (last_reading_time == 0) {
+            last_reading_time = now;
+            return;
+        }
+        uint32_t elapsed = now - last_reading_time;
+        last_reading_time = now;
+
+        float dt = static_cast<float>(elapsed) / 1'000'000.0f;
+        float pack_current = ADC_reading::current_reading;
+        float delta_soc =
+            (pack_current * dt * 100.0f) / (SEGMENT_CAPACITY_AH * 3600.0f);
+        coulomb_soc -= delta_soc;
+        if (coulomb_soc < 0.0f) coulomb_soc = 0.0f;
+        if (coulomb_soc > 100.0f) coulomb_soc = 100.0f;
+        SOC = coulomb_soc;
+    }
+
     static void read() {
         read_cells();
-        // read_analog();
-        // get_max_min_temperatures();
-        // read_current();
+        update_coulomb_counting();
+
         if (modules_read < bcc_config.devicesCnt) {
             modules_read++;
         } else {
-            for (uint8_t c = 0; c < H11_N_SEGMENTS; c++) {
-                battery[read_module].cell_soc[c] =
-                    lookup_OCV(battery[read_module].cells[c] / 1000.0f);
+            if (!soc_initialized) {
+                for (uint8_t c = 0; c < H11_N_SEGMENTS; c++) {
+                    battery[read_module].cell_soc[c] =
+                        lookup_OCV(battery[read_module].cells[c] / 1000.0f);
+                }
+                SOC = compute_ocv_soc();
+                soc_initialized = true;
             }
-            update_SOC();
         }
         read_module = (read_module + 1) % bcc_config.devicesCnt;
     }
@@ -388,16 +415,14 @@ struct Batteries {
         return ocv[index];
     }
 
-    static void update_SOC() {
+    static float compute_ocv_soc() {
+        if (modules_read == 0) return SOC;
         float sum_soc = 0;
         for (uint8_t m = 0; m < modules_read; m++) {
-            if (m == 0) continue;  // borrar esto
             for (uint8_t c = 0; c < H11_N_SEGMENTS; c++) {
                 sum_soc += battery[m].cell_soc[c];
             }
         }
-        // y cambiar esto cuando todas lean bien
-        // SOC = sum_soc / static_cast<float>(modules_read * H11_N_SEGMENTS);
-        SOC = sum_soc / static_cast<float>(H11_N_SEGMENTS);
+        return sum_soc / static_cast<float>(modules_read * H11_N_SEGMENTS);
     }
 };
