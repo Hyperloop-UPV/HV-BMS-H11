@@ -7,8 +7,8 @@
 #include "HVBMS/Data/Data.hpp"
 #include "ST-LIB.hpp"
 
-#define BATTERIES_CONNECTED 0
-#define H11_N_MODULES 8
+#define BATTERIES_CONNECTED 1
+#define H11_N_MODULES 2
 #define H11_N_SEGMENTS 12
 #define H11_N_HW_CELLS 14
 #define H11_N_GPIO 4
@@ -272,7 +272,7 @@ struct Batteries {
     static void read() {
         read_cells();
         for (uint8_t c = 0; c < H11_N_SEGMENTS; c++) {
-            battery[read_module].cell_soc[c] = lookup_OCV(battery[read_module].cells[c]);
+            battery[read_module].cell_soc[c] = lookup_OCV(battery[read_module].cells[c] / 1000.0f);
         }
         // read_analog();
         // get_max_min_temperatures();
@@ -353,19 +353,22 @@ struct Batteries {
 
     template <size_t points>
     static constexpr array<float, points> calculate_OCV() {
-        float A{-8.698389};
-        float B{154.147195};
-        float C{-1086.692323};
-        float D{3806.408675};
-        float E{-6622.935366};
-        float F{4583.849472};
+        float A{2.0000857323f};
+        float B{-26.585900707f};
+        float C{128.754813f};
+        float D{-271.11938173f};
+        float E{214.69606092f};
+
+        constexpr float total_capacity_ah = 4.2f;
 
         auto delta = (MAX_VOLTAGE - MIN_VOLTAGE) / (points - 1);
         array<float, points> result;
         for (size_t i{0}; i < points; ++i) {
             auto x = MIN_VOLTAGE + i * delta;
-            result[i] = (A * x * x * x * x * x) + (B * x * x * x * x) + (C * x * x * x) +
-                        (D * x * x) + (E * x) + F;
+            auto missing_ah = (A * x * x * x * x) + (B * x * x * x) + (C * x * x) + (D * x) + E;
+            auto soc = 100.0f * (1.0f - missing_ah / total_capacity_ah);
+            soc = std::max(0.0, std::min(100.0, soc));  // clamp
+            result[i] = soc;
         }
 
         return result;
@@ -391,7 +394,8 @@ struct Batteries {
                 sum_soc += battery[m].cell_soc[c];
             }
         }
+        // y cambiar esto cuando todas lean bien
         //SOC = sum_soc / static_cast<float>(modules_read * H11_N_SEGMENTS);
-        SOC = sum_soc;
+        SOC = sum_soc / static_cast<float>(H11_N_SEGMENTS);
     }
 };
