@@ -36,5 +36,5 @@
     "shared_mutex": "cpp",
 
 },
-"cortex-debug.variableUseNaturalFormat": false
+"cortex-debug.variableUseNaturalFormat": true
 }

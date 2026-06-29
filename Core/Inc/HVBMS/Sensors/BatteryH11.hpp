@@ -8,7 +8,7 @@
 #include "ST-LIB.hpp"
 
 #define BATTERIES_CONNECTED 1
-#define H11_N_MODULES 2
+#define H11_N_MODULES 1
 #define H11_N_SEGMENTS 12
 #define H11_N_HW_CELLS 14
 #define H11_N_GPIO 4
@@ -223,21 +223,28 @@ struct Batteries {
     }
 
     static void read_analog() {
-        uint32_t an_voltages[H11_N_GPIO];
+        uint16_t an_raw[H11_N_GPIO];
 
-        bcc_status_t status =
-            BCC_Meas_GetAnVoltages(&bcc_config, (bcc_cid_t)(read_module + 1), an_voltages);
+        bcc_status_t status = BCC_Reg_Read(
+            &bcc_config, (bcc_cid_t)(read_module + 1), MC33771C_MEAS_AN3_OFFSET, 4, an_raw);
         if (status != BCC_STATUS_SUCCESS) {
             return;
         }
+
+        constexpr float A_coef = 1.028444e-3f;
+        constexpr float B_coef = 2.392435e-4f;
+        constexpr float C_coef = 1.562216e-7f;
 
         float mod_max = std::numeric_limits<float>::lowest();
         float mod_min = std::numeric_limits<float>::max();
 
         for (uint8_t gpio = 0; gpio < H11_N_TEMPS; gpio++) {
-            float voltage = static_cast<float>(an_voltages[gpio]) / 1000.0f;
-            float resistance = (voltage * 1000.0f) / (3.0f - voltage);
-            float temp = (resistance - 100.0f) / (0.00385f * 100.0f);
+            float raw = static_cast<float>(an_raw[3 - gpio] & 0x7FFFU);
+            float ratio = raw / 32768.0f;
+            float r_ntc = 6800.0f * ratio / (1.0f - ratio);
+            float ln_r = logf(r_ntc);
+            float inv_t = A_coef + B_coef * ln_r + C_coef * ln_r * ln_r * ln_r;
+            float temp = (1.0f / inv_t) - 273.15f;
             temperature[read_module * H11_N_TEMPS + gpio] = temp;
             mod_max = std::max(mod_max, temp);
             mod_min = std::min(mod_min, temp);
@@ -296,6 +303,7 @@ struct Batteries {
 
     static void read() {
         read_cells();
+        read_analog();
         update_coulomb_counting();
 
         if (modules_read < bcc_config.devicesCnt) {
