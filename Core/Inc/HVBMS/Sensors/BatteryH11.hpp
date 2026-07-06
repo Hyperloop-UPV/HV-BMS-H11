@@ -269,10 +269,6 @@ struct Batteries {
         }
         return min_total_voltage;
     }
-    static float get_total_voltage() { return total_voltage; }
-    static float get_min_temperature() { return min_temperature; }
-    static float get_max_temperature() { return max_temperature; }
-    static float get_SOC() { return SOC; }
 
     static void read_current() {
         int32_t isense_uv;
@@ -304,7 +300,7 @@ struct Batteries {
     static void read() {
         read_cells();
         read_analog();
-        update_coulomb_counting();
+        //update_coulomb_counting();
 
         if (modules_read < bcc_config.devicesCnt) {
             modules_read++;
@@ -315,7 +311,20 @@ struct Batteries {
                         lookup_OCV(battery[read_module].cells[c] / 1000.0f);
                 }
                 coulomb_soc = compute_ocv_soc();
+                SOC = coulomb_soc;
                 soc_initialized = true;
+            } else {
+                if (ADC_reading::current_reading > 0.2){
+                    update_coulomb_counting();
+                }
+                else{
+                    for (uint8_t c = 0; c < H11_N_SEGMENTS; c++) {
+                        battery[read_module].cell_soc[c] =
+                            lookup_OCV(battery[read_module].cells[c] / 1000.0f);
+                    }
+                    coulomb_soc = compute_ocv_soc();
+                    SOC = coulomb_soc;
+                }
             }
         }
         read_module = (read_module + 1) % bcc_config.devicesCnt;
