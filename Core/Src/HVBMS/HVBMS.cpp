@@ -5,18 +5,20 @@
 #include "HVBMS/Sensors/SDC.hpp"
 
 void HVBMS::update() {
-
     if (OrderPackets::start_precharge_flag) {
         OrderPackets::start_precharge_flag = false;
+        are_we_precharging = true;
 
         if (SDC::status == DataPackets::sdc_status::DISENGAGED) {
             WARNING("SDC is disengaged, cannot start precharge");
+            are_we_precharging = false;
         } else {
             SDC::emis = true;
             Actuators::start_precharge();
             id_timeout_precharge = Scheduler::set_timeout(4000000, []() {
                 Scheduler::unregister_task(id_check_precharge);
                 Actuators::open_HV();
+                are_we_precharging = false;
                 FAULT("Precharge failed");
             });
 
@@ -25,6 +27,7 @@ void HVBMS::update() {
                      Scheduler::cancel_timeout(id_timeout_precharge);
                      Actuators::close_HV();
                      Scheduler::unregister_task(id_check_precharge);
+                     are_we_precharging = false;
                 }
             });
         }
@@ -34,6 +37,7 @@ void HVBMS::update() {
         Actuators::open_HV();
         Scheduler::cancel_timeout(id_timeout_precharge);
         Scheduler::unregister_task(id_check_precharge);
+        are_we_precharging = false;
     }
     if (OrderPackets::check_faults_flag) {
         bcc_status_t status;
@@ -56,11 +60,15 @@ void HVBMS::update() {
     }
 
     current_gsm_state = state_machine.get_current_state();
+    current_nested_sm_state = nested_state_machine.get_current_state();
 }
 
 
 void HVBMS::on_fault_enter(){
     Actuators::open_HV();
+    if (fault_sensor_task_id == Scheduler::INVALID_ID) {
+        fault_sensor_task_id = Scheduler::register_task(10000, []() { Sensors::update_sensors(); });
+    }
     DO::sdc_fw_fault->turn_off();
     DO::operational_led->turn_off();
     DO::fault_led->turn_on();

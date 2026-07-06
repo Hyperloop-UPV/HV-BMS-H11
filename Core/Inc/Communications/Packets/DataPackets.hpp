@@ -24,6 +24,11 @@ public:
         EQUIPMENT_FAULT = 4,
         GROUNDING_FAULT = 5,
     };
+    enum class nested_sm_status : uint8_t
+    {
+        PRECHARGE = 0,
+        OPERATIONAL = 1,
+    };
     
 
     static void batteries_voltage_init(float &batteries_voltage_reading)
@@ -121,6 +126,11 @@ public:
         SOC_packet = new HeapPacket(static_cast<uint16_t>(990), &soc);
     }
 
+    static void nested_state_machine_init(nested_sm_status &nested_sm_status)
+    {
+        nested_state_machine_packet = new HeapPacket(static_cast<uint16_t>(960), &nested_sm_status);
+    }
+
     public:
     inline static HeapPacket *batteries_voltage_packet{nullptr};
     inline static HeapPacket *voltage_sensor_packet{nullptr};
@@ -141,6 +151,7 @@ public:
     inline static HeapPacket *batteries_data_packet{nullptr};
     inline static HeapPacket *contactor_status_packet{nullptr};
     inline static HeapPacket *SOC_packet{nullptr};
+    inline static HeapPacket *nested_state_machine_packet{nullptr};
     
     inline static DatagramSocket *control_station_udp{nullptr};
     
@@ -204,6 +215,9 @@ public:
         if (SOC_packet == nullptr) {
             PANIC("Packet SOC not initialized");
         }
+        if (nested_state_machine_packet == nullptr) {
+            PANIC("Packet nested_state_machine not initialized");
+        }
         
 
         control_station_udp = new DatagramSocket("192.168.1.7",50400,"192.168.0.9",50400);
@@ -228,6 +242,7 @@ public:
             DataPackets::control_station_udp->send_packet(*DataPackets::batteries_data_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::contactor_status_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::SOC_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::nested_state_machine_packet);
             });
     }
 

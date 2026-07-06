@@ -12,7 +12,6 @@ void Sensors::init() {
     DO::sdc_fw_fault->turn_on();
     sdc.enable();
 
-    Scheduler::register_task(1000, []() { Sensors::update_sensors(); });
 #if BATTERIES_CONNECTED
     battery_h11.init();
     battery_h11.start();

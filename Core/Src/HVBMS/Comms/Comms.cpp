@@ -98,6 +98,8 @@ void Comms::start() {
 
     DataPackets::general_state_machine_init(HVBMS::current_gsm_state);
 
+    DataPackets::nested_state_machine_init(HVBMS::current_nested_sm_state);
+
     DataPackets::driver_diagnosis_init(Sensors::battery_h11.period_ms);
 
     DataPackets::sdc_init(Sensors::sdc.status);

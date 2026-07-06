@@ -265,7 +265,7 @@ struct Batteries {
     static float& get_min_voltage() {
         min_total_voltage = std::numeric_limits<float>::max();
         for (uint8_t m = 0; m < modules_read; m++) {
-            min_total_voltage = std::min(battery[m].max_voltage, min_total_voltage);
+            min_total_voltage = std::min(battery[m].min_voltage, min_total_voltage);
         }
         return min_total_voltage;
     }
@@ -314,7 +314,7 @@ struct Batteries {
                     battery[read_module].cell_soc[c] =
                         lookup_OCV(battery[read_module].cells[c] / 1000.0f);
                 }
-                SOC = compute_ocv_soc();
+                coulomb_soc = compute_ocv_soc();
                 soc_initialized = true;
             }
         }
