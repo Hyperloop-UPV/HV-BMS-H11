@@ -8,7 +8,7 @@
 #include "ST-LIB.hpp"
 
 #define BATTERIES_CONNECTED 1
-#define H11_N_MODULES 1
+#define H11_N_MODULES 8
 #define H11_N_SEGMENTS 12
 #define H11_N_HW_CELLS 14
 #define H11_N_GPIO 4
@@ -300,7 +300,6 @@ struct Batteries {
     static void read() {
         read_cells();
         read_analog();
-        //update_coulomb_counting();
 
         if (modules_read < bcc_config.devicesCnt) {
             modules_read++;
@@ -330,6 +329,19 @@ struct Batteries {
         read_module = (read_module + 1) % bcc_config.devicesCnt;
     }
     
+    static void prueba_columb(){
+        if (!soc_initialized) {
+            for (uint8_t c = 0; c < H11_N_SEGMENTS; c++) {
+                battery[read_module].cell_soc[c] =
+                    lookup_OCV(battery[read_module].cells[c] / 1000.0f);
+            }
+            coulomb_soc = compute_ocv_soc();
+            SOC = coulomb_soc;
+            soc_initialized = true;
+        } else {
+            update_coulomb_counting();
+        }
+    }
 
     static void stop_cell_balance() {
         constexpr uint16_t balance_timer = 0U;

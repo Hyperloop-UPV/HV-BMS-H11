@@ -155,6 +155,11 @@ inline std::optional<SPIDomain::SPIWrapper<bms_spi_tx>> bms_wrapper_tx;
 inline std::optional<SPIDomain::SPIWrapper<bms_spi_rx>> bms_wrapper_rx;
 }  // namespace NewSPI
 
+using ST_LIB::EthernetDomain;
+namespace Eth {
+    inline EthernetDomain::Instance *eth_instance;
+}
+
 // Tasks and timeouts id
 inline uint16_t id_timeout_precharge;
 inline uint16_t id_check_precharge;

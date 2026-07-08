@@ -22,18 +22,18 @@ class HVBMS {
     static void on_fault_enter();
 
     inline static void control_station_disconnected() {
-        if (!OrderPackets::control_station_tcp->is_connected()) {
+    if (!OrderPackets::control_station_tcp->is_connected() || !Eth::eth_instance->is_connected()) {
             FAULT("Control station disconnected");
         }
     }
 
-    // Crear estados
+// Crear estados
     static constexpr auto connecting_state =
         make_state(DataPackets::gsm_status::CONNECTING,
                    Transition<DataPackets::gsm_status>{
                        DataPackets::gsm_status::OPERATIONAL, []() {
-                           return OrderPackets::control_station_tcp != nullptr &&
-                                  OrderPackets::control_station_tcp->is_connected();
+                           return OrderPackets::control_station_tcp->is_connected() &&
+                                  Eth::eth_instance->is_connected();
                        }});
 
     static constexpr auto operational_state = make_state(DataPackets::gsm_status::OPERATIONAL);
@@ -98,4 +98,5 @@ class HVBMS {
                                      operational_state);
             return bms_sm;
         }();
-};
+}
+;

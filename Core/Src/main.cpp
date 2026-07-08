@@ -15,7 +15,7 @@ constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "50:50
 constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "50:50:71:40:01:67",
                                               "192.168.1.7", "255.255.0.0");
 #elif defined(USE_PHY_KSZ8041)
-constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "67:67:67:00:61:07",
+constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "67:67:67:67:67:67",
                                               "192.168.1.7", "255.255.0.0");
 #else
 #error "No PHY selected for Ethernet pinset selection"
@@ -56,7 +56,7 @@ int main(void) {
     NewSPI::bms_wrapper_rx.emplace(myBoard::instance_of<bms_spi_rx>());
     NewSPI::bms_wrapper_tx.emplace(myBoard::instance_of<bms_spi_tx>());
 
-    auto eth_instance = &myBoard::instance_of<eth>();
+    Eth::eth_instance = &myBoard::instance_of<eth>();
 
     TimerWrapper<timer_us_tick_def> us_timer = get_timer_instance(myBoard, timer_us_tick_def);
     GlobalTimer::global_us_timer = us_timer.instance->tim;
@@ -80,12 +80,17 @@ int main(void) {
     Actuators::init();
     Sensors::init();
 
+    using namespace std::chrono_literals;
+    Watchdog::watchdog_time = 100ms;
+    Watchdog::start();
+
     while (1) {
         FaultController::check_transitions();
-        eth_instance->update();
+        Eth::eth_instance->update();
         HVBMS::update();
         myBoard::evaluate_protections();
         Diagnostics::Hub::flush();
+        Watchdog::refresh();
         Scheduler::update();
     }
 }

@@ -881,7 +881,7 @@ bcc_status_t BCC_Meas_StartConversionGlobal(bcc_drv_config_t* const drvConfig,
 bcc_status_t BCC_Meas_IsConverting(bcc_drv_config_t* const drvConfig,
     const bcc_cid_t cid, bool* const completed)
 {
-    uint16_t adcCfgVal;
+    uint16_t adcCfgVal{};
     bcc_status_t status;
 
     BCC_MCU_Assert(drvConfig != NULL);
@@ -1516,7 +1516,7 @@ bcc_status_t BCC_GPIO_ReadPin(bcc_drv_config_t* const drvConfig,
     const bcc_cid_t cid, const uint8_t gpioSel, bool* const val)
 {
     bcc_status_t status;
-    uint16_t gpioStsVal;
+    uint16_t gpioStsVal{};
 
     BCC_MCU_Assert(drvConfig != NULL);
     BCC_MCU_Assert(val != NULL);

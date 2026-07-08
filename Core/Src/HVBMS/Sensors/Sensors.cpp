@@ -1,10 +1,7 @@
 #define BCC_STLIB_IMPLEMENTATION
 #include "HVBMS/Sensors/Sensors.hpp"
 
-#include "HALAL/Benchmarking_toolkit/DataWatchpointTrace/DataWatchpointTrace.hpp"
-
 void Sensors::init() {
-    DataWatchpointTrace::start();
 
     imd.bind(DO::imd_enable);
     imd.power_on();
@@ -12,6 +9,7 @@ void Sensors::init() {
     DO::sdc_fw_fault->turn_on();
     sdc.enable();
 
+    //Scheduler::register_task(10000, []() { battery_h11.prueba_columb(); });
 #if BATTERIES_CONNECTED
     battery_h11.init();
     battery_h11.start();
@@ -21,10 +19,7 @@ void Sensors::init() {
 }
 
 void Sensors::update_batteries() {
-    DataWatchpointTrace::start_count();
     battery_h11.read();
-    unsigned int prueba = DataWatchpointTrace::stop_count();
-    (void)prueba;
 }
 
 void Sensors::update_sensors() {
