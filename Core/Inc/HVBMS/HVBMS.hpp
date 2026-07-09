@@ -72,16 +72,16 @@ class HVBMS {
 
             operational_sm.add_enter_action(
                 []() {
-                    Scheduler::unregister_task(Sensors::sensor_frequency_task_id);
-                    Sensors::sensor_frequency_task_id = Sensors::create_sensor_task(1000);
+                    Sensors::cancel_sensor_task();
+                    Sensors::create_sensor_task(1000);
 
                 },
                 nested_precharging_state);
 
             operational_sm.add_exit_action(
                 []() {
-                    Scheduler::unregister_task(Sensors::sensor_frequency_task_id);
-                    Sensors::sensor_frequency_task_id = Sensors::create_sensor_task(10000);
+                    Sensors::cancel_sensor_task();
+                    Sensors::create_sensor_task(10000);
                 },
                 nested_precharging_state);
 

@@ -16,20 +16,20 @@ class Sensors {
     static constexpr float CURRENT_SLOPE{-336.6379022410105};
     static constexpr float CURRENT_OFFSET{570.2997963006376};
 
-    
-    public:
-    inline static uint16_t sensor_frequency_task_id{Scheduler::INVALID_ID}; 
+    inline static uint16_t sensor_frequency_task_id{Scheduler::INVALID_ID};
 
-     inline static SDC sdc;
+   public:
+    inline static SDC sdc;
 
-     inline static Batteries battery_h11;
+    inline static Batteries battery_h11;
 
-     inline static IMD imd;
+    inline static IMD imd;
 
-     inline static float precharge_offset{0.0};
+    inline static float precharge_offset{0.0};
 
-     static void init();
-     static void update_sensors();
-     static void update_batteries();
-     static uint16_t create_sensor_task(uint16_t time_us);
+    static void init();
+    static void update_sensors();
+    static void update_batteries();
+    static void create_sensor_task(uint16_t time_us);
+    static void cancel_sensor_task();
 };
