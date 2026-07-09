@@ -6,7 +6,7 @@ void Comms::start() {
     DataPackets::high_voltage_system_init(
         Batteries::get_min_voltage(), Batteries::get_max_voltage(), Batteries::get_min_temp(),
         Batteries::get_max_temp(), ADC_reading::current_reading, ADC_reading::voltage_reading,
-        Sensors::battery_h11.total_global_voltage, HVBMS::current_nested_sm_state);
+        Sensors::battery_h11.total_global_voltage, HVBMS::current_sm_state);
 
     DataPackets::SOC_init(Batteries::SOC);
 
@@ -73,8 +73,6 @@ void Comms::start() {
         Sensors::battery_h11.battery[7].cells[9], Sensors::battery_h11.battery[7].cells[10],
         Sensors::battery_h11.battery[7].cells[11], Sensors::battery_h11.battery[7].total_voltage,
         Sensors::battery_h11.battery[7].max_temp, Sensors::battery_h11.battery[7].min_temp);
-
-    DataPackets::HVBMS_GSM_init(HVBMS::current_gsm_state);
 
     DataPackets::IMD_init(Sensors::imd.status, Sensors::imd.resistance, Sensors::imd.is_ok,
                           Sensors::imd.duty, Sensors::imd.freq);

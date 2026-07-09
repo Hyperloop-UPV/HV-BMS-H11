@@ -54,13 +54,12 @@ void HVBMS::update() {
         FAULT("FAULT order triggered");
     }
 
-    current_gsm_state = state_machine.get_current_state();
-    current_nested_sm_state = nested_state_machine.get_current_state();
+    current_sm_state = state_machine.get_current_state();
 }
 
 void HVBMS::on_fault_enter() {
     Actuators::open_HV();
-    HVBMS::nested_state_machine.force_change_state(nested_fault_state);
+    HVBMS::state_machine.force_change_state(fault_state);
     DO::sdc_fw_fault->turn_off();
     DO::operational_led->turn_off();
     DO::fault_led->turn_on();
