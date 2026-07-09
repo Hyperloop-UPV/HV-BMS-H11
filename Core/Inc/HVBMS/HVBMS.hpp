@@ -53,8 +53,8 @@ class HVBMS {
     static inline constinit StateMachine<DataPackets::sm_status, 6U, 5U> state_machine =
         []() consteval {
             StateMachine<DataPackets::sm_status, 6U, 5U> operational_sm =
-                make_state_machine(DataPackets::sm_status::IDLE, connecting_state, idle_state,
-                                   rtp_state, energized_state, precharging_state, fault_state);
+                make_state_machine(DataPackets::sm_status::CONNECTING, connecting_state, idle_state,
+                                   rtp_state, precharging_state, energized_state, fault_state);
 
             using namespace std::chrono_literals;
 
@@ -62,7 +62,6 @@ class HVBMS {
 
             operational_sm.add_enter_action([]() { DO::operational_led->turn_on(); }, idle_state);
 
-            // CONNECTING
             operational_sm.add_cyclic_action([]() { Actuators::toggle_operational_led(); }, 300ms,
                                              connecting_state);
 
