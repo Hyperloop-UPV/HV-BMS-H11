@@ -16,7 +16,6 @@ class HVBMS {
     inline static DataPackets::nested_sm_status current_nested_sm_state{
         DataPackets::nested_sm_status::IDLE};
 
-    inline static uint16_t fault_sensor_task_id{Scheduler::INVALID_ID};
     static void update();
     static void on_fault_enter();
 
@@ -71,8 +70,21 @@ class HVBMS {
 
             using namespace std::chrono_literals;
 
-            operational_sm.add_cyclic_action([]() { Sensors::update_sensors(); }, 1ms,
-                                             nested_precharging_state);
+            operational_sm.add_enter_action(
+                []() {
+                    Scheduler::unregister_task(Sensors::sensor_frequency_task_id);
+                    Sensors::sensor_frequency_task_id = Sensors::create_sensor_task(1000);
+
+                },
+                nested_precharging_state);
+
+            operational_sm.add_exit_action(
+                []() {
+                    Scheduler::unregister_task(Sensors::sensor_frequency_task_id);
+                    Sensors::sensor_frequency_task_id = Sensors::create_sensor_task(10000);
+                },
+                nested_precharging_state);
+
             return operational_sm;
         }();
 
@@ -101,8 +113,6 @@ class HVBMS {
             // CONNECTING
             bms_sm.add_cyclic_action([]() { Actuators::toggle_operational_led(); }, 300ms,
                                      connecting_state);
-
-            bms_sm.add_cyclic_action([]() { Sensors::update_sensors(); }, 10ms, connecting_state);
 
             // OPERATIONAL
             // Si me desconecto me tengo que ir a fault

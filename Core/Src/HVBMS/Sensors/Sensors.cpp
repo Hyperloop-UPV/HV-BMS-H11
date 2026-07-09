@@ -1,26 +1,25 @@
 #define BCC_STLIB_IMPLEMENTATION
+#include "HVBMS/HVBMS.hpp"
 #include "HVBMS/Sensors/Sensors.hpp"
 
 void Sensors::init() {
-
     imd.bind(DO::imd_enable);
     imd.power_on();
 
     DO::sdc_fw_fault->turn_on();
     sdc.enable();
 
-    //Scheduler::register_task(10000, []() { battery_h11.prueba_columb(); });
+    
+    // Scheduler::register_task(10000, []() { battery_h11.prueba_columb(); });
 #if BATTERIES_CONNECTED
     battery_h11.init();
     battery_h11.start();
 
-    Scheduler::register_task(10000, []() { Sensors::update_batteries(); });
+    Scheduler::register_task(10000, []() { update_batteries(); });
 #endif
 }
 
-void Sensors::update_batteries() {
-    battery_h11.read();
-}
+void Sensors::update_batteries() { battery_h11.read(); }
 
 void Sensors::update_sensors() {
     ADC_reading::voltage_reading =
@@ -30,4 +29,8 @@ void Sensors::update_sensors() {
                                    (Sensors::CURRENT_OFFSET - 6.07) +
                                    (Sensors::precharge_offset * ADC_reading::voltage_reading);
     imd.read();
+}
+
+uint16_t Sensors::create_sensor_task(uint16_t time_us){
+    return Scheduler::register_task(time_us, []() { update_sensors(); });
 }

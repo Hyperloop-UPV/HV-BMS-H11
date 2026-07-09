@@ -61,9 +61,7 @@ void HVBMS::update() {
 
 void HVBMS::on_fault_enter(){
     Actuators::open_HV();
-    if (fault_sensor_task_id == Scheduler::INVALID_ID) {
-        fault_sensor_task_id = Scheduler::register_task(10000, []() { Sensors::update_sensors(); });
-    }
+    HVBMS::nested_state_machine.force_change_state(nested_fault_state);
     DO::sdc_fw_fault->turn_off();
     DO::operational_led->turn_off();
     DO::fault_led->turn_on();
