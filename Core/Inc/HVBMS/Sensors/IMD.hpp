@@ -22,10 +22,10 @@ class IMD {
     inline static DigitalOutputDomain::Instance* pow{nullptr};
     inline static bool enabled{false};
     inline static uint16_t debouncing_timeout{Scheduler::INVALID_ID};
-    
-    public:
+
+   public:
     inline static EXTIDomain::Instance* ok{nullptr};
-    
+
     inline static bool is_ok{true};
     inline static DataPackets::imd_status status{DataPackets::imd_status::FAST_EVAL};
     inline static float resistance{};
@@ -57,26 +57,21 @@ class IMD {
         if (lessError(freq, 0, 5)) {
             status = DataPackets::imd_status::SHORTCIRCUIT;
             return;
-        }
-        else if (lessError(freq, 10, 5)) {
+        } else if (lessError(freq, 10, 5)) {
             status = DataPackets::imd_status::NORMAL;
             calculate_resistance();
             return;
-        }
-        else if (lessError(freq, 20, 5)) {
+        } else if (lessError(freq, 20, 5)) {
             status = DataPackets::imd_status::UNDERVOLTAGE;
             calculate_resistance();
             return;
-        }
-        else if (lessError(freq, 30, 5)) {
+        } else if (lessError(freq, 30, 5)) {
             status = DataPackets::imd_status::FAST_EVAL;
             return;
-        }
-        else if (lessError(freq, 40, 5)) {
+        } else if (lessError(freq, 40, 5)) {
             status = DataPackets::imd_status::EQUIPMENT_FAULT;
             return;
-        }
-        else if (lessError(freq, 50, 5)) {
+        } else if (lessError(freq, 50, 5)) {
             status = DataPackets::imd_status::GROUNDING_FAULT;
             return;
         }

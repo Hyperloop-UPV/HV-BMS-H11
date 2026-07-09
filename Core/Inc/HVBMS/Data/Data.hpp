@@ -56,8 +56,8 @@ inline DigitalInputDomain::Instance* battery_intb;
 
 using ST_LIB::ADCDomain;
 
-static float voltage_reading_ch1_raw;
-static float current_reading_raw;
+inline static float voltage_reading_ch1_raw;
+inline static float current_reading_raw;
 
 inline constexpr ADCDomain::ADC adc_PA3{ST_LIB::PA3, voltage_reading_ch1_raw};
 inline constexpr ADCDomain::ADC adc_PA5{ST_LIB::PA5, current_reading_raw};
@@ -157,7 +157,7 @@ inline std::optional<SPIDomain::SPIWrapper<bms_spi_rx>> bms_wrapper_rx;
 
 using ST_LIB::EthernetDomain;
 namespace Eth {
-    inline EthernetDomain::Instance *eth_instance;
+inline EthernetDomain::Instance* eth_instance;
 }
 
 // Tasks and timeouts id

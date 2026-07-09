@@ -4,7 +4,6 @@
 #include "Communications/Packets/OrderPackets.hpp"
 
 class Comms {
-
-public:
+   public:
     static void start();
 };

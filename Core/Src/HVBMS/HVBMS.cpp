@@ -20,10 +20,10 @@ void HVBMS::update() {
             });
 
             id_check_precharge = Scheduler::register_task(1000, []() {
-                if (ADC_reading::voltage_reading / 100 >= 0.95) {
-                     Scheduler::cancel_timeout(id_timeout_precharge);
-                     Actuators::close_HV();
-                     Scheduler::unregister_task(id_check_precharge);
+                if (ADC_reading::voltage_reading / Batteries::total_global_voltage >= 0.95) {
+                    Scheduler::cancel_timeout(id_timeout_precharge);
+                    Actuators::close_HV();
+                    Scheduler::unregister_task(id_check_precharge);
                 }
             });
         }
@@ -58,8 +58,7 @@ void HVBMS::update() {
     current_nested_sm_state = nested_state_machine.get_current_state();
 }
 
-
-void HVBMS::on_fault_enter(){
+void HVBMS::on_fault_enter() {
     Actuators::open_HV();
     HVBMS::nested_state_machine.force_change_state(nested_fault_state);
     DO::sdc_fw_fault->turn_off();

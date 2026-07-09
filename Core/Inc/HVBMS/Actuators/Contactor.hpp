@@ -10,9 +10,10 @@ class Contactor {
     bool normally_opened;
     bool state;
 
-public:
+   public:
     Contactor() = default;
-    Contactor(DigitalOutputDomain::Instance* output, DigitalInputDomain::Instance* input, bool normally_opened);
+    Contactor(DigitalOutputDomain::Instance* output, DigitalInputDomain::Instance* input,
+              bool normally_opened);
     void open();
     bool is_open();
 

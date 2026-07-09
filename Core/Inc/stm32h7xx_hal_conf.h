@@ -108,8 +108,8 @@ extern "C" {
  * PLL).
  */
 #if !defined(HSE_VALUE)
-#define HSE_VALUE                                                                                  \
-    (8000000UL) /*!< Value of the External oscillator in Hz : FPGA case fixed                      \
+#define HSE_VALUE                                                             \
+    (8000000UL) /*!< Value of the External oscillator in Hz : FPGA case fixed \
                    to 60MHZ */
 #endif          /* HSE_VALUE */
 
@@ -150,8 +150,8 @@ extern "C" {
 
 #if !defined(LSI_VALUE)
 #define LSI_VALUE (32000UL) /*!< LSI Typical Value in Hz*/
-#endif /* LSI_VALUE */      /*!< Value of the Internal Low Speed oscillator in Hz                  \
-                              The real value may vary depending on the variations                  \
+#endif /* LSI_VALUE */      /*!< Value of the Internal Low Speed oscillator in Hz \
+                              The real value may vary depending on the variations \
                               in voltage and temperature.*/
 
 /**
@@ -160,8 +160,8 @@ extern "C" {
  * source frequency, this source is inserted directly through I2S_CKIN pad.
  */
 #if !defined(EXTERNAL_CLOCK_VALUE)
-#define EXTERNAL_CLOCK_VALUE                                                                       \
-    12288000UL /*!< Value of the External clock in                                                 \
+#define EXTERNAL_CLOCK_VALUE                       \
+    12288000UL /*!< Value of the External clock in \
                   Hz*/
 #endif         /* EXTERNAL_CLOCK_VALUE */
 

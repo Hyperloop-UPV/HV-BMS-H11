@@ -74,7 +74,6 @@ class HVBMS {
                 []() {
                     Sensors::cancel_sensor_task();
                     Sensors::create_sensor_task(1000);
-
                 },
                 nested_precharging_state);
 

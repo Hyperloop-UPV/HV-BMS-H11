@@ -17,12 +17,12 @@ void SDC::sdc_callback() {
         }
         return;
     }
-    if(emis){
-        if (emi_timeout == Scheduler::INVALID_ID){
-            emi_timeout = Scheduler::set_timeout(3000, [](){
+    if (emis) {
+        if (emi_timeout == Scheduler::INVALID_ID) {
+            emi_timeout = Scheduler::set_timeout(3000, []() {
                 emis = false;
                 emi_timeout = Scheduler::INVALID_ID;
-                if (sdc_interrupt->read() == GPIO_PinState::GPIO_PIN_RESET){
+                if (sdc_interrupt->read() == GPIO_PinState::GPIO_PIN_RESET) {
                     FAULT("EMIS otra vez");
                 }
             });

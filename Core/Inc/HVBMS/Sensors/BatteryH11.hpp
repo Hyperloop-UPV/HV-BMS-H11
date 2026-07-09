@@ -42,7 +42,7 @@ struct Batteries {
     static inline float coulomb_soc{50.0f};
     static inline bool soc_initialized{false};
     static inline float current{};
-    static inline float total_voltage{};
+    static inline float total_global_voltage{};
     static inline float min_temperature{};
     static inline float max_temperature{};
     static inline float max_total_voltage{};
@@ -219,14 +219,14 @@ struct Batteries {
         for (uint8_t m = 0; m < modules_read; m++) {
             voltage_sum += battery[m].total_voltage;
         }
-        total_voltage = voltage_sum;
+        total_global_voltage = voltage_sum;
     }
 
     static void read_analog() {
         uint16_t an_raw[H11_N_GPIO];
 
-        bcc_status_t status = BCC_Reg_Read(
-            &bcc_config, (bcc_cid_t)(read_module + 1), MC33771C_MEAS_AN3_OFFSET, 4, an_raw);
+        bcc_status_t status = BCC_Reg_Read(&bcc_config, (bcc_cid_t)(read_module + 1),
+                                           MC33771C_MEAS_AN3_OFFSET, 4, an_raw);
         if (status != BCC_STATUS_SUCCESS) {
             return;
         }
@@ -270,15 +270,15 @@ struct Batteries {
         return min_total_voltage;
     }
 
-    static float& get_min_temp() { 
+    static float& get_min_temp() {
         min_temperature = std::numeric_limits<float>::max();
         for (uint16_t i = 0; i < modules_read * H11_N_TEMPS; i++) {
             min_temperature = std::min(min_temperature, temperature[i]);
         }
         return min_temperature;
-     }
+    }
 
-    static float& get_max_temp(){
+    static float& get_max_temp() {
         max_temperature = std::numeric_limits<float>::lowest();
         for (uint16_t i = 0; i < modules_read * H11_N_TEMPS; i++) {
             max_temperature = std::max(max_temperature, temperature[i]);
@@ -305,15 +305,14 @@ struct Batteries {
 
         float dt = static_cast<float>(elapsed) / 1'000'000.0f;
         float pack_current = ADC_reading::current_reading;
-        float delta_soc =
-            (pack_current * dt * 100.0f) / (SEGMENT_CAPACITY_AH * 3600.0f);
+        float delta_soc = (pack_current * dt * 100.0f) / (SEGMENT_CAPACITY_AH * 3600.0f);
         coulomb_soc -= delta_soc;
         if (coulomb_soc < 0.0f) coulomb_soc = 0.0f;
         if (coulomb_soc > 100.0f) coulomb_soc = 100.0f;
         SOC = coulomb_soc;
     }
 
-    static void read_LUT(){
+    static void read_LUT() {
         for (uint8_t c = 0; c < H11_N_SEGMENTS; c++) {
             battery[read_module].cell_soc[c] = lookup_OCV(battery[read_module].cells[c] / 1000.0f);
         }
@@ -331,18 +330,17 @@ struct Batteries {
                 read_LUT();
                 soc_initialized = true;
             } else {
-                if (ADC_reading::current_reading > 0.2){
+                if (ADC_reading::current_reading > 0.2) {
                     update_coulomb_counting();
-                }
-                else{
+                } else {
                     read_LUT();
                 }
             }
         }
         read_module = (read_module + 1) % bcc_config.devicesCnt;
     }
-    
-    static void prueba_columb(){
+
+    static void prueba_columb() {
         if (!soc_initialized) {
             for (uint8_t c = 0; c < H11_N_SEGMENTS; c++) {
                 battery[read_module].cell_soc[c] =
