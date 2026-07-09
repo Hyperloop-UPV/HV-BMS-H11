@@ -270,6 +270,22 @@ struct Batteries {
         return min_total_voltage;
     }
 
+    static float& get_min_temp() { 
+        min_temperature = std::numeric_limits<float>::max();
+        for (uint16_t i = 0; i < modules_read * H11_N_TEMPS; i++) {
+            min_temperature = std::min(min_temperature, temperature[i]);
+        }
+        return min_temperature;
+     }
+
+    static float& get_max_temp(){
+        max_temperature = std::numeric_limits<float>::lowest();
+        for (uint16_t i = 0; i < modules_read * H11_N_TEMPS; i++) {
+            max_temperature = std::max(max_temperature, temperature[i]);
+        }
+        return max_temperature;
+    }
+
     static void read_current() {
         int32_t isense_uv;
         bcc_status_t status = BCC_Meas_GetIsenseVoltage(&bcc_config, (bcc_cid_t)1, &isense_uv);
@@ -393,17 +409,6 @@ struct Batteries {
             INFO("Cell balancing in module %d configured to %.3f V)", cid,
                  battery[cid - 1].min_voltage);
         }
-    }
-
-    static void get_max_min_temperatures() {
-        float min_t = std::numeric_limits<float>::max();
-        float max_t = std::numeric_limits<float>::lowest();
-        for (uint16_t i = 0; i < modules_read * H11_N_TEMPS; i++) {
-            min_t = std::min(min_t, temperature[i]);
-            max_t = std::max(max_t, temperature[i]);
-        }
-        min_temperature = min_t;
-        max_temperature = max_t;
     }
 
     template <size_t points>
