@@ -26,8 +26,11 @@ public:
     };
     enum class nested_sm_status : uint8_t
     {
-        PRECHARGE = 0,
-        OPERATIONAL = 1,
+        IDLE = 0,
+        READY_TO_PRECHARGE = 1,
+        PRECHARGING = 2,
+        ENERGIZED = 3,
+        FAULT = 4,
     };
     
 
@@ -126,9 +129,14 @@ public:
         SOC_packet = new HeapPacket(static_cast<uint16_t>(990), &soc);
     }
 
-    static void nested_state_machine_init(nested_sm_status &nested_sm_status)
+    static void high_voltage_status_init(nested_sm_status &nested_sm_status)
     {
-        nested_state_machine_packet = new HeapPacket(static_cast<uint16_t>(960), &nested_sm_status);
+        high_voltage_status_packet = new HeapPacket(static_cast<uint16_t>(960), &nested_sm_status);
+    }
+
+    static void high_voltage_system_init(float &voltage_min, float &voltage_max, float &temp_min, float &temp_max, float &current_reading, float &batteries_voltage_reading, float &voltage_reading, nested_sm_status &nested_sm_status)
+    {
+        high_voltage_system_packet = new HeapPacket(static_cast<uint16_t>(999), &voltage_min, &voltage_max, &temp_min, &temp_max, &current_reading, &batteries_voltage_reading, &voltage_reading, &nested_sm_status);
     }
 
     public:
@@ -151,7 +159,8 @@ public:
     inline static HeapPacket *batteries_data_packet{nullptr};
     inline static HeapPacket *contactor_status_packet{nullptr};
     inline static HeapPacket *SOC_packet{nullptr};
-    inline static HeapPacket *nested_state_machine_packet{nullptr};
+    inline static HeapPacket *high_voltage_status_packet{nullptr};
+    inline static HeapPacket *high_voltage_system_packet{nullptr};
     
     inline static DatagramSocket *control_station_udp{nullptr};
     
@@ -215,8 +224,11 @@ public:
         if (SOC_packet == nullptr) {
             PANIC("Packet SOC not initialized");
         }
-        if (nested_state_machine_packet == nullptr) {
-            PANIC("Packet nested_state_machine not initialized");
+        if (high_voltage_status_packet == nullptr) {
+            PANIC("Packet high_voltage_status not initialized");
+        }
+        if (high_voltage_system_packet == nullptr) {
+            PANIC("Packet high_voltage_system not initialized");
         }
         
 
@@ -242,7 +254,8 @@ public:
             DataPackets::control_station_udp->send_packet(*DataPackets::batteries_data_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::contactor_status_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::SOC_packet);
-            DataPackets::control_station_udp->send_packet(*DataPackets::nested_state_machine_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::high_voltage_status_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::high_voltage_system_packet);
             });
     }
 

@@ -14,20 +14,20 @@ class HVBMS {
    public:
     inline static DataPackets::gsm_status current_gsm_state{DataPackets::gsm_status::CONNECTING};
     inline static DataPackets::nested_sm_status current_nested_sm_state{
-        DataPackets::nested_sm_status::OPERATIONAL};
+        DataPackets::nested_sm_status::IDLE};
 
-    inline static bool are_we_precharging{false};
     inline static uint16_t fault_sensor_task_id{Scheduler::INVALID_ID};
     static void update();
     static void on_fault_enter();
 
     inline static void control_station_disconnected() {
-    if (!OrderPackets::control_station_tcp->is_connected() || !Eth::eth_instance->is_connected()) {
+        if (!OrderPackets::control_station_tcp->is_connected() ||
+            !Eth::eth_instance->is_connected()) {
             FAULT("Control station disconnected");
         }
     }
 
-// Crear estados
+    // Crear estados para la general
     static constexpr auto connecting_state =
         make_state(DataPackets::gsm_status::CONNECTING,
                    Transition<DataPackets::gsm_status>{
@@ -38,41 +38,53 @@ class HVBMS {
 
     static constexpr auto operational_state = make_state(DataPackets::gsm_status::OPERATIONAL);
 
-    static constexpr auto nested_precharge_state = make_state(
-        DataPackets::nested_sm_status::PRECHARGE,
-        Transition<DataPackets::nested_sm_status>{DataPackets::nested_sm_status::OPERATIONAL,
-                                                  []() { return !are_we_precharging; }});
+    // Crear estados para la nested
+    static constexpr auto nested_idle_state =
+        make_state(DataPackets::nested_sm_status::IDLE,
+                   Transition<DataPackets::nested_sm_status>{
+                       DataPackets::nested_sm_status::READY_TO_PRECHARGE,
+                       []() { return SDC::status == DataPackets::sdc_status::ENGAGED; }});
 
-    static constexpr auto nested_operational_state = make_state(
-        DataPackets::nested_sm_status::OPERATIONAL,
-        Transition<DataPackets::nested_sm_status>{DataPackets::nested_sm_status::PRECHARGE,
-                                                  []() { return are_we_precharging; }});
+    static constexpr auto nested_rtp_state = make_state(
+        DataPackets::nested_sm_status::READY_TO_PRECHARGE,
+        Transition<DataPackets::nested_sm_status>{DataPackets::nested_sm_status::PRECHARGING,
+                                                  []() { return Actuators::is_precharging(); }});
+
+    static constexpr auto nested_precharging_state = make_state(
+        DataPackets::nested_sm_status::PRECHARGING,
+        Transition<DataPackets::nested_sm_status>{DataPackets::nested_sm_status::ENERGIZED,
+                                                  []() { return !Actuators::is_precharging(); }});
+
+    static constexpr auto nested_energized_state = make_state(
+        DataPackets::nested_sm_status::ENERGIZED,
+        Transition<DataPackets::nested_sm_status>{DataPackets::nested_sm_status::READY_TO_PRECHARGE,
+                                                  []() { return Actuators::is_HV_open(); }});
+
+    static constexpr auto nested_fault_state = make_state(DataPackets::nested_sm_status::FAULT);
 
     // Crear maquina de estados operacional
-    static inline constinit StateMachine<DataPackets::nested_sm_status, 2U, 2U>
+    static inline constinit StateMachine<DataPackets::nested_sm_status, 5U, 4U>
         nested_state_machine = []() consteval {
-            StateMachine<DataPackets::nested_sm_status, 2U, 2U> operational_sm =
-                make_state_machine(DataPackets::nested_sm_status::OPERATIONAL,
-                                   nested_operational_state, nested_precharge_state);
+            StateMachine<DataPackets::nested_sm_status, 5U, 4U> operational_sm = make_state_machine(
+                DataPackets::nested_sm_status::IDLE, nested_idle_state, nested_rtp_state,
+                nested_energized_state, nested_precharging_state, nested_fault_state);
 
             using namespace std::chrono_literals;
-            operational_sm.add_cyclic_action([]() { Sensors::update_sensors(); }, 10ms,
-                                             nested_operational_state);
 
             operational_sm.add_cyclic_action([]() { Sensors::update_sensors(); }, 1ms,
-                                             nested_precharge_state);
+                                             nested_precharging_state);
             return operational_sm;
         }();
 
     // Crear maquina de estados general
     static inline constinit StateMachine<DataPackets::gsm_status, 2U, 1U,
-                                         StateMachine<DataPackets::nested_sm_status, 2U, 2U>>
+                                         StateMachine<DataPackets::nested_sm_status, 5U, 4U>>
         state_machine = []() consteval {
             NestedMachineBinding<DataPackets::gsm_status,
-                                 StateMachine<DataPackets::nested_sm_status, 2U, 2U>>
+                                 StateMachine<DataPackets::nested_sm_status, 5U, 4U>>
                 nested = StateMachineHelper::add_nesting(operational_state, nested_state_machine);
             StateMachine<DataPackets::gsm_status, 2U, 1U,
-                         StateMachine<DataPackets::nested_sm_status, 2U, 2U>>
+                         StateMachine<DataPackets::nested_sm_status, 5U, 4U>>
                 bms_sm = make_state_machine(DataPackets::gsm_status::CONNECTING,
                                             StateMachineHelper::add_nested_machines(nested),
                                             connecting_state, operational_state);
@@ -98,5 +110,4 @@ class HVBMS {
                                      operational_state);
             return bms_sm;
         }();
-}
-;
+};

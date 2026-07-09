@@ -297,6 +297,13 @@ struct Batteries {
         SOC = coulomb_soc;
     }
 
+    static void read_LUT(){
+        for (uint8_t c = 0; c < H11_N_SEGMENTS; c++) {
+            battery[read_module].cell_soc[c] = lookup_OCV(battery[read_module].cells[c] / 1000.0f);
+        }
+        coulomb_soc = compute_ocv_soc();
+        SOC = coulomb_soc;
+    }
     static void read() {
         read_cells();
         read_analog();
@@ -305,24 +312,14 @@ struct Batteries {
             modules_read++;
         } else {
             if (!soc_initialized) {
-                for (uint8_t c = 0; c < H11_N_SEGMENTS; c++) {
-                    battery[read_module].cell_soc[c] =
-                        lookup_OCV(battery[read_module].cells[c] / 1000.0f);
-                }
-                coulomb_soc = compute_ocv_soc();
-                SOC = coulomb_soc;
+                read_LUT();
                 soc_initialized = true;
             } else {
                 if (ADC_reading::current_reading > 0.2){
                     update_coulomb_counting();
                 }
                 else{
-                    for (uint8_t c = 0; c < H11_N_SEGMENTS; c++) {
-                        battery[read_module].cell_soc[c] =
-                            lookup_OCV(battery[read_module].cells[c] / 1000.0f);
-                    }
-                    coulomb_soc = compute_ocv_soc();
-                    SOC = coulomb_soc;
+                    read_LUT();
                 }
             }
         }
