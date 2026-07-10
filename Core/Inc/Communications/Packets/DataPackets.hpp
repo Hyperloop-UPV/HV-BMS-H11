@@ -68,7 +68,7 @@ public:
     inline static HeapPacket *IMD_packet{nullptr};
     inline static HeapPacket *Contactor_Status_packet{nullptr};
     
-    inline static DatagramSocket *control_station_udp{nullptr};
+    inline static DatagramSocket *vcu_udp{nullptr};
     
 
     static void start()
@@ -93,17 +93,17 @@ public:
         }
         
 
-        control_station_udp = new DatagramSocket("192.168.1.7",50400,"192.168.0.9",50400);
+        vcu_udp = new DatagramSocket("192.168.1.7",50400,"192.168.1.7",50400);
         
         Scheduler::register_task(10000, +[](){
-            DataPackets::control_station_udp->send_packet(*DataPackets::High_Voltage_System_packet);
+            DataPackets::vcu_udp->send_packet(*DataPackets::High_Voltage_System_packet);
             });
         Scheduler::register_task(50000, +[](){
-            DataPackets::control_station_udp->send_packet(*DataPackets::SOC_packet);
-            DataPackets::control_station_udp->send_packet(*DataPackets::SDC_packet);
-            DataPackets::control_station_udp->send_packet(*DataPackets::High_Voltage_Batteries_packet);
-            DataPackets::control_station_udp->send_packet(*DataPackets::IMD_packet);
-            DataPackets::control_station_udp->send_packet(*DataPackets::Contactor_Status_packet);
+            DataPackets::vcu_udp->send_packet(*DataPackets::SOC_packet);
+            DataPackets::vcu_udp->send_packet(*DataPackets::SDC_packet);
+            DataPackets::vcu_udp->send_packet(*DataPackets::High_Voltage_Batteries_packet);
+            DataPackets::vcu_udp->send_packet(*DataPackets::IMD_packet);
+            DataPackets::vcu_udp->send_packet(*DataPackets::Contactor_Status_packet);
             });
     }
 

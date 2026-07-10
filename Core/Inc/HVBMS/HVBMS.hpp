@@ -22,7 +22,7 @@ class HVBMS {
         make_state(DataPackets::sm_status::Connecting,
                    Transition<DataPackets::sm_status>{
                        DataPackets::sm_status::Idle, []() {
-                           return OrderPackets::control_station_tcp->is_connected() &&
+                           return OrderPackets::vcu_tcp->is_connected() &&
                                   Eth::eth_instance->is_connected();
                        }});
 

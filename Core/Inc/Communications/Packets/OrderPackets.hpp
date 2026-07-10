@@ -48,7 +48,7 @@ public:
     
 
     
-    inline static ServerSocket *control_station_tcp{nullptr};
+    inline static ServerSocket *vcu_tcp{nullptr};
     
 
     static void start()
@@ -70,7 +70,7 @@ public:
         }
         
 
-        control_station_tcp = new ServerSocket("192.168.1.7",50500);
+        vcu_tcp = new ServerSocket("192.168.1.7",50500);
         
     }
 

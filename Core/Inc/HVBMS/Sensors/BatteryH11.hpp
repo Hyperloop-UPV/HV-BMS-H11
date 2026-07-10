@@ -7,7 +7,7 @@
 #include "HVBMS/Data/Data.hpp"
 #include "ST-LIB.hpp"
 
-#define BATTERIES_CONNECTED 1
+#define BATTERIES_CONNECTED 0
 #define H11_N_MODULES 1
 #define H11_N_SEGMENTS 12
 #define H11_N_HW_CELLS 14
