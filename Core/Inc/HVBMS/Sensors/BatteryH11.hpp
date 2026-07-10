@@ -7,7 +7,7 @@
 #include "HVBMS/Data/Data.hpp"
 #include "ST-LIB.hpp"
 
-#define BATTERIES_CONNECTED 0
+#define BATTERIES_CONNECTED 1
 #define H11_N_MODULES 1
 #define H11_N_SEGMENTS 12
 #define H11_N_HW_CELLS 14
@@ -35,8 +35,8 @@ struct BatteryData {
 
 struct Batteries {
     static inline bcc_drv_config_t bcc_config{};
-    static inline BatteryData battery[H11_N_MODULES]{};
-    static inline float temperature[H11_N_MODULES * H11_N_TEMPS]{};
+    static inline BatteryData battery[8]{};
+    static inline float temperature[8 * H11_N_TEMPS]{};
 
     static inline float SOC{50.0f};
     static inline float coulomb_soc{50.0f};
