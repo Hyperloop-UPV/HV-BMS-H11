@@ -7,11 +7,11 @@ class DataPackets{
 public:
     enum class sm_status : uint8_t
     {
-        CONNECTING = 0,
-        IDLE = 1,
-        READY_TO_PRECHARGE = 2,
-        PRECHARGING = 3,
-        ENERGIZED = 4,
+        Connecting = 0,
+        Idle = 1,
+        Ready_To_Precharge = 2,
+        Precharging = 3,
+        Energized = 4,
         FAULT = 5,
     };
     enum class sdc_status : uint8_t
@@ -30,9 +30,9 @@ public:
     };
     
 
-    static void high_voltage_system_init(float &voltage_min, float &voltage_max, float &temp_min, float &temp_max, float &current_reading, float &voltage_reading, float &batteries_voltage_reading, sm_status &sm_status)
+    static void High_Voltage_System_init(float &voltage_min, float &voltage_max, float &temp_min, float &temp_max, float &current_reading, float &voltage_reading, float &batteries_voltage_reading, sm_status &sm_status)
     {
-        high_voltage_system_packet = new HeapPacket(static_cast<uint16_t>(950), &voltage_min, &voltage_max, &temp_min, &temp_max, &current_reading, &voltage_reading, &batteries_voltage_reading, &sm_status);
+        High_Voltage_System_packet = new HeapPacket(static_cast<uint16_t>(950), &voltage_min, &voltage_max, &temp_min, &temp_max, &current_reading, &voltage_reading, &batteries_voltage_reading, &sm_status);
     }
 
     static void SOC_init(float &soc)
@@ -40,70 +40,70 @@ public:
         SOC_packet = new HeapPacket(static_cast<uint16_t>(951), &soc);
     }
 
-    static void sdc_init(sdc_status &sdc_status)
+    static void SDC_init(sdc_status &sdc_status)
     {
-        sdc_packet = new HeapPacket(static_cast<uint16_t>(952), &sdc_status);
+        SDC_packet = new HeapPacket(static_cast<uint16_t>(952), &sdc_status);
     }
 
-    static void high_voltage_batteries_init(float &battery1_cell1, float &battery1_cell2, float &battery1_cell3, float &battery1_cell4, float &battery1_cell5, float &battery1_cell6, float &battery1_cell7, float &battery1_cell8, float &battery1_cell9, float &battery1_cell10, float &battery1_cell11, float &battery1_cell12, float &battery1_total_voltage, float &battery1_max_temp, float &battery1_min_temp, float &battery2_cell1, float &battery2_cell2, float &battery2_cell3, float &battery2_cell4, float &battery2_cell5, float &battery2_cell6, float &battery2_cell7, float &battery2_cell8, float &battery2_cell9, float &battery2_cell10, float &battery2_cell11, float &battery2_cell12, float &battery2_total_voltage, float &battery2_max_temp, float &battery2_min_temp, float &battery3_cell1, float &battery3_cell2, float &battery3_cell3, float &battery3_cell4, float &battery3_cell5, float &battery3_cell6, float &battery3_cell7, float &battery3_cell8, float &battery3_cell9, float &battery3_cell10, float &battery3_cell11, float &battery3_cell12, float &battery3_total_voltage, float &battery3_max_temp, float &battery3_min_temp, float &battery4_cell1, float &battery4_cell2, float &battery4_cell3, float &battery4_cell4, float &battery4_cell5, float &battery4_cell6, float &battery4_cell7, float &battery4_cell8, float &battery4_cell9, float &battery4_cell10, float &battery4_cell11, float &battery4_cell12, float &battery4_total_voltage, float &battery4_max_temp, float &battery4_min_temp, float &battery5_cell1, float &battery5_cell2, float &battery5_cell3, float &battery5_cell4, float &battery5_cell5, float &battery5_cell6, float &battery5_cell7, float &battery5_cell8, float &battery5_cell9, float &battery5_cell10, float &battery5_cell11, float &battery5_cell12, float &battery5_total_voltage, float &battery5_max_temp, float &battery5_min_temp, float &battery6_cell1, float &battery6_cell2, float &battery6_cell3, float &battery6_cell4, float &battery6_cell5, float &battery6_cell6, float &battery6_cell7, float &battery6_cell8, float &battery6_cell9, float &battery6_cell10, float &battery6_cell11, float &battery6_cell12, float &battery6_total_voltage, float &battery6_max_temp, float &battery6_min_temp, float &battery7_cell1, float &battery7_cell2, float &battery7_cell3, float &battery7_cell4, float &battery7_cell5, float &battery7_cell6, float &battery7_cell7, float &battery7_cell8, float &battery7_cell9, float &battery7_cell10, float &battery7_cell11, float &battery7_cell12, float &battery7_total_voltage, float &battery7_max_temp, float &battery7_min_temp, float &battery8_cell1, float &battery8_cell2, float &battery8_cell3, float &battery8_cell4, float &battery8_cell5, float &battery8_cell6, float &battery8_cell7, float &battery8_cell8, float &battery8_cell9, float &battery8_cell10, float &battery8_cell11, float &battery8_cell12, float &battery8_total_voltage, float &battery8_max_temp, float &battery8_min_temp)
+    static void High_Voltage_Batteries_init(float &battery1_cell1, float &battery1_cell2, float &battery1_cell3, float &battery1_cell4, float &battery1_cell5, float &battery1_cell6, float &battery1_cell7, float &battery1_cell8, float &battery1_cell9, float &battery1_cell10, float &battery1_cell11, float &battery1_cell12, float &battery1_total_voltage, float &battery1_max_temp, float &battery1_min_temp, float &battery2_cell1, float &battery2_cell2, float &battery2_cell3, float &battery2_cell4, float &battery2_cell5, float &battery2_cell6, float &battery2_cell7, float &battery2_cell8, float &battery2_cell9, float &battery2_cell10, float &battery2_cell11, float &battery2_cell12, float &battery2_total_voltage, float &battery2_max_temp, float &battery2_min_temp, float &battery3_cell1, float &battery3_cell2, float &battery3_cell3, float &battery3_cell4, float &battery3_cell5, float &battery3_cell6, float &battery3_cell7, float &battery3_cell8, float &battery3_cell9, float &battery3_cell10, float &battery3_cell11, float &battery3_cell12, float &battery3_total_voltage, float &battery3_max_temp, float &battery3_min_temp, float &battery4_cell1, float &battery4_cell2, float &battery4_cell3, float &battery4_cell4, float &battery4_cell5, float &battery4_cell6, float &battery4_cell7, float &battery4_cell8, float &battery4_cell9, float &battery4_cell10, float &battery4_cell11, float &battery4_cell12, float &battery4_total_voltage, float &battery4_max_temp, float &battery4_min_temp, float &battery5_cell1, float &battery5_cell2, float &battery5_cell3, float &battery5_cell4, float &battery5_cell5, float &battery5_cell6, float &battery5_cell7, float &battery5_cell8, float &battery5_cell9, float &battery5_cell10, float &battery5_cell11, float &battery5_cell12, float &battery5_total_voltage, float &battery5_max_temp, float &battery5_min_temp, float &battery6_cell1, float &battery6_cell2, float &battery6_cell3, float &battery6_cell4, float &battery6_cell5, float &battery6_cell6, float &battery6_cell7, float &battery6_cell8, float &battery6_cell9, float &battery6_cell10, float &battery6_cell11, float &battery6_cell12, float &battery6_total_voltage, float &battery6_max_temp, float &battery6_min_temp, float &battery7_cell1, float &battery7_cell2, float &battery7_cell3, float &battery7_cell4, float &battery7_cell5, float &battery7_cell6, float &battery7_cell7, float &battery7_cell8, float &battery7_cell9, float &battery7_cell10, float &battery7_cell11, float &battery7_cell12, float &battery7_total_voltage, float &battery7_max_temp, float &battery7_min_temp, float &battery8_cell1, float &battery8_cell2, float &battery8_cell3, float &battery8_cell4, float &battery8_cell5, float &battery8_cell6, float &battery8_cell7, float &battery8_cell8, float &battery8_cell9, float &battery8_cell10, float &battery8_cell11, float &battery8_cell12, float &battery8_total_voltage, float &battery8_max_temp, float &battery8_min_temp)
     {
-        high_voltage_batteries_packet = new HeapPacket(static_cast<uint16_t>(953), &battery1_cell1, &battery1_cell2, &battery1_cell3, &battery1_cell4, &battery1_cell5, &battery1_cell6, &battery1_cell7, &battery1_cell8, &battery1_cell9, &battery1_cell10, &battery1_cell11, &battery1_cell12, &battery1_total_voltage, &battery1_max_temp, &battery1_min_temp, &battery2_cell1, &battery2_cell2, &battery2_cell3, &battery2_cell4, &battery2_cell5, &battery2_cell6, &battery2_cell7, &battery2_cell8, &battery2_cell9, &battery2_cell10, &battery2_cell11, &battery2_cell12, &battery2_total_voltage, &battery2_max_temp, &battery2_min_temp, &battery3_cell1, &battery3_cell2, &battery3_cell3, &battery3_cell4, &battery3_cell5, &battery3_cell6, &battery3_cell7, &battery3_cell8, &battery3_cell9, &battery3_cell10, &battery3_cell11, &battery3_cell12, &battery3_total_voltage, &battery3_max_temp, &battery3_min_temp, &battery4_cell1, &battery4_cell2, &battery4_cell3, &battery4_cell4, &battery4_cell5, &battery4_cell6, &battery4_cell7, &battery4_cell8, &battery4_cell9, &battery4_cell10, &battery4_cell11, &battery4_cell12, &battery4_total_voltage, &battery4_max_temp, &battery4_min_temp, &battery5_cell1, &battery5_cell2, &battery5_cell3, &battery5_cell4, &battery5_cell5, &battery5_cell6, &battery5_cell7, &battery5_cell8, &battery5_cell9, &battery5_cell10, &battery5_cell11, &battery5_cell12, &battery5_total_voltage, &battery5_max_temp, &battery5_min_temp, &battery6_cell1, &battery6_cell2, &battery6_cell3, &battery6_cell4, &battery6_cell5, &battery6_cell6, &battery6_cell7, &battery6_cell8, &battery6_cell9, &battery6_cell10, &battery6_cell11, &battery6_cell12, &battery6_total_voltage, &battery6_max_temp, &battery6_min_temp, &battery7_cell1, &battery7_cell2, &battery7_cell3, &battery7_cell4, &battery7_cell5, &battery7_cell6, &battery7_cell7, &battery7_cell8, &battery7_cell9, &battery7_cell10, &battery7_cell11, &battery7_cell12, &battery7_total_voltage, &battery7_max_temp, &battery7_min_temp, &battery8_cell1, &battery8_cell2, &battery8_cell3, &battery8_cell4, &battery8_cell5, &battery8_cell6, &battery8_cell7, &battery8_cell8, &battery8_cell9, &battery8_cell10, &battery8_cell11, &battery8_cell12, &battery8_total_voltage, &battery8_max_temp, &battery8_min_temp);
+        High_Voltage_Batteries_packet = new HeapPacket(static_cast<uint16_t>(953), &battery1_cell1, &battery1_cell2, &battery1_cell3, &battery1_cell4, &battery1_cell5, &battery1_cell6, &battery1_cell7, &battery1_cell8, &battery1_cell9, &battery1_cell10, &battery1_cell11, &battery1_cell12, &battery1_total_voltage, &battery1_max_temp, &battery1_min_temp, &battery2_cell1, &battery2_cell2, &battery2_cell3, &battery2_cell4, &battery2_cell5, &battery2_cell6, &battery2_cell7, &battery2_cell8, &battery2_cell9, &battery2_cell10, &battery2_cell11, &battery2_cell12, &battery2_total_voltage, &battery2_max_temp, &battery2_min_temp, &battery3_cell1, &battery3_cell2, &battery3_cell3, &battery3_cell4, &battery3_cell5, &battery3_cell6, &battery3_cell7, &battery3_cell8, &battery3_cell9, &battery3_cell10, &battery3_cell11, &battery3_cell12, &battery3_total_voltage, &battery3_max_temp, &battery3_min_temp, &battery4_cell1, &battery4_cell2, &battery4_cell3, &battery4_cell4, &battery4_cell5, &battery4_cell6, &battery4_cell7, &battery4_cell8, &battery4_cell9, &battery4_cell10, &battery4_cell11, &battery4_cell12, &battery4_total_voltage, &battery4_max_temp, &battery4_min_temp, &battery5_cell1, &battery5_cell2, &battery5_cell3, &battery5_cell4, &battery5_cell5, &battery5_cell6, &battery5_cell7, &battery5_cell8, &battery5_cell9, &battery5_cell10, &battery5_cell11, &battery5_cell12, &battery5_total_voltage, &battery5_max_temp, &battery5_min_temp, &battery6_cell1, &battery6_cell2, &battery6_cell3, &battery6_cell4, &battery6_cell5, &battery6_cell6, &battery6_cell7, &battery6_cell8, &battery6_cell9, &battery6_cell10, &battery6_cell11, &battery6_cell12, &battery6_total_voltage, &battery6_max_temp, &battery6_min_temp, &battery7_cell1, &battery7_cell2, &battery7_cell3, &battery7_cell4, &battery7_cell5, &battery7_cell6, &battery7_cell7, &battery7_cell8, &battery7_cell9, &battery7_cell10, &battery7_cell11, &battery7_cell12, &battery7_total_voltage, &battery7_max_temp, &battery7_min_temp, &battery8_cell1, &battery8_cell2, &battery8_cell3, &battery8_cell4, &battery8_cell5, &battery8_cell6, &battery8_cell7, &battery8_cell8, &battery8_cell9, &battery8_cell10, &battery8_cell11, &battery8_cell12, &battery8_total_voltage, &battery8_max_temp, &battery8_min_temp);
     }
 
     static void IMD_init(imd_status &imd_status, float &imd_resistance, bool &imd_is_ok, float &imd_duty, float &imd_freq)
     {
-        IMD_packet = new HeapPacket(static_cast<uint16_t>(955), &imd_status, &imd_resistance, &imd_is_ok, &imd_duty, &imd_freq);
+        IMD_packet = new HeapPacket(static_cast<uint16_t>(954), &imd_status, &imd_resistance, &imd_is_ok, &imd_duty, &imd_freq);
     }
 
-    static void contactor_status_init(bool &contactor_discharge, bool &contactor_precharge, bool &contactor_low, bool &contactor_high, bool &contactor_common_high)
+    static void Contactor_Status_init(bool &contactor_discharge, bool &contactor_precharge, bool &contactor_low, bool &contactor_high, bool &contactor_common_high)
     {
-        contactor_status_packet = new HeapPacket(static_cast<uint16_t>(956), &contactor_discharge, &contactor_precharge, &contactor_low, &contactor_high, &contactor_common_high);
+        Contactor_Status_packet = new HeapPacket(static_cast<uint16_t>(955), &contactor_discharge, &contactor_precharge, &contactor_low, &contactor_high, &contactor_common_high);
     }
 
     public:
-    inline static HeapPacket *high_voltage_system_packet{nullptr};
+    inline static HeapPacket *High_Voltage_System_packet{nullptr};
     inline static HeapPacket *SOC_packet{nullptr};
-    inline static HeapPacket *sdc_packet{nullptr};
-    inline static HeapPacket *high_voltage_batteries_packet{nullptr};
+    inline static HeapPacket *SDC_packet{nullptr};
+    inline static HeapPacket *High_Voltage_Batteries_packet{nullptr};
     inline static HeapPacket *IMD_packet{nullptr};
-    inline static HeapPacket *contactor_status_packet{nullptr};
+    inline static HeapPacket *Contactor_Status_packet{nullptr};
     
     inline static DatagramSocket *control_station_udp{nullptr};
     
 
     static void start()
     {
-        if (high_voltage_system_packet == nullptr) {
-            PANIC("Packet high_voltage_system not initialized");
+        if (High_Voltage_System_packet == nullptr) {
+            PANIC("Packet High_Voltage_System not initialized");
         }
         if (SOC_packet == nullptr) {
             PANIC("Packet SOC not initialized");
         }
-        if (sdc_packet == nullptr) {
-            PANIC("Packet sdc not initialized");
+        if (SDC_packet == nullptr) {
+            PANIC("Packet SDC not initialized");
         }
-        if (high_voltage_batteries_packet == nullptr) {
-            PANIC("Packet high_voltage_batteries not initialized");
+        if (High_Voltage_Batteries_packet == nullptr) {
+            PANIC("Packet High_Voltage_Batteries not initialized");
         }
         if (IMD_packet == nullptr) {
             PANIC("Packet IMD not initialized");
         }
-        if (contactor_status_packet == nullptr) {
-            PANIC("Packet contactor_status not initialized");
+        if (Contactor_Status_packet == nullptr) {
+            PANIC("Packet Contactor_Status not initialized");
         }
         
 
         control_station_udp = new DatagramSocket("192.168.1.7",50400,"192.168.0.9",50400);
         
         Scheduler::register_task(10000, +[](){
-            DataPackets::control_station_udp->send_packet(*DataPackets::high_voltage_system_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::High_Voltage_System_packet);
             });
         Scheduler::register_task(50000, +[](){
             DataPackets::control_station_udp->send_packet(*DataPackets::SOC_packet);
-            DataPackets::control_station_udp->send_packet(*DataPackets::sdc_packet);
-            DataPackets::control_station_udp->send_packet(*DataPackets::high_voltage_batteries_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::SDC_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::High_Voltage_Batteries_packet);
             DataPackets::control_station_udp->send_packet(*DataPackets::IMD_packet);
-            DataPackets::control_station_udp->send_packet(*DataPackets::contactor_status_packet);
+            DataPackets::control_station_udp->send_packet(*DataPackets::Contactor_Status_packet);
             });
     }
 

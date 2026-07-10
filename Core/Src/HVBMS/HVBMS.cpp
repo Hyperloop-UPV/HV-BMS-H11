@@ -5,8 +5,8 @@
 #include "HVBMS/Sensors/SDC.hpp"
 
 void HVBMS::update() {
-    if (OrderPackets::start_precharge_flag) {
-        OrderPackets::start_precharge_flag = false;
+    if (OrderPackets::Start_Precharge_flag) {
+        OrderPackets::Start_Precharge_flag = false;
 
         if (SDC::status == DataPackets::sdc_status::DISENGAGED) {
             WARNING("SDC is disengaged, cannot start precharge");
@@ -28,13 +28,13 @@ void HVBMS::update() {
             });
         }
     }
-    if (OrderPackets::open_contactors_flag) {
-        OrderPackets::open_contactors_flag = false;
+    if (OrderPackets::Open_Contactors_flag) {
+        OrderPackets::Open_Contactors_flag = false;
         Actuators::open_HV();
         Scheduler::cancel_timeout(id_timeout_precharge);
         Scheduler::unregister_task(id_check_precharge);
     }
-    if (OrderPackets::check_faults_flag) {
+    if (OrderPackets::Check_Faults_flag) {
         bcc_status_t status;
         for (uint8_t cid = 1; cid <= Batteries::bcc_config.devicesCnt; cid++) {
             status = BCC_Fault_GetStatus(&Batteries::bcc_config, (bcc_cid_t)cid, Batteries::faults);
@@ -46,8 +46,8 @@ void HVBMS::update() {
             INFO("FAULT %u: %u", cid, Batteries::faults);
         }
     }
-    if (OrderPackets::cell_balance_flag) {
-        OrderPackets::cell_balance_flag = false;
+    if (OrderPackets::Cell_Balance_flag) {
+        OrderPackets::Cell_Balance_flag = false;
         Batteries::start_cell_balance();
     }
     if (OrderPackets::FAULT_flag) {

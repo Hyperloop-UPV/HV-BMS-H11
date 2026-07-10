@@ -3,16 +3,16 @@
 #include "HVBMS/HVBMS.hpp"
 
 void Comms::start() {
-    DataPackets::high_voltage_system_init(
+    DataPackets::High_Voltage_System_init(
         Batteries::get_min_voltage(), Batteries::get_max_voltage(), Batteries::get_min_temp(),
         Batteries::get_max_temp(), ADC_reading::current_reading, ADC_reading::voltage_reading,
         Sensors::battery_h11.total_global_voltage, HVBMS::current_sm_state);
 
     DataPackets::SOC_init(Batteries::SOC);
 
-    DataPackets::sdc_init(Sensors::sdc.status);
+    DataPackets::SDC_init(Sensors::sdc.status);
 
-    DataPackets::high_voltage_batteries_init(
+    DataPackets::High_Voltage_Batteries_init(
         Sensors::battery_h11.battery[0].cells[0], Sensors::battery_h11.battery[0].cells[1],
         Sensors::battery_h11.battery[0].cells[2], Sensors::battery_h11.battery[0].cells[3],
         Sensors::battery_h11.battery[0].cells[4], Sensors::battery_h11.battery[0].cells[5],
@@ -77,18 +77,18 @@ void Comms::start() {
     DataPackets::IMD_init(Sensors::imd.status, Sensors::imd.resistance, Sensors::imd.is_ok,
                           Sensors::imd.duty, Sensors::imd.freq);
 
-    DataPackets::contactor_status_init(
+    DataPackets::Contactor_Status_init(
         Actuators::get_contactor_discharge_state(), Actuators::get_contactor_precharge_state(),
         Actuators::get_contactor_low_state(), Actuators::get_contactor_high_state(),
         Actuators::get_contactor_common_high_state());
 
     DataPackets::start();
 
-    OrderPackets::open_contactors_init();
-    OrderPackets::cell_balance_init();
-    OrderPackets::start_precharge_init();
+    OrderPackets::Open_Contactors_init();
+    OrderPackets::Cell_Balance_init();
+    OrderPackets::Start_Precharge_init();
     OrderPackets::FAULT_init();
-    OrderPackets::check_faults_init();
+    OrderPackets::Check_Faults_init();
 
     OrderPackets::start();
 }

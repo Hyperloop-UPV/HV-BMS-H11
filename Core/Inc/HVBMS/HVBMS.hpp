@@ -12,39 +12,39 @@
 
 class HVBMS {
    public:
-    inline static DataPackets::sm_status current_sm_state{DataPackets::sm_status::CONNECTING};
+    inline static DataPackets::sm_status current_sm_state{DataPackets::sm_status::Connecting};
 
     static void update();
     static void on_fault_enter();
 
     // Crear estados
     static constexpr auto connecting_state =
-        make_state(DataPackets::sm_status::CONNECTING,
+        make_state(DataPackets::sm_status::Connecting,
                    Transition<DataPackets::sm_status>{
-                       DataPackets::sm_status::IDLE, []() {
+                       DataPackets::sm_status::Idle, []() {
                            return OrderPackets::control_station_tcp->is_connected() &&
                                   Eth::eth_instance->is_connected();
                        }});
 
     static constexpr auto idle_state =
-        make_state(DataPackets::sm_status::IDLE,
+        make_state(DataPackets::sm_status::Idle,
                    Transition<DataPackets::sm_status>{
-                       DataPackets::sm_status::READY_TO_PRECHARGE,
+                       DataPackets::sm_status::Ready_To_Precharge,
                        []() { return SDC::status == DataPackets::sdc_status::ENGAGED; }});
 
     static constexpr auto rtp_state = make_state(
-        DataPackets::sm_status::READY_TO_PRECHARGE,
-        Transition<DataPackets::sm_status>{DataPackets::sm_status::PRECHARGING,
+        DataPackets::sm_status::Ready_To_Precharge,
+        Transition<DataPackets::sm_status>{DataPackets::sm_status::Precharging,
                                            []() { return Actuators::is_precharging(); }});
 
     static constexpr auto precharging_state = make_state(
-        DataPackets::sm_status::PRECHARGING,
-        Transition<DataPackets::sm_status>{DataPackets::sm_status::ENERGIZED,
+        DataPackets::sm_status::Precharging,
+        Transition<DataPackets::sm_status>{DataPackets::sm_status::Energized,
                                            []() { return !Actuators::is_precharging(); }});
 
     static constexpr auto energized_state =
-        make_state(DataPackets::sm_status::ENERGIZED,
-                   Transition<DataPackets::sm_status>{DataPackets::sm_status::READY_TO_PRECHARGE,
+        make_state(DataPackets::sm_status::Energized,
+                   Transition<DataPackets::sm_status>{DataPackets::sm_status::Ready_To_Precharge,
                                                       []() { return Actuators::is_HV_open(); }});
 
     static constexpr auto fault_state = make_state(DataPackets::sm_status::FAULT);
@@ -53,7 +53,7 @@ class HVBMS {
     static inline constinit StateMachine<DataPackets::sm_status, 6U, 5U> state_machine =
         []() consteval {
             StateMachine<DataPackets::sm_status, 6U, 5U> operational_sm =
-                make_state_machine(DataPackets::sm_status::CONNECTING, connecting_state, idle_state,
+                make_state_machine(DataPackets::sm_status::Connecting, connecting_state, idle_state,
                                    rtp_state, precharging_state, energized_state, fault_state);
 
             using namespace std::chrono_literals;

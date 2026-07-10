@@ -32,6 +32,7 @@ using myBoard =
 
 int main(void) {
     myBoard::init();
+    Diagnostics::install_ethernet_sink(OrderPackets::control_station_tcp);
     DO::operational_led = &myBoard::instance_of<led_PG9>();
     DO::fault_led = &myBoard::instance_of<led_PG13>();
     DO::contactor_high = &myBoard::instance_of<contactor_PD8>();
@@ -83,7 +84,7 @@ int main(void) {
 
     using namespace std::chrono_literals;
     Watchdog::watchdog_time = 100ms;
-    Watchdog::start();
+    //Watchdog::start();
 
     while (1) {
         FaultController::check_transitions();
@@ -91,7 +92,7 @@ int main(void) {
         HVBMS::update();
         myBoard::evaluate_protections();
         Diagnostics::Hub::flush();
-        Watchdog::refresh();
+//        Watchdog::refresh();
         Scheduler::update();
     }
 }

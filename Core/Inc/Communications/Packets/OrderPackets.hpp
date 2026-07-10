@@ -10,40 +10,40 @@ public:
     
 
     inline static bool FAULT_flag{false};
-    inline static bool open_contactors_flag{false};
-    inline static bool cell_balance_flag{false};
-    inline static bool start_precharge_flag{false};
-    inline static bool check_faults_flag{false};
+    inline static bool Open_Contactors_flag{false};
+    inline static bool Cell_Balance_flag{false};
+    inline static bool Start_Precharge_flag{false};
+    inline static bool Check_Faults_flag{false};
     
 
     OrderPackets() = default;
 
     inline static HeapOrder *FAULT_order{nullptr};
-    inline static HeapOrder *open_contactors_order{nullptr};
-    inline static HeapOrder *cell_balance_order{nullptr};
-    inline static HeapOrder *start_precharge_order{nullptr};
-    inline static HeapOrder *check_faults_order{nullptr};
+    inline static HeapOrder *Open_Contactors_order{nullptr};
+    inline static HeapOrder *Cell_Balance_order{nullptr};
+    inline static HeapOrder *Start_Precharge_order{nullptr};
+    inline static HeapOrder *Check_Faults_order{nullptr};
     
 
     static void FAULT_init()
     {
         FAULT_order = new HeapOrder(0, &FAULT_cb);
     }
-    static void open_contactors_init()
+    static void Open_Contactors_init()
     {
-        open_contactors_order = new HeapOrder(901, &open_contactors_cb);
+        Open_Contactors_order = new HeapOrder(901, &Open_Contactors_cb);
     }
-    static void cell_balance_init()
+    static void Cell_Balance_init()
     {
-        cell_balance_order = new HeapOrder(902, &cell_balance_cb);
+        Cell_Balance_order = new HeapOrder(902, &Cell_Balance_cb);
     }
-    static void start_precharge_init()
+    static void Start_Precharge_init()
     {
-        start_precharge_order = new HeapOrder(903, &start_precharge_cb);
+        Start_Precharge_order = new HeapOrder(903, &Start_Precharge_cb);
     }
-    static void check_faults_init()
+    static void Check_Faults_init()
     {
-        check_faults_order = new HeapOrder(904, &check_faults_cb);
+        Check_Faults_order = new HeapOrder(904, &Check_Faults_cb);
     }
     
 
@@ -56,17 +56,17 @@ public:
         if (FAULT_order == nullptr) {
             PANIC("Order FAULT not initialized");
         }
-        if (open_contactors_order == nullptr) {
-            PANIC("Order open_contactors not initialized");
+        if (Open_Contactors_order == nullptr) {
+            PANIC("Order Open_Contactors not initialized");
         }
-        if (cell_balance_order == nullptr) {
-            PANIC("Order cell_balance not initialized");
+        if (Cell_Balance_order == nullptr) {
+            PANIC("Order Cell_Balance not initialized");
         }
-        if (start_precharge_order == nullptr) {
-            PANIC("Order start_precharge not initialized");
+        if (Start_Precharge_order == nullptr) {
+            PANIC("Order Start_Precharge not initialized");
         }
-        if (check_faults_order == nullptr) {
-            PANIC("Order check_faults not initialized");
+        if (Check_Faults_order == nullptr) {
+            PANIC("Order Check_Faults not initialized");
         }
         
 
@@ -79,21 +79,21 @@ private:
     {
         FAULT_flag = true;
     }
-    static void open_contactors_cb()
+    static void Open_Contactors_cb()
     {
-        open_contactors_flag = true;
+        Open_Contactors_flag = true;
     }
-    static void cell_balance_cb()
+    static void Cell_Balance_cb()
     {
-        cell_balance_flag = true;
+        Cell_Balance_flag = true;
     }
-    static void start_precharge_cb()
+    static void Start_Precharge_cb()
     {
-        start_precharge_flag = true;
+        Start_Precharge_flag = true;
     }
-    static void check_faults_cb()
+    static void Check_Faults_cb()
     {
-        check_faults_flag = true;
+        Check_Faults_flag = true;
     }
     
 };
