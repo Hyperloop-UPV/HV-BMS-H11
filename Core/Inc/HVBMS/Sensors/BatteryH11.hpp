@@ -9,7 +9,7 @@
 
 // You may need to change this
 #define BATTERIES_CONNECTED 1
-#define H11_N_MODULES 1
+#define H11_N_MODULES 4
 
 // You should not need to change this
 #define H11_N_SEGMENTS 12
