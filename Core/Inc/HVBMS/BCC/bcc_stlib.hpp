@@ -405,6 +405,9 @@ bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance, volatile uint8_t txB
             FAULT("MC33771C is not answering");
             return BCC_STATUS_COM_TIMEOUT;
         }
+        Eth::eth_instance->update();
+        Watchdog::refresh();
+        Scheduler::update();
     }
     for (size_t i = 0; i < rxTrCnt * 6; i++) {
         rxBuf[i] = rx_buffer_nc[i];

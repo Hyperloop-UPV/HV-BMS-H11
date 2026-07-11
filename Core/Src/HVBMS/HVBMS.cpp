@@ -5,6 +5,14 @@
 #include "HVBMS/Sensors/SDC.hpp"
 
 void HVBMS::update() {
+    if (Batteries::read_flag) {
+        Batteries::read_flag = false;
+        Batteries::read();
+    }
+    if (Batteries::stop_balance_flag) {
+        Batteries::stop_balance_flag = false;
+        Batteries::stop_cell_balance();
+    }
     if (OrderPackets::Start_Precharge_flag) {
         OrderPackets::Start_Precharge_flag = false;
 
@@ -35,6 +43,7 @@ void HVBMS::update() {
         Scheduler::unregister_task(id_check_precharge);
     }
     if (OrderPackets::Check_Faults_flag) {
+        OrderPackets::Check_Faults_flag = false;
         bcc_status_t status;
         for (uint8_t cid = 1; cid <= Batteries::bcc_config.devicesCnt; cid++) {
             status = BCC_Fault_GetStatus(&Batteries::bcc_config, (bcc_cid_t)cid, Batteries::faults);
@@ -43,7 +52,11 @@ void HVBMS::update() {
                 return;
             }
 
-            INFO("FAULT %u: %u", cid, Batteries::faults);
+            for (uint8_t i = 0; i < BCC_STAT_CNT; i++) {
+                if (Batteries::faults[i] != 0) {
+                    INFO("FAULT cid=%u reg=%u: 0x%04X", cid, i, Batteries::faults[i]);
+                }
+            }
         }
     }
     if (OrderPackets::Cell_Balance_flag) {

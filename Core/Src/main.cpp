@@ -4,7 +4,7 @@
 #include "HVBMS/Sensors/Sensors.hpp"
 #include "ST-LIB.hpp"
 
-#define M24 1
+#define M16 1
 
 #if defined(M16)
 #define MASCARA "255.255.0.0"
@@ -15,13 +15,13 @@
 using ST_LIB::EthernetDomain;
 
 #if defined(USE_PHY_LAN8742)
-constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "67:67:67:67:67:67",
+constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "68:67:67:67:67:67",
                                               "192.168.1.7", MASCARA);
 #elif defined(USE_PHY_LAN8700)
-constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "67:67:67:67:67:67",
+constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "68:67:67:67:67:67",
                                               "192.168.1.7", MASCARA);
 #elif defined(USE_PHY_KSZ8041)
-constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "67:67:67:67:67:67",
+constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "68:67:67:67:67:67",
                                               "192.168.1.7", MASCARA);
 #else
 #error "No PHY selected for Ethernet pinset selection"
@@ -38,7 +38,7 @@ using myBoard =
 
 int main(void) {
     myBoard::init();
-    Diagnostics::install_ethernet_sink(OrderPackets::vcu_tcp);
+    Diagnostics::install_ethernet_sink(OrderPackets::control_station_tcp);
     DO::operational_led = &myBoard::instance_of<led_PG9>();
     DO::fault_led = &myBoard::instance_of<led_PG13>();
     DO::contactor_high = &myBoard::instance_of<contactor_PD8>();
@@ -98,7 +98,7 @@ int main(void) {
         HVBMS::update();
         myBoard::evaluate_protections();
         Diagnostics::Hub::flush();
-//        Watchdog::refresh();
+        //Watchdog::refresh();
         Scheduler::update();
     }
 }

@@ -16,11 +16,10 @@ void Sensors::init() {
     battery_h11.init();
     battery_h11.start();
 
-    Scheduler::register_task(10000, []() { update_batteries(); });
+    Scheduler::register_task(10000, []() { Batteries::read_flag = true; });
+    //Scheduler::register_task(10000, []() { Sensors::battery_h11.read(); });
 #endif
 }
-
-void Sensors::update_batteries() { battery_h11.read(); }
 
 void Sensors::update_sensors() {
     ADC_reading::voltage_reading =

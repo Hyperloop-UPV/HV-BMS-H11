@@ -22,7 +22,7 @@ class HVBMS {
         make_state(DataPackets::sm_status::Connecting,
                    Transition<DataPackets::sm_status>{
                        DataPackets::sm_status::Idle, []() {
-                           return OrderPackets::vcu_tcp->is_connected() &&
+                           return OrderPackets::control_station_tcp->is_connected() &&
                                   Eth::eth_instance->is_connected();
                        }});
 
@@ -30,29 +30,49 @@ class HVBMS {
         make_state(DataPackets::sm_status::Idle,
                    Transition<DataPackets::sm_status>{
                        DataPackets::sm_status::Ready_To_Precharge,
-                       []() { return SDC::status == DataPackets::sdc_status::ENGAGED; }});
+                       []() { return SDC::status == DataPackets::sdc_status::ENGAGED; }},
+                   Transition<DataPackets::sm_status>{
+                       DataPackets::sm_status::FAULT, []() {
+                           return !OrderPackets::control_station_tcp->is_connected() &&
+                                  !Eth::eth_instance->is_connected();
+                       }});
 
-    static constexpr auto rtp_state = make_state(
-        DataPackets::sm_status::Ready_To_Precharge,
-        Transition<DataPackets::sm_status>{DataPackets::sm_status::Precharging,
-                                           []() { return Actuators::is_precharging(); }});
+    static constexpr auto rtp_state =
+        make_state(DataPackets::sm_status::Ready_To_Precharge,
+                   Transition<DataPackets::sm_status>{DataPackets::sm_status::Precharging,
+                                                      []() { return Actuators::is_precharging(); }},
+                   Transition<DataPackets::sm_status>{
+                       DataPackets::sm_status::FAULT, []() {
+                           return !OrderPackets::control_station_tcp->is_connected() &&
+                                  !Eth::eth_instance->is_connected();
+                       }});
 
     static constexpr auto precharging_state = make_state(
         DataPackets::sm_status::Precharging,
         Transition<DataPackets::sm_status>{DataPackets::sm_status::Energized,
-                                           []() { return !Actuators::is_precharging(); }});
+                                           []() { return !Actuators::is_precharging(); }},
+        Transition<DataPackets::sm_status>{
+            DataPackets::sm_status::FAULT, []() {
+                return !OrderPackets::control_station_tcp->is_connected() &&
+                       !Eth::eth_instance->is_connected();
+            }});
 
     static constexpr auto energized_state =
         make_state(DataPackets::sm_status::Energized,
                    Transition<DataPackets::sm_status>{DataPackets::sm_status::Ready_To_Precharge,
-                                                      []() { return Actuators::is_HV_open(); }});
+                                                      []() { return Actuators::is_HV_open(); }},
+                   Transition<DataPackets::sm_status>{
+                       DataPackets::sm_status::FAULT, []() {
+                           return !OrderPackets::control_station_tcp->is_connected() &&
+                                  !Eth::eth_instance->is_connected();
+                       }});
 
     static constexpr auto fault_state = make_state(DataPackets::sm_status::FAULT);
 
     // Crear maquina de estados
-    static inline constinit StateMachine<DataPackets::sm_status, 6U, 5U> state_machine =
+    static inline constinit auto state_machine =
         []() consteval {
-            StateMachine<DataPackets::sm_status, 6U, 5U> operational_sm =
+            auto operational_sm =
                 make_state_machine(DataPackets::sm_status::Connecting, connecting_state, idle_state,
                                    rtp_state, precharging_state, energized_state, fault_state);
 
@@ -78,6 +98,13 @@ class HVBMS {
                     Sensors::create_sensor_task(10000);
                 },
                 precharging_state);
+
+            operational_sm.add_enter_action(
+                []() {
+                    FAULT("Connection with control-station/VCU lost");
+                },
+                fault_state
+            );
 
             return operational_sm;
         }();

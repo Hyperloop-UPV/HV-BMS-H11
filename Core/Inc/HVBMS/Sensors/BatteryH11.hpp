@@ -7,8 +7,11 @@
 #include "HVBMS/Data/Data.hpp"
 #include "ST-LIB.hpp"
 
-#define BATTERIES_CONNECTED 0
+// You may need to change this
+#define BATTERIES_CONNECTED 1
 #define H11_N_MODULES 1
+
+// You should not need to change this
 #define H11_N_SEGMENTS 12
 #define H11_N_HW_CELLS 14
 #define H11_N_GPIO 4
@@ -48,6 +51,9 @@ struct Batteries {
     static inline float max_total_voltage{};
     static inline float min_total_voltage{};
     static inline uint16_t faults[11]{};
+
+    static inline bool read_flag{false};
+    static inline bool stop_balance_flag{false};
 
     static inline uint32_t last_reading_time{};
     static inline int32_t period_ms{};
@@ -337,6 +343,10 @@ struct Batteries {
                 }
             }
         }
+        get_max_temp();
+        get_min_temp();
+        get_max_voltage();
+        get_min_voltage();
         read_module = (read_module + 1) % bcc_config.devicesCnt;
     }
 
@@ -402,11 +412,11 @@ struct Batteries {
                 }
             }
 
-            Scheduler::set_timeout(300000000, stop_cell_balance);
-
             INFO("Cell balancing in module %d configured to %.3f V)", cid,
                  battery[cid - 1].min_voltage);
         }
+
+        Scheduler::set_timeout(300000000, []() { stop_balance_flag = true; });
     }
 
     template <size_t points>
