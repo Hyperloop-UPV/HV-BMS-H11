@@ -16,8 +16,7 @@ void Sensors::init() {
     battery_h11.init();
     battery_h11.start();
 
-    Scheduler::register_task(10000, []() { Batteries::read_flag = true; });
-    //Scheduler::register_task(10000, []() { Sensors::battery_h11.read(); });
+    Scheduler::register_task(100000, []() { Batteries::read_flag = true; });
 #endif
 }
 

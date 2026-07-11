@@ -33,7 +33,7 @@ class HVBMS {
                        []() { return SDC::status == DataPackets::sdc_status::ENGAGED; }},
                    Transition<DataPackets::sm_status>{
                        DataPackets::sm_status::FAULT, []() {
-                           return !OrderPackets::control_station_tcp->is_connected() &&
+                           return !OrderPackets::control_station_tcp->is_connected() ||
                                   !Eth::eth_instance->is_connected();
                        }});
 
@@ -43,7 +43,7 @@ class HVBMS {
                                                       []() { return Actuators::is_precharging(); }},
                    Transition<DataPackets::sm_status>{
                        DataPackets::sm_status::FAULT, []() {
-                           return !OrderPackets::control_station_tcp->is_connected() &&
+                           return !OrderPackets::control_station_tcp->is_connected() ||
                                   !Eth::eth_instance->is_connected();
                        }});
 
@@ -53,7 +53,7 @@ class HVBMS {
                                            []() { return !Actuators::is_precharging(); }},
         Transition<DataPackets::sm_status>{
             DataPackets::sm_status::FAULT, []() {
-                return !OrderPackets::control_station_tcp->is_connected() &&
+                return !OrderPackets::control_station_tcp->is_connected() ||
                        !Eth::eth_instance->is_connected();
             }});
 
@@ -63,7 +63,7 @@ class HVBMS {
                                                       []() { return Actuators::is_HV_open(); }},
                    Transition<DataPackets::sm_status>{
                        DataPackets::sm_status::FAULT, []() {
-                           return !OrderPackets::control_station_tcp->is_connected() &&
+                           return !OrderPackets::control_station_tcp->is_connected() ||
                                   !Eth::eth_instance->is_connected();
                        }});
 

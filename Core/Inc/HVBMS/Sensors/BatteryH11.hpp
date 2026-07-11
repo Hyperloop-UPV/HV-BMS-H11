@@ -187,11 +187,8 @@ struct Batteries {
     }
 
     static void read_cells() {
-        uint32_t cell_voltages[H11_N_HW_CELLS];
-
-        // Leer voltaje
-        bcc_status_t status =
-            BCC_Meas_GetCellVoltages(&bcc_config, (bcc_cid_t)(read_module + 1), cell_voltages);
+        uint16_t raw[BCC_MEAS_CNT];
+        bcc_status_t status = BCC_Meas_GetRawValues(&bcc_config, (bcc_cid_t)(read_module + 1), raw);
         if (status != BCC_STATUS_SUCCESS) {
             WARNING("Could not read module %u", (bcc_cid_t)(read_module + 1));
             return;
@@ -199,21 +196,46 @@ struct Batteries {
 
         float device_voltage = 0.0f;
         uint8_t sw = 0;
+        uint32_t cell_voltages[H11_N_HW_CELLS] = {0};
         // Guardar voltaje menos de la 4 y la 5 (por diseño de hardware)
         for (uint8_t hw = 0; hw < H11_N_HW_CELLS; hw++) {
+            cell_voltages[hw] = BCC_GET_VOLT(raw[BCC_MSR_CELL_VOLT1 - hw]);
             if (hw == 4 || hw == 5) continue;
             battery[read_module].cells[sw] = static_cast<float>(cell_voltages[hw]) / 1000.0f;
             if (hw == H11_N_HW_CELLS - 1) battery[read_module].cells[sw] += 255;
             device_voltage += battery[read_module].cells[sw];
             sw++;
         }
+
         battery[read_module].total_voltage = device_voltage;
+
+        constexpr float A_coef = 1.028444e-3f;
+        constexpr float B_coef = 2.392435e-4f;
+        constexpr float C_coef = 1.562216e-7f;
+
+        float mod_max = std::numeric_limits<float>::lowest();
+        float mod_min = std::numeric_limits<float>::max();
+
+        for (uint8_t gpio = 0; gpio < H11_N_TEMPS; gpio++) {
+            float an_raw = static_cast<float>(raw[BCC_MSR_AN0 - gpio]);
+            float ratio = an_raw / 32768.0f;
+            float r_ntc = 6800.0f * ratio / (1.0f - ratio);
+            float ln_r = logf(r_ntc);
+            float inv_t = A_coef + B_coef * ln_r + C_coef * ln_r * ln_r * ln_r;
+            float temp = (1.0f / inv_t) - 273.15f;
+            temperature[read_module * H11_N_TEMPS + gpio] = temp;
+            mod_max = std::max(mod_max, temp);
+            mod_min = std::min(mod_min, temp);
+        }
+
+        battery[read_module].max_temp = mod_max;
+        battery[read_module].min_temp = mod_min;
 
         float voltage_sum = 0.0f;
         float min_v = std::numeric_limits<float>::max();
         float max_v = std::numeric_limits<float>::lowest();
 
-        // Calcular voltaje minimo de ese module
+        // Calcular voltaje minimo y máximo de ese modulo
         for (uint8_t c = 0; c < H11_N_SEGMENTS; c++) {
             min_v = std::min(min_v, battery[read_module].cells[c]);
             max_v = std::max(max_v, battery[read_module].cells[c]);
@@ -226,38 +248,6 @@ struct Batteries {
             voltage_sum += battery[m].total_voltage;
         }
         total_global_voltage = voltage_sum;
-    }
-
-    static void read_analog() {
-        uint16_t an_raw[H11_N_GPIO];
-
-        bcc_status_t status = BCC_Reg_Read(&bcc_config, (bcc_cid_t)(read_module + 1),
-                                           MC33771C_MEAS_AN3_OFFSET, 4, an_raw);
-        if (status != BCC_STATUS_SUCCESS) {
-            return;
-        }
-
-        constexpr float A_coef = 1.028444e-3f;
-        constexpr float B_coef = 2.392435e-4f;
-        constexpr float C_coef = 1.562216e-7f;
-
-        float mod_max = std::numeric_limits<float>::lowest();
-        float mod_min = std::numeric_limits<float>::max();
-
-        for (uint8_t gpio = 0; gpio < H11_N_TEMPS; gpio++) {
-            float raw = static_cast<float>(an_raw[3 - gpio] & 0x7FFFU);
-            float ratio = raw / 32768.0f;
-            float r_ntc = 6800.0f * ratio / (1.0f - ratio);
-            float ln_r = logf(r_ntc);
-            float inv_t = A_coef + B_coef * ln_r + C_coef * ln_r * ln_r * ln_r;
-            float temp = (1.0f / inv_t) - 273.15f;
-            temperature[read_module * H11_N_TEMPS + gpio] = temp;
-            mod_max = std::max(mod_max, temp);
-            mod_min = std::min(mod_min, temp);
-        }
-
-        battery[read_module].max_temp = mod_max;
-        battery[read_module].min_temp = mod_min;
     }
 
     static float& get_max_voltage() {
@@ -326,8 +316,13 @@ struct Batteries {
         SOC = coulomb_soc;
     }
     static void read() {
+        bool completed = false;
+        bcc_status_t status = BCC_Meas_IsConverting(&bcc_config, (bcc_cid_t)(read_module + 1), &completed);
+        if (status != BCC_STATUS_SUCCESS || !completed) {
+            return;
+        }
+
         read_cells();
-        read_analog();
 
         if (modules_read < bcc_config.devicesCnt) {
             modules_read++;
@@ -347,7 +342,14 @@ struct Batteries {
         get_min_temp();
         get_max_voltage();
         get_min_voltage();
+
         read_module = (read_module + 1) % bcc_config.devicesCnt;
+        status =
+            BCC_Meas_StartConversion(&bcc_config, (bcc_cid_t)(read_module + 1), (bcc_avg_t)1);
+        if (status != BCC_STATUS_SUCCESS) {
+            WARNING("Could not start conversion with module %u", (bcc_cid_t)(read_module + 1));
+            return;
+        }
     }
 
     static void prueba_columb() {
