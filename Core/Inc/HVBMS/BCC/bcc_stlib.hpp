@@ -402,11 +402,13 @@ bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance, volatile uint8_t txB
     while (!rx_complete) {
         if ((uint32_t)(GlobalTimer::timeout_timer->CNT - start_wait) > timeout_us) {
             NewSPI::bms_wrapper_rx->abort_and_recover();
-            FAULT("MC33771C is not answering");
+            static bool has_faulted{false};
+            if (!has_faulted) FAULT("MC33771C is not answering");
+            has_faulted = true;
             return BCC_STATUS_COM_TIMEOUT;
         }
         Eth::eth_instance->update();
-        Watchdog::refresh();
+        //Watchdog::refresh();
         Scheduler::update();
     }
     for (size_t i = 0; i < rxTrCnt * 6; i++) {
