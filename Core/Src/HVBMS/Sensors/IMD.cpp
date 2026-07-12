@@ -3,19 +3,11 @@
 #include "HVBMS/HVBMS.hpp"
 
 void IMD::imd_callback() {
-    if (!enabled) {
-        if (debouncing_timeout == Scheduler::INVALID_ID) {
-            debouncing_timeout = Scheduler::set_timeout(2000000, []() {
-                enabled = true;
-                debouncing_timeout = Scheduler::INVALID_ID;
-            });
-        }
-        return;
-    }
     if (ok->read() == GPIO_PinState::GPIO_PIN_RESET) {
         is_ok = false;
     } else {
         is_ok = true;
     }
+
     FAULT("IMD fault");
 }

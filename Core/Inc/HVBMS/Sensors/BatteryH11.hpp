@@ -8,8 +8,8 @@
 #include "ST-LIB.hpp"
 
 // You may need to change this
-#define BATTERIES_CONNECTED 1
-#define H11_N_MODULES 4
+#define BATTERIES_CONNECTED 0
+#define H11_N_MODULES 8
 
 // You should not need to change this
 #define H11_N_SEGMENTS 12
@@ -317,7 +317,8 @@ struct Batteries {
     }
     static void read() {
         bool completed = false;
-        bcc_status_t status = BCC_Meas_IsConverting(&bcc_config, (bcc_cid_t)(read_module + 1), &completed);
+        bcc_status_t status =
+            BCC_Meas_IsConverting(&bcc_config, (bcc_cid_t)(read_module + 1), &completed);
         if (status != BCC_STATUS_SUCCESS || !completed) {
             return;
         }
@@ -344,8 +345,7 @@ struct Batteries {
         get_min_voltage();
 
         read_module = (read_module + 1) % bcc_config.devicesCnt;
-        status =
-            BCC_Meas_StartConversion(&bcc_config, (bcc_cid_t)(read_module + 1), (bcc_avg_t)1);
+        status = BCC_Meas_StartConversion(&bcc_config, (bcc_cid_t)(read_module + 1), (bcc_avg_t)4);
         if (status != BCC_STATUS_SUCCESS) {
             WARNING("Could not start conversion with module %u", (bcc_cid_t)(read_module + 1));
             return;

@@ -16,9 +16,7 @@ inline bool lessError(const A& a, const B& b, const E& error) {
 using ST_LIB::EXTIDomain;
 
 class IMD {
-    using IC_Type =
-        ST_LIB::InputCapture<timer_imd, GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>;
-    inline static IC_Type* ic{nullptr};
+    inline static ST_LIB::InputCapture<timer_imd, GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>* ic{nullptr};
     inline static DigitalOutputDomain::Instance* pow{nullptr};
     inline static bool enabled{false};
     inline static uint16_t debouncing_timeout{Scheduler::INVALID_ID};
@@ -39,9 +37,16 @@ class IMD {
                 .get_input_capture<GlobalTimer::ic_pin, ST_LIB::TimerChannel::CHANNEL_2>();
         ic = &ic_instance;
         ic->turn_on();
+        pow->turn_on();
+        Scheduler::set_timeout(2000000, []() {
+            if (ok->read() == GPIO_PinState::GPIO_PIN_RESET) {
+                FAULT("IMD read fault");
+            }
+            ok->turn_on();
+        });
     }
 
-    static void power_on() { pow->turn_on(); }
+    static void power_on() {  }
 
     static void calculate_resistance() { resistance = ((90 * 1.2e6) / (duty - 5)) - 1.2e6; }
 

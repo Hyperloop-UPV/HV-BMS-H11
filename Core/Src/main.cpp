@@ -4,7 +4,7 @@
 #include "HVBMS/Sensors/Sensors.hpp"
 #include "ST-LIB.hpp"
 
-#define M16 1
+#define M24 1
 
 #if defined(M16)
 #define MASCARA "255.255.0.0"
@@ -38,7 +38,7 @@ using myBoard =
 
 int main(void) {
     myBoard::init();
-    Diagnostics::install_ethernet_sink(OrderPackets::control_station_tcp);
+    Diagnostics::install_ethernet_sink(OrderPackets::vcu_tcp);
     DO::operational_led = &myBoard::instance_of<led_PG9>();
     DO::fault_led = &myBoard::instance_of<led_PG13>();
     DO::contactor_high = &myBoard::instance_of<contactor_PD8>();
@@ -90,7 +90,7 @@ int main(void) {
 
     using namespace std::chrono_literals;
     Watchdog::watchdog_time = 100ms;
-    //Watchdog::start();
+    // Watchdog::start();
 
     while (1) {
         FaultController::check_transitions();
@@ -98,7 +98,8 @@ int main(void) {
         HVBMS::update();
         myBoard::evaluate_protections();
         Diagnostics::Hub::flush();
-        //Watchdog::refresh();
+        // El watchdog también esta en bcc_stlib.hpp, hay que ponerlo
+        // Watchdog::refresh();
         Scheduler::update();
     }
 }

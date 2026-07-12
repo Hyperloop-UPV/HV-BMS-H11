@@ -64,7 +64,9 @@ void HVBMS::update() {
         Batteries::start_cell_balance();
     }
     if (OrderPackets::FAULT_flag) {
-        FAULT("FAULT order triggered");
+        WARNING("Something is fucking wrong with the fault flag");
+        OrderPackets::FAULT_flag = false;
+        // FAULT("FAULT order triggered");
     }
 
     current_sm_state = state_machine.get_current_state();
