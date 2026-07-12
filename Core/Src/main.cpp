@@ -1,6 +1,7 @@
 #include "main.h"
 
 #include "HVBMS/HVBMS.hpp"
+#include "HVBMS/Protections/BatteryProtections.hpp"
 #include "HVBMS/Sensors/Sensors.hpp"
 #include "ST-LIB.hpp"
 
@@ -15,10 +16,10 @@
 using ST_LIB::EthernetDomain;
 
 #if defined(USE_PHY_LAN8742)
-constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "68:67:67:67:67:67",
+constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "68:67:67:67:67:67",
                                               "192.168.1.7", MASCARA);
 #elif defined(USE_PHY_LAN8700)
-constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "68:67:67:67:67:67",
+constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "68:67:67:67:67:67",
                                               "192.168.1.7", MASCARA);
 #elif defined(USE_PHY_KSZ8041)
 constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "68:67:67:67:67:67",

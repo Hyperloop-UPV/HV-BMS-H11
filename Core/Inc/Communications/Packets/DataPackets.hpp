@@ -93,7 +93,7 @@ public:
         }
         
 
-        vcu_udp = new DatagramSocket("192.168.1.7",50400,"192.168.1.7",50400);
+        vcu_udp = new DatagramSocket("192.168.1.7",50403,"192.168.1.3",50403);
         
         Scheduler::register_task(10000, +[](){
             DataPackets::vcu_udp->send_packet(*DataPackets::High_Voltage_System_packet);
