@@ -2,6 +2,8 @@
 #include "HVBMS/Data/Data.hpp"
 #include "ST-LIB_LOW.hpp"
 
+#define IMD_CONNECTED 0
+
 template <typename A, typename B>
 concept Substractable = requires(A a, B b) {
     { a - b } -> std::totally_ordered;
@@ -38,12 +40,14 @@ class IMD {
         ic = &ic_instance;
         ic->turn_on();
         pow->turn_on();
+        #ifdef IMD_CONNECTED
         Scheduler::set_timeout(2000000, []() {
             if (ok->read() == GPIO_PinState::GPIO_PIN_RESET) {
                 FAULT("IMD read fault");
             }
             ok->turn_on();
         });
+        #endif
     }
 
     static void power_on() {  }

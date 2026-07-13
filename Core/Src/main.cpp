@@ -11,31 +11,41 @@
 #define MASCARA "255.255.0.0"
 #elif defined(M24)
 #define MASCARA "255.255.255.0"
+#else
+#error "Mask needs to be defined"
 #endif
+
+#define MAC_ADDRESS "68:67:67:67:67:67"  // do NOT put 67 at the start (or 69)
+
+#define IP_ADDRESS "192.168.1.7"
 
 using ST_LIB::EthernetDomain;
 
 #if defined(USE_PHY_LAN8742)
-constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "68:67:67:67:67:67",
-                                              "192.168.1.7", MASCARA);
+constexpr auto eth =
+    EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, MAC_ADDRESS, IP_ADDRESS, MASCARA);
 #elif defined(USE_PHY_LAN8700)
-constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, "68:67:67:67:67:67",
-                                              "192.168.1.7", MASCARA);
+constexpr auto eth =
+    EthernetDomain::Ethernet(EthernetDomain::PINSET_H10, MAC_ADDRESS, IP_ADDRESS, MASCARA);
 #elif defined(USE_PHY_KSZ8041)
-constexpr auto eth = EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, "68:67:67:67:67:67",
-                                              "192.168.1.7", MASCARA);
+constexpr auto eth =
+    EthernetDomain::Ethernet(EthernetDomain::PINSET_H11, MAC_ADDRESS, IP_ADDRESS, MASCARA);
 #else
 #error "No PHY selected for Ethernet pinset selection"
 #endif
 
 using myBoard =
     ST_LIB::Board<ST_LIB::FaultPolicy<HVBMS::state_machine, &HVBMS::on_fault_enter>, eth,
-                  dc_current_protection, dc_voltage_protection, led_PG13, led_PG9, contactor_PD8,
-                  contactor_PD9, contactor_PD10, contactor_PB14, contactor_PB15, aux_contactor_PD12,
-                  aux_contactor_PG2, aux_contactor_PD13, aux_contactor_PD14, aux_contactor_PD15,
-                  sdc_PB4, adc_PA3, adc_PA5, timer_us_tick_def, timer_imd, timeout_timer_def,
-                  sdc_PB5, imd_enable_PE11, imd_ok_PE12, cs_tx_PE4, bms_spi_tx, bms_spi_rx,
-                  spi_enable_PE3, battery_intb_PE1>;
+                  dc_current_protection, dc_voltage_protection,
+#ifdef BATTERIES_CONNECTED
+                  battery_temp_max_protection, battery_temp_min_protection,
+                  battery_cell_voltage_max_protection, battery_cell_voltage_min_protection,
+#endif
+                  led_PG13, led_PG9, contactor_PD8, contactor_PD9, contactor_PD10, contactor_PB14,
+                  contactor_PB15, aux_contactor_PD12, aux_contactor_PG2, aux_contactor_PD13,
+                  aux_contactor_PD14, aux_contactor_PD15, sdc_PB4, adc_PA3, adc_PA5,
+                  timer_us_tick_def, timer_imd, timeout_timer_def, sdc_PB5, imd_enable_PE11,
+                  imd_ok_PE12, cs_tx_PE4, bms_spi_tx, bms_spi_rx, spi_enable_PE3, battery_intb_PE1>;
 
 int main(void) {
     myBoard::init();

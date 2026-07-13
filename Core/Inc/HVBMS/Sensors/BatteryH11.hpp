@@ -345,7 +345,7 @@ struct Batteries {
         get_min_voltage();
 
         read_module = (read_module + 1) % bcc_config.devicesCnt;
-        status = BCC_Meas_StartConversion(&bcc_config, (bcc_cid_t)(read_module + 1), (bcc_avg_t)4);
+        status = BCC_Meas_StartConversion(&bcc_config, (bcc_cid_t)(read_module + 1), (bcc_avg_t)8);
         if (status != BCC_STATUS_SUCCESS) {
             WARNING("Could not start conversion with module %u", (bcc_cid_t)(read_module + 1));
             return;
