@@ -3,7 +3,7 @@
 #include "Protections/Protection.hpp"
 
 
-#ifdef BATTERIES_CONNECTED
+#if BATTERIES_CONNECTED
 inline constexpr auto battery_temp_max_protection =
     Protections::protection<"battery_temp_max", Batteries::max_temperature>(
         Protections::Rules::above(60.0f));

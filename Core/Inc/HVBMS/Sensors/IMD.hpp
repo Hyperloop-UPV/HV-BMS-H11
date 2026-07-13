@@ -40,7 +40,7 @@ class IMD {
         ic = &ic_instance;
         ic->turn_on();
         pow->turn_on();
-        #ifdef IMD_CONNECTED
+        #if IMD_CONNECTED
         Scheduler::set_timeout(2000000, []() {
             if (ok->read() == GPIO_PinState::GPIO_PIN_RESET) {
                 FAULT("IMD read fault");

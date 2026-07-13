@@ -5,7 +5,7 @@
 #include "HVBMS/Sensors/Sensors.hpp"
 #include "ST-LIB.hpp"
 
-#define M24 1
+#define M16 1
 
 #if defined(M16)
 #define MASCARA "255.255.0.0"
@@ -37,7 +37,7 @@ constexpr auto eth =
 using myBoard =
     ST_LIB::Board<ST_LIB::FaultPolicy<HVBMS::state_machine, &HVBMS::on_fault_enter>, eth,
                   dc_current_protection, dc_voltage_protection,
-#ifdef BATTERIES_CONNECTED
+#if BATTERIES_CONNECTED
                   battery_temp_max_protection, battery_temp_min_protection,
                   battery_cell_voltage_max_protection, battery_cell_voltage_min_protection,
 #endif
