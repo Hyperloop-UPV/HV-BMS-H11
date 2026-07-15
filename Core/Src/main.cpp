@@ -4,6 +4,7 @@
 #include "HVBMS/Protections/BatteryProtections.hpp"
 #include "HVBMS/Sensors/Sensors.hpp"
 #include "ST-LIB.hpp"
+#include "ErrorHandler/ErrorHandler.hpp"
 
 #define M16 1
 
