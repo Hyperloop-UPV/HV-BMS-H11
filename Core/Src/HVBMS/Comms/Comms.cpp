@@ -1,5 +1,6 @@
 #include "HVBMS/Comms/Comms.hpp"
 
+#include "../../../../tools/binary_metadata_template.cpp"
 #include "HVBMS/HVBMS.hpp"
 
 void Comms::start() {
@@ -13,13 +14,13 @@ void Comms::start() {
     DataPackets::SDC_init(Sensors::sdc.status);
 
     DataPackets::High_Voltage_Batteries_init(
-        Sensors::battery_h11.battery[0].cells[0], Sensors::battery_h11.battery[0].cells[1],
-        Sensors::battery_h11.battery[0].cells[2], Sensors::battery_h11.battery[0].cells[3],
-        Sensors::battery_h11.battery[0].cells[4], Sensors::battery_h11.battery[0].cells[5],
-        Sensors::battery_h11.battery[0].cells[6], Sensors::battery_h11.battery[0].cells[7],
-        Sensors::battery_h11.battery[0].cells[8], Sensors::battery_h11.battery[0].cells[9],
-        Sensors::battery_h11.battery[0].cells[10], Sensors::battery_h11.battery[0].cells[11],
-        Sensors::battery_h11.battery[0].total_voltage, Sensors::battery_h11.temperature[0],
+        Sensors::battery_h11.battery[2].cells[0], Sensors::battery_h11.battery[2].cells[1],
+        Sensors::battery_h11.battery[2].cells[2], Sensors::battery_h11.battery[2].cells[3],
+        Sensors::battery_h11.battery[2].cells[4], Sensors::battery_h11.battery[2].cells[5],
+        Sensors::battery_h11.battery[2].cells[6], Sensors::battery_h11.battery[2].cells[7],
+        Sensors::battery_h11.battery[2].cells[8], Sensors::battery_h11.battery[2].cells[9],
+        Sensors::battery_h11.battery[2].cells[10], Sensors::battery_h11.battery[2].cells[11],
+        Sensors::battery_h11.battery[2].total_voltage, Sensors::battery_h11.temperature[10],
         Sensors::battery_h11.temperature[1], Sensors::battery_h11.temperature[2],
         Sensors::battery_h11.temperature[3], Sensors::battery_h11.battery[1].cells[0],
         Sensors::battery_h11.battery[1].cells[1], Sensors::battery_h11.battery[1].cells[2],
@@ -47,13 +48,13 @@ void Comms::start() {
         Sensors::battery_h11.battery[3].cells[11], Sensors::battery_h11.battery[3].total_voltage,
         Sensors::battery_h11.temperature[12], Sensors::battery_h11.temperature[13],
         Sensors::battery_h11.temperature[14], Sensors::battery_h11.temperature[15],
-        Sensors::battery_h11.battery[4].cells[0], Sensors::battery_h11.battery[4].cells[1],
-        Sensors::battery_h11.battery[4].cells[2], Sensors::battery_h11.battery[4].cells[3],
-        Sensors::battery_h11.battery[4].cells[4], Sensors::battery_h11.battery[4].cells[5],
-        Sensors::battery_h11.battery[4].cells[6], Sensors::battery_h11.battery[4].cells[7],
-        Sensors::battery_h11.battery[4].cells[8], Sensors::battery_h11.battery[4].cells[9],
-        Sensors::battery_h11.battery[4].cells[10], Sensors::battery_h11.battery[4].cells[11],
-        Sensors::battery_h11.battery[4].total_voltage, Sensors::battery_h11.temperature[16],
+        Sensors::battery_h11.battery[6].cells[0], Sensors::battery_h11.battery[6].cells[1],
+        Sensors::battery_h11.battery[6].cells[2], Sensors::battery_h11.battery[6].cells[3],
+        Sensors::battery_h11.battery[6].cells[4], Sensors::battery_h11.battery[6].cells[5],
+        Sensors::battery_h11.battery[6].cells[6], Sensors::battery_h11.battery[6].cells[7],
+        Sensors::battery_h11.battery[6].cells[8], Sensors::battery_h11.battery[6].cells[9],
+        Sensors::battery_h11.battery[6].cells[10], Sensors::battery_h11.battery[6].cells[11],
+        Sensors::battery_h11.battery[6].total_voltage, Sensors::battery_h11.temperature[16],
         Sensors::battery_h11.temperature[17], Sensors::battery_h11.temperature[18],
         Sensors::battery_h11.temperature[19], Sensors::battery_h11.battery[5].cells[0],
         Sensors::battery_h11.battery[5].cells[1], Sensors::battery_h11.battery[5].cells[2],
@@ -99,4 +100,21 @@ void Comms::start() {
     OrderPackets::Check_Faults_init();
 
     OrderPackets::start();
+
+    FaultController::register_fault_propagation(OrderPackets::vcu_tcp, OrderPackets::FAULT_order);
+    #if ADJ_CHECK
+    adj_commit_order = new HeapOrder(0xFFFF, &check_adj_commit, &adj_remote_id);
+    #else
+        adj_passed = true;
+    #endif
+}
+
+void Comms::check_adj_commit() {
+    if (adj_remote_id != *(reinterpret_cast<const uint16_t*>(ADJ_COMMIT_HASH))) {
+        FAULT("ADJ commit doesn't match: %u (remote) and %u (HVBMS)", adj_remote_id,
+              ADJ_COMMIT_HASH);
+    }
+    else{
+        adj_passed = true;
+    }
 }

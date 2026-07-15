@@ -2,7 +2,7 @@
 #include "HVBMS/Data/Data.hpp"
 #include "ST-LIB_LOW.hpp"
 
-#define IMD_CONNECTED 0
+#define IMD_CONNECTED 1
 
 template <typename A, typename B>
 concept Substractable = requires(A a, B b) {
@@ -41,7 +41,7 @@ class IMD {
         ic->turn_on();
         pow->turn_on();
         #if IMD_CONNECTED
-        Scheduler::set_timeout(2000000, []() {
+        Scheduler::set_timeout(2'500'000, []() {
             if (ok->read() == GPIO_PinState::GPIO_PIN_RESET) {
                 FAULT("IMD read fault");
             }
@@ -62,25 +62,28 @@ class IMD {
         }
 
         freq = ic->get_frequency();
+        if(freq != 0){
+            freq++;
+        }
         duty = ic->get_duty_cycle();
-        if (lessError(freq, 0, 5)) {
+        if (lessError(freq, 0, 2)) {
             status = DataPackets::imd_status::SHORTCIRCUIT;
             return;
-        } else if (lessError(freq, 10, 5)) {
+        } else if (lessError(freq, 10, 2)) {
             status = DataPackets::imd_status::NORMAL;
             calculate_resistance();
             return;
-        } else if (lessError(freq, 20, 5)) {
+        } else if (lessError(freq, 20, 2)) {
             status = DataPackets::imd_status::UNDERVOLTAGE;
             calculate_resistance();
             return;
-        } else if (lessError(freq, 30, 5)) {
+        } else if (lessError(freq, 30, 2)) {
             status = DataPackets::imd_status::FAST_EVAL;
             return;
-        } else if (lessError(freq, 40, 5)) {
+        } else if (lessError(freq, 40, 2)) {
             status = DataPackets::imd_status::EQUIPMENT_FAULT;
             return;
-        } else if (lessError(freq, 50, 5)) {
+        } else if (lessError(freq, 50, 2)) {
             status = DataPackets::imd_status::GROUNDING_FAULT;
             return;
         }

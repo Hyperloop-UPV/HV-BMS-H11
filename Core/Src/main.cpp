@@ -1,12 +1,12 @@
 #include "main.h"
 
+#include "ErrorHandler/ErrorHandler.hpp"
 #include "HVBMS/HVBMS.hpp"
 #include "HVBMS/Protections/BatteryProtections.hpp"
 #include "HVBMS/Sensors/Sensors.hpp"
 #include "ST-LIB.hpp"
-#include "ErrorHandler/ErrorHandler.hpp"
 
-#define M16 1
+#define M24 1
 
 #if defined(M16)
 #define MASCARA "255.255.0.0"
@@ -94,6 +94,7 @@ int main(void) {
 
     SDC::sdc_interrupt =
         &myBoard::instance_of<sdc_PB5>();  // Por culpa de C++ tengo que tener esto fuera
+    SDC::sdc_interrupt->turn_on();
 
     IMD::ok = &myBoard::instance_of<imd_ok_PE12>();  // Y esto más de lo mismo
 
@@ -102,7 +103,7 @@ int main(void) {
 
     using namespace std::chrono_literals;
     Watchdog::watchdog_time = 100ms;
-    // Watchdog::start();
+    Watchdog::start();
 
     while (1) {
         FaultController::check_transitions();
@@ -111,7 +112,7 @@ int main(void) {
         myBoard::evaluate_protections();
         Diagnostics::Hub::flush();
         // El watchdog también esta en bcc_stlib.hpp, hay que ponerlo
-        // Watchdog::refresh();
+        Watchdog::refresh();
         Scheduler::update();
     }
 }

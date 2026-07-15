@@ -8,6 +8,7 @@ void IMD::imd_callback() {
     } else {
         is_ok = true;
     }
-
+#if IMD_CONNECTED
     FAULT("IMD fault");
+#endif
 }

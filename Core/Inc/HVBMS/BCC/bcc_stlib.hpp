@@ -408,7 +408,7 @@ bcc_status_t BCC_MCU_TransferTpl(const uint8_t drvInstance, volatile uint8_t txB
             return BCC_STATUS_COM_TIMEOUT;
         }
         Eth::eth_instance->update();
-        //Watchdog::refresh();
+        Watchdog::refresh();
         Scheduler::update();
     }
     for (size_t i = 0; i < rxTrCnt * 6; i++) {

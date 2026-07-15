@@ -31,7 +31,7 @@ class HVBMS {
                    Transition<DataPackets::sm_status>{
                        DataPackets::sm_status::Idle, []() {
                            return OrderPackets::vcu_tcp->is_connected() &&
-                                  Eth::eth_instance->is_connected();
+                                  Eth::eth_instance->is_connected() && Comms::adj_passed;
                        }});
 
     static constexpr auto idle_state =
