@@ -73,7 +73,7 @@ class HVBMS {
 
         using namespace std::chrono_literals;
 
-        operational_sm.add_enter_action([]() { Comms::start(); }, connecting_state);
+        // operational_sm.add_enter_action([]() { Comms::start(); }, connecting_state);
 
         operational_sm.add_enter_action([]() { DO::operational_led->turn_on(); }, idle_state);
 

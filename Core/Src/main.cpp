@@ -62,48 +62,49 @@ int main(void) {
     DO::cs_tx = &myBoard::instance_of<cs_tx_PE4>();
     DO::spi_enable = &myBoard::instance_of<spi_enable_PE3>();
     DO::imd_enable = &myBoard::instance_of<imd_enable_PE11>();
-
+    
     DI::aux_contactor_discharge = &myBoard::instance_of<aux_contactor_PD12>();
     DI::aux_contactor_low = &myBoard::instance_of<aux_contactor_PD13>();
     DI::aux_contactor_high = &myBoard::instance_of<aux_contactor_PD14>();
     DI::aux_contactor_precharge = &myBoard::instance_of<aux_contactor_PG2>();
     DI::aux_contactor_common_high = &myBoard::instance_of<aux_contactor_PD15>();
     DI::battery_intb = &myBoard::instance_of<battery_intb_PE1>();
-
+    
     ADC::adc_voltage_ch1 = &myBoard::instance_of<adc_PA3>();
     ADC::adc_current = &myBoard::instance_of<adc_PA5>();
-
+    
     NewSPI::bms_wrapper_rx.emplace(myBoard::instance_of<bms_spi_rx>());
     NewSPI::bms_wrapper_tx.emplace(myBoard::instance_of<bms_spi_tx>());
-
+    
     Eth::eth_instance = &myBoard::instance_of<eth>();
-
+    
     TimerWrapper<timer_us_tick_def> us_timer = get_timer_instance(myBoard, timer_us_tick_def);
     GlobalTimer::global_us_timer = us_timer.instance->tim;
     us_timer.set_prescaler((uint16_t)(us_timer.get_clock_frequency() / 1000'000) - 1);
     us_timer.counter_enable();
-
+    
     GlobalTimer::input_timer = get_timer_instance(myBoard, timer_imd);
-
+    
     GlobalTimer::input_timer.instance->tim->PSC = 600;
-
+    
     TimerWrapper<timeout_timer_def> battery_timer = get_timer_instance(myBoard, timeout_timer_def);
     GlobalTimer::timeout_timer = battery_timer.instance->tim;
     battery_timer.set_prescaler((uint16_t)(us_timer.get_clock_frequency() / 1000'000) - 1);
     battery_timer.counter_enable();
-
+    
     SDC::sdc_interrupt =
-        &myBoard::instance_of<sdc_PB5>();  // Por culpa de C++ tengo que tener esto fuera
+    &myBoard::instance_of<sdc_PB5>();  // Por culpa de C++ tengo que tener esto fuera
     SDC::sdc_interrupt->turn_on();
-
+    
     IMD::ok = &myBoard::instance_of<imd_ok_PE12>();  // Y esto más de lo mismo
-
+    
+    Comms::start();
     Actuators::init();
     Sensors::init();
 
     using namespace std::chrono_literals;
     Watchdog::watchdog_time = 100ms;
-    Watchdog::start();
+    // Watchdog::start();
 
     while (1) {
         FaultController::check_transitions();
@@ -112,7 +113,7 @@ int main(void) {
         myBoard::evaluate_protections();
         Diagnostics::Hub::flush();
         // El watchdog también esta en bcc_stlib.hpp, hay que ponerlo
-        Watchdog::refresh();
+        // Watchdog::refresh();
         Scheduler::update();
     }
 }

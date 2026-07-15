@@ -259,7 +259,8 @@ struct Batteries {
         for (uint8_t m = 0; m < H11_N_MODULES; m++) {
             if (m == 0 || m == 4)
                 max_total_voltage = std::max(battery[7].max_voltage, max_total_voltage);
-            max_total_voltage = std::max(battery[m].max_voltage, max_total_voltage);
+            else
+                max_total_voltage = std::max(battery[m].max_voltage, max_total_voltage);
         }
         return max_total_voltage;
     }
@@ -269,7 +270,8 @@ struct Batteries {
         for (uint8_t m = 0; m < H11_N_MODULES; m++) {
             if (m == 0 || m == 4)
                 min_total_voltage = std::min(battery[7].min_voltage, min_total_voltage);
-            min_total_voltage = std::min(battery[m].min_voltage, min_total_voltage);
+            else
+                min_total_voltage = std::min(battery[m].min_voltage, min_total_voltage);
         }
         return min_total_voltage;
     }
@@ -277,8 +279,10 @@ struct Batteries {
     static float& get_min_temp() {
         min_temperature = 2000;
         for (uint16_t i = 0; i < H11_N_MODULES * H11_N_TEMPS; i++) {
-            if (i == 0) min_temperature = std::min(min_temperature, temperature[5]);
-            min_temperature = std::min(min_temperature, temperature[i]);
+            if (i == 0)
+                min_temperature = std::min(min_temperature, temperature[5]);
+            else
+                min_temperature = std::min(min_temperature, temperature[i]);
         }
         return min_temperature;
     }
@@ -286,8 +290,10 @@ struct Batteries {
     static float& get_max_temp() {
         max_temperature = -2000;
         for (uint16_t i = 0; i < H11_N_MODULES * H11_N_TEMPS; i++) {
-            if (i == 0) max_temperature = std::max(max_temperature, temperature[5]);
-            max_temperature = std::max(max_temperature, temperature[i]);
+            if (i == 0)
+                max_temperature = std::max(max_temperature, temperature[5]);
+            else
+                max_temperature = std::max(max_temperature, temperature[i]);
         }
         return max_temperature;
     }
