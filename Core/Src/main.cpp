@@ -105,7 +105,7 @@ int main(void) {
 
     using namespace std::chrono_literals;
     Watchdog::watchdog_time = 100ms;
-    // Watchdog::start();
+    Watchdog::start();
 
     while (1) {
         FaultController::check_transitions();
@@ -114,7 +114,7 @@ int main(void) {
         myBoard::evaluate_protections();
         Diagnostics::Hub::flush();
         // El watchdog también esta en bcc_stlib.hpp, hay que ponerlo
-        // Watchdog::refresh();
+        Watchdog::refresh();
         Scheduler::update();
     }
 }
