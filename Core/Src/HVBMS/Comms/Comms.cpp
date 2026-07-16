@@ -1,6 +1,6 @@
 #include "HVBMS/Comms/Comms.hpp"
 
-#include "../../../../tools/binary_metadata_template.cpp"
+#include "../../Runes/generated_metadata.cpp"
 #include "HVBMS/HVBMS.hpp"
 
 #define ADJ_CHECK 1
@@ -104,19 +104,33 @@ void Comms::start() {
     OrderPackets::start();
 
     FaultController::register_fault_propagation(OrderPackets::vcu_tcp, OrderPackets::FAULT_order);
-    #if ADJ_CHECK
+#if ADJ_CHECK
     adj_commit_order = new HeapOrder(0xFFFF, &check_adj_commit, &adj_remote_id);
-    #else
-        adj_passed = true;
-    #endif
+#else
+    adj_passed = true;
+#endif
 }
 
 void Comms::check_adj_commit() {
-    if (adj_remote_id != *(reinterpret_cast<const uint16_t*>(ADJ_COMMIT_HASH))) {
-        FAULT("ADJ commit doesn't match: %u (remote) and %u (HVBMS)", adj_remote_id,
-              ADJ_COMMIT_HASH);
-    }
-    else{
+    uint64_t hash_flat =
+        ((uint64_t)ADJ_COMMIT_HASH[0]) | ((uint64_t)ADJ_COMMIT_HASH[1] << 8) |
+        ((uint64_t)ADJ_COMMIT_HASH[2] << 16) | ((uint64_t)ADJ_COMMIT_HASH[3] << 24) |
+        ((uint64_t)ADJ_COMMIT_HASH[4] << 32) | ((uint64_t)ADJ_COMMIT_HASH[5] << 40) |
+        ((uint64_t)ADJ_COMMIT_HASH[6] << 48) | ((uint64_t)ADJ_COMMIT_HASH[7] << 56);
+    bool ok = adj_remote_id == hash_flat;
+    if (!ok) {
+        char buf[16];
+        buf[0] = ((adj_remote_id >> 0) & 0xFF);
+        buf[1] = ((adj_remote_id >> 8) & 0xFF);
+        buf[2] = ((adj_remote_id >> 16) & 0xFF);
+        buf[3] = ((adj_remote_id >> 24) & 0xFF);
+        buf[4] = ((adj_remote_id >> 32) & 0xFF);
+        buf[5] = ((adj_remote_id >> 40) & 0xFF);
+        buf[6] = ((adj_remote_id >> 48) & 0xFF);
+        buf[7] = ((adj_remote_id >> 56) & 0xFF);
+        buf[8] = 0;
+        FAULT("ADJ commit doesn't match: %s (remote) and %s (HVBMS)", buf, ADJ_COMMIT_HASH);
+    } else {
         adj_passed = true;
     }
 }
