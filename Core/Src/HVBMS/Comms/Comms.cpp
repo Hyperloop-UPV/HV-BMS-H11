@@ -3,6 +3,8 @@
 #include "../../../../tools/binary_metadata_template.cpp"
 #include "HVBMS/HVBMS.hpp"
 
+#define ADJ_CHECK 1
+
 void Comms::start() {
     DataPackets::High_Voltage_System_init(
         Batteries::get_min_voltage(), Batteries::get_max_voltage(), Batteries::get_min_temp(),
