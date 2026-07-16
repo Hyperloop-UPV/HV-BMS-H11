@@ -51,8 +51,11 @@ class HVBMS {
 
     static constexpr auto precharging_state = make_state(
         DataPackets::sm_status::Precharging,
-        Transition<DataPackets::sm_status>{DataPackets::sm_status::Energized,
-                                           []() { return !Actuators::is_precharging(); }},
+        Transition<DataPackets::sm_status>{
+            DataPackets::sm_status::Energized,
+            []() {
+                return ADC_reading::voltage_reading / Batteries::total_global_voltage >= 0.95;
+            }},
         Transition<DataPackets::sm_status>{DataPackets::sm_status::FAULT,
                                            []() { return are_we_connected(); }});
 

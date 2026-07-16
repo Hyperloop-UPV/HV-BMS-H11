@@ -50,7 +50,6 @@ using myBoard =
 
 int main(void) {
     myBoard::init();
-    Diagnostics::install_ethernet_sink(OrderPackets::vcu_tcp);
     DO::operational_led = &myBoard::instance_of<led_PG9>();
     DO::fault_led = &myBoard::instance_of<led_PG13>();
     DO::contactor_high = &myBoard::instance_of<contactor_PD8>();
@@ -97,8 +96,10 @@ int main(void) {
     SDC::sdc_interrupt->turn_on();
     
     IMD::ok = &myBoard::instance_of<imd_ok_PE12>();  // Y esto más de lo mismo
-    
+
     Comms::start();
+    Diagnostics::install_ethernet_sink(OrderPackets::vcu_tcp);
+
     Actuators::init();
     Sensors::init();
 

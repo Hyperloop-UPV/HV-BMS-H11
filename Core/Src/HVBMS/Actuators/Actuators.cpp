@@ -22,6 +22,12 @@ void Actuators::init() {
     contactor_high.open();
     contactor_common_high.open();
 
+    contactor_discharge.is_closed();
+    contactor_precharge.is_open();
+    contactor_low.is_open();
+    contactor_high.is_open();
+    contactor_common_high.is_open();
+
     Scheduler::register_task(50000, Actuators::update_contactors);
 }
 

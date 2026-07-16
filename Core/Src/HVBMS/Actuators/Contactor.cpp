@@ -11,22 +11,7 @@ void Contactor::open() {
         output->turn_on();
 }
 
-bool Contactor::is_open() {
-    if (input->read() == GPIO_PinState::GPIO_PIN_SET)
-        if (normally_opened) {
-            state = true;
-        } else {
-            state = false;
-        }
-    else {
-        if (normally_opened) {
-            state = false;
-        } else {
-            state = true;
-        }
-    }
-    return state;
-}
+bool Contactor::is_open() { return !is_closed(); }
 
 void Contactor::close() {
     if (normally_opened)
@@ -37,17 +22,9 @@ void Contactor::close() {
 
 bool Contactor::is_closed() {
     if (input->read() == GPIO_PinState::GPIO_PIN_RESET)
-        if (normally_opened) {
-            state = false;
-        } else {
-            state = true;
-        }
+        state = false;
     else {
-        if (normally_opened) {
-            state = true;
-        } else {
-            state = false;
-        }
+        state = true;
     }
     return state;
 }
