@@ -19,7 +19,6 @@ void HVBMS::update() {
         if (SDC::status == DataPackets::sdc_status::DISENGAGED) {
             WARNING("SDC is disengaged, cannot start precharge");
         } else {
-            SDC::emis = true;
             Actuators::start_precharge();
             id_timeout_precharge = Scheduler::set_timeout(4000000, []() {
                 Scheduler::unregister_task(id_check_precharge);

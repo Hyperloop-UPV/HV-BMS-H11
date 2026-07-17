@@ -3,32 +3,16 @@
 #include "HVBMS/HVBMS.hpp"
 
 void SDC::sdc_callback() {
-    if (sdc_interrupt->read() == GPIO_PinState::GPIO_PIN_RESET) {
-        SDC::status = DataPackets::sdc_status::DISENGAGED;
-    } else {
-        SDC::status = DataPackets::sdc_status::ENGAGED;
+    if (read_timeout != Scheduler::INVALID_ID) {
+        Scheduler::cancel_timeout(read_timeout);
     }
-    if (!enabled) {
-        if (debouncing_timeout == Scheduler::INVALID_ID) {
-            debouncing_timeout = Scheduler::set_timeout(10000, []() {
-                enabled = true;
-                debouncing_timeout = Scheduler::INVALID_ID;
-            });
+    read_timeout = Scheduler::set_timeout(200000, []() {
+        read_timeout = Scheduler::INVALID_ID;
+        if (sdc_interrupt->read() == GPIO_PinState::GPIO_PIN_SET) {
+            status = DataPackets::sdc_status::ENGAGED;
+        } else {
+            status = DataPackets::sdc_status::DISENGAGED;
+            FAULT("SDC fault");
         }
-        return;
-    }
-    if (emis) {
-        if (emi_timeout == Scheduler::INVALID_ID) {
-            emi_timeout = Scheduler::set_timeout(100000, []() {
-                emis = false;
-                emi_timeout = Scheduler::INVALID_ID;
-                if (sdc_interrupt->read() == GPIO_PinState::GPIO_PIN_RESET) {
-                    FAULT("EMIS otra vez");
-                }
-            });
-        }
-        return;
-    }
-
-    FAULT("SDC fault");
+    });
 }

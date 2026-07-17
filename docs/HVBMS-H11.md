@@ -218,7 +218,8 @@ Resistance: `R = (90 * 1.2e6) / (duty - 5) - 1.2e6`
 
 - SDC input: PB5 (EXTI both edges)
 - SDC forward: PB4 (DO)
-- Debounce: 10s on startup, then immediate FAULT on change
+- Deferred read: each EXTI edge (re)arms a 200 ms timeout; `sdc_status` is latched from the GPIO only when the timeout fires (200 ms after the last edge). This deferral provides EMI immunity by ignoring transient edge bursts.
+- Fault: a DISENGAGED reading (GPIO_PIN_RESET) triggers `FAULT("SDC fault")`.
 
 ---
 
